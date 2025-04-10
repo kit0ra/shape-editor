@@ -35,14 +35,33 @@ public class CustomPanel extends Canvas {
         addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
             @Override
             public void mouseMoved(java.awt.event.MouseEvent e) {
+                boolean stateChanged = false;
+                int mouseX = e.getX();
+                int mouseY = e.getY();
+
                 for (IButton button : buttons) {
-                    if (button.isMouseOver(e.getX(), e.getY())) {
-                        button.onMouseOver();
+                    boolean isOver = button.isMouseOver(mouseX, mouseY);
+
+                    // Check if this button is currently being hovered over
+                    if (isOver) {
+                        // Only call onMouseOver if the state is changing
+                        if (!button.isCurrentlyHovered()) {
+                            button.onMouseOver();
+                            stateChanged = true;
+                        }
                     } else {
-                        button.onMouseOut();
+                        // Only call onMouseOut if the state is changing
+                        if (button.isCurrentlyHovered()) {
+                            button.onMouseOut();
+                            stateChanged = true;
+                        }
                     }
                 }
-                repaint();
+
+                // Only repaint if a button's state has changed
+                if (stateChanged) {
+                    repaint();
+                }
             }
         });
     }

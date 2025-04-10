@@ -20,6 +20,11 @@ public abstract class ButtonDecorator implements IButton {
     }
 
     @Override
+    public boolean isCurrentlyHovered() {
+        return decoratedButton.isCurrentlyHovered();
+    }
+
+    @Override
     public void onClick() {
         decoratedButton.onClick();
     }
