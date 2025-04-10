@@ -1,9 +1,10 @@
 package com.editor.shapes;
 
-import java.awt.Graphics;
+import com.editor.drawing.Drawer;
 
 public class Rectangle implements Shape {
     private int x, y, width, height;
+    private boolean selected;
 
     public Rectangle(int x, int y, int width, int height) {
         this.x = x;
@@ -13,17 +14,29 @@ public class Rectangle implements Shape {
     }
 
     @Override
-    public void draw(Graphics g) {
-        g.drawRect(x, y, width, height);
+    public void draw(Drawer drawer) {
+        drawer.drawRectangle(x, y, width, height);
+    }
+
+    @Override
+    public void move(int x, int y) {
+        this.x = x;
+        this.y = y;
     }
 
     @Override
     public boolean isSelected(int x, int y) {
-        return x >= this.x && x <= this.x + width && y >= this.y && y <= this.y + height;
+        return x >= this.x && x <= this.x + width &&
+                y >= this.y && y <= this.y + height;
     }
 
     @Override
     public void setSelected(boolean selected) {
-        // Implement selection logic if needed
+        this.selected = selected;
+    }
+
+    @Override
+    public boolean isSelected() {
+        return selected;
     }
 }

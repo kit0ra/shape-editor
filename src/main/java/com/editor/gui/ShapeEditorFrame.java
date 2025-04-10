@@ -18,8 +18,11 @@ public class ShapeEditorFrame extends Frame {
     private VerticalPanel verticalPanel;
     private WhiteBoard whiteBoard;
 
-    // Button spacing for horizontal panel
+    // Button spacing and positioning constants
     private static final int BUTTON_SPACING = 10;
+    private static final int VERTICAL_BUTTON_SPACING = 15;
+    private static final int VERTICAL_INITIAL_OFFSET = 80; // Initial Y offset to position below horizontal panel
+    private static final int BUTTON_LEFT_MARGIN = 50; // Left margin for buttons in vertical panel
 
     public ShapeEditorFrame() {
         super("Shape Editor");
@@ -46,7 +49,9 @@ public class ShapeEditorFrame extends Frame {
                 "icons/save.png",
                 "icons/load.png",
                 "icons/undo.png",
-                "icons/redo.png");
+                "icons/redo.png",
+                "icons/rectangle.png",
+                "icons/polygon.png");
 
         // ✅ Add this to close properly
         addWindowListener(new WindowAdapter() {
@@ -61,10 +66,11 @@ public class ShapeEditorFrame extends Frame {
 
     private void init() {
         // Initialize buttons with tooltips
-        initializeButtons();
+        initializeHorizontalButtons();
+        initializeVerticalButtons();
     }
 
-    private void initializeButtons() {
+    private void initializeHorizontalButtons() {
         // Create save button with tooltip
         int x = BUTTON_SPACING;
 
@@ -113,6 +119,33 @@ public class ShapeEditorFrame extends Frame {
 
         // Add to panel
         horizontalPanel.addButton(redoButton);
+    }
+
+    private void initializeVerticalButtons() {
+        // Create rectangle button with tooltip
+        int y = VERTICAL_INITIAL_OFFSET;
+
+        // Create rectangle button (icon only)
+        IButton rectangleButton = ButtonFactory.createToolbarButton(
+                BUTTON_LEFT_MARGIN, y, "icons/rectangle.png");
+
+        // Add tooltip to rectangle button
+        rectangleButton = new TooltipDecorator(rectangleButton, "Draw a rectangle");
+
+        // Add to panel
+        verticalPanel.addButton(rectangleButton);
+
+        // Create polygon button with tooltip (position it below the rectangle button)
+        y += rectangleButton.getHeight() + VERTICAL_BUTTON_SPACING;
+
+        IButton polygonButton = ButtonFactory.createToolbarButton(
+                BUTTON_LEFT_MARGIN, y, "icons/polygon.png");
+
+        // Add tooltip to polygon button
+        polygonButton = new TooltipDecorator(polygonButton, "Draw a polygon");
+
+        // Add to panel
+        verticalPanel.addButton(polygonButton);
     }
 
     public void launch() {

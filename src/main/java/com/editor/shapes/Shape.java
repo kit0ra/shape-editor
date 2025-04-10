@@ -1,13 +1,16 @@
 package com.editor.shapes;
 
-import java.awt.Graphics;
+import com.editor.drawing.Drawer;
 
 public interface Shape {
-    void draw(Graphics g);
+    void draw(Drawer drawer);
 
-    boolean isSelected(int x, int y);
+    void move(int x, int y);
 
-    void setSelected(boolean selected);
+    boolean isSelected(int x, int y); // Check if point (x,y) is within the shape
 
-    // Other shape-related methods
+    void setSelected(boolean selected); // Set selection state
+
+    boolean isSelected(); // Get current selection state
+
 }

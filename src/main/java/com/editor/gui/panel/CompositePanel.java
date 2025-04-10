@@ -36,7 +36,7 @@ public class CompositePanel extends Panel {
     public void paint(Graphics g) {
         super.paint(g);
         for (Shape shape : shapes) {
-            shape.draw(g);
+            // shape.draw(g);
         }
     }
 }

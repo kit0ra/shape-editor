@@ -1,6 +1,7 @@
 com\editor\gui\button\BorderDecorator.class
 com\editor\shapes\Rectangle.class
 com\editor\gui\button\ImageDecorator$ImageMode.class
+com\editor\drawing\AWTDrawing.class
 com\editor\gui\button\ImageDecorator.class
 com\editor\gui\panel\CompositePanel.class
 com\editor\gui\panel\CustomPanel$3.class
@@ -17,6 +18,7 @@ com\editor\utils\ImageLoader.class
 com\editor\gui\button\TooltipDecorator.class
 com\editor\App.class
 com\editor\gui\button\ButtonFactory$1.class
+com\editor\drawing\Drawer.class
 com\editor\gui\button\CustomButton.class
 com\editor\gui\panel\HorizontalPanel.class
 com\editor\gui\panel\CompositePanel$1.class
