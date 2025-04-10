@@ -39,25 +39,65 @@ public class ShapeEditorFrame extends Frame {
         verticalPanel.makeResponsiveTo(this);
         add(verticalPanel);
 
-        // Load the icon
+        // Load icons
         Image saveIcon = ImageLoader.loadImage("icons/save.png");
+        Image loadIcon = ImageLoader.loadImage("icons/load.png");
 
-        // Create the base button (make it wider to fit icon + text)
-        IButton saveButton = new CustomButton(0, 0, 130, 30, "Save"); // Wider width (130 instead of 100)
+        // Constants for consistent UI
+        final int BUTTON_HEIGHT = 40;
+        final int ICON_SIZE = 24;
+        final int BUTTON_PADDING = 8;
+        final int BUTTON_SPACING = 10;
 
-        // Decorate with icon if loaded
+        // Create Save button (icon only)
+        IButton saveButton = new CustomButton(
+                20, // x
+                5, // y
+                ICON_SIZE + BUTTON_PADDING * 2, // width
+                BUTTON_HEIGHT, // height
+                "" // no text
+        );
+
         if (saveIcon != null) {
             saveButton = new ImageDecorator(
                     saveButton,
                     saveIcon,
-                    20, 20, // Icon dimensions
-                    5 // Padding between icon and text
-            );
+                    ICON_SIZE, ICON_SIZE,
+                    BUTTON_PADDING,
+                    ImageDecorator.ImageMode.ICON_ONLY);
+        } else {
+            System.err.println("Failed to load save icon");
         }
 
-        horizontalPanel.addButton(saveButton);
+        // Create Load button (icon + text)
+        IButton loadButton = new CustomButton(
+                saveButton.getX() + saveButton.getWidth() + BUTTON_SPACING, // x position after save button
+                5, // same y as save button
+                ICON_SIZE + BUTTON_PADDING * 3 + 40, // width (icon + padding + text space)
+                BUTTON_HEIGHT, // same height
+                "Load" // button text
+        );
 
-        IButton loadButton = new CustomButton(0, 30, 100, 30, "Load");
+        if (loadIcon != null) {
+            loadButton = new ImageDecorator(
+                    loadButton,
+                    loadIcon,
+                    ICON_SIZE, ICON_SIZE,
+                    BUTTON_PADDING,
+                    ImageDecorator.ImageMode.ICON_AND_TEXT);
+        } else {
+            System.err.println("Failed to load load icon");
+            // Fallback to text-only button
+            loadButton = new CustomButton(
+                    loadButton.getX(), loadButton.getY(),
+                    80, // wider to accommodate text
+                    BUTTON_HEIGHT,
+                    "Load");
+        }
+
+        // Add buttons to panel
+        horizontalPanel.addButton(saveButton);
+        horizontalPanel.addButton(loadButton);
 
         // ✅ Add this to close properly
         addWindowListener(new WindowAdapter() {

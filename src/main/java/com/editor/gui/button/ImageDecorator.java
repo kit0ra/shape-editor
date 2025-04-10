@@ -4,38 +4,81 @@ import java.awt.Graphics;
 import java.awt.Image;
 
 public class ImageDecorator extends ButtonDecorator {
-    private final Image image;
-    private final int iconWidth, iconHeight;
-    private final int iconPadding;
+    public enum ImageMode {
+        ICON_ONLY, // Button is just the image (centered)
+        ICON_AND_TEXT, // Standard icon + text layout
+        FILL_BUTTON // Image stretches to fill entire button
+    }
 
-    public ImageDecorator(IButton decoratedButton, Image image, int iconWidth, int iconHeight, int iconPadding) {
+    private final Image image;
+    private final int desiredWidth, desiredHeight;
+    private final int padding;
+    private final ImageMode mode;
+
+    public ImageDecorator(IButton decoratedButton, Image image,
+            int desiredWidth, int desiredHeight,
+            int padding, ImageMode mode) {
         super(decoratedButton);
         this.image = image;
-        this.iconWidth = iconWidth;
-        this.iconHeight = iconHeight;
-        this.iconPadding = iconPadding;
+        this.desiredWidth = desiredWidth;
+        this.desiredHeight = desiredHeight;
+        this.padding = padding;
+        this.mode = mode;
+    }
+
+    // Convenience constructor with default mode
+    public ImageDecorator(IButton decoratedButton, Image image,
+            int desiredWidth, int desiredHeight,
+            int padding) {
+        this(decoratedButton, image, desiredWidth, desiredHeight,
+                padding, ImageMode.ICON_AND_TEXT);
     }
 
     @Override
     public void draw(Graphics g) {
-        // Draw the base button (background, borders, etc.)
         super.draw(g);
 
-        if (image != null) {
-            // Calculate icon position (centered vertically, left-aligned)
-            int iconX = decoratedButton.getX() + iconPadding;
-            int iconY = decoratedButton.getY() + (decoratedButton.getHeight() - iconHeight) / 2;
+        if (image == null)
+            return;
 
-            // Draw the icon
-            g.drawImage(image, iconX, iconY, iconWidth, iconHeight, null);
+        int imgX, imgY, imgWidth, imgHeight;
 
-            // Adjust text position to avoid overlapping with the icon
-            int textX = iconX + iconWidth + iconPadding;
-            int textY = decoratedButton.getY() + (decoratedButton.getHeight() + g.getFontMetrics().getAscent()) / 2;
+        switch (mode) {
+            case FILL_BUTTON:
+                // Fill entire button with image
+                imgX = getX();
+                imgY = getY();
+                imgWidth = getWidth();
+                imgHeight = getHeight();
+                break;
 
-            // Draw the text (assuming CustomButton has a getText() method)
-            g.drawString(decoratedButton.getText(), textX, textY);
+            case ICON_ONLY:
+                // Center image in button
+                imgWidth = Math.min(desiredWidth, getWidth() - padding * 2);
+                imgHeight = Math.min(desiredHeight, getHeight() - padding * 2);
+                imgX = getX() + (getWidth() - imgWidth) / 2;
+                imgY = getY() + (getHeight() - imgHeight) / 2;
+                break;
+
+            case ICON_AND_TEXT:
+            default:
+                // Standard icon + text layout
+                imgWidth = desiredWidth;
+                imgHeight = desiredHeight;
+                imgX = getX() + padding;
+                imgY = getY() + (getHeight() - imgHeight) / 2;
+
+                // Draw text if exists
+                String text = getText();
+                if (text != null && !text.isEmpty()) {
+                    int textX = imgX + imgWidth + padding;
+                    int textY = getY() + (getHeight() + g.getFontMetrics().getAscent()) / 2;
+                    g.drawString(text, textX, textY);
+                }
+                break;
         }
+
+        g.drawImage(image, imgX, imgY, imgWidth, imgHeight, null);
     }
 
     @Override
