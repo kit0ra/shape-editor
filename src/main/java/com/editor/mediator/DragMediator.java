@@ -80,6 +80,11 @@ public interface DragMediator {
     boolean checkPointOverTrash(Point screenPoint);
 
     /**
+     * Reset the trash panel's visual state
+     */
+    void resetTrashPanelState();
+
+    /**
      * Enable or disable debug messages
      *
      * @param enabled Whether debug messages should be enabled

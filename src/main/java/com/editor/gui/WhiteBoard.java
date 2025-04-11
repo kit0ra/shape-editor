@@ -1,14 +1,18 @@
 package com.editor.gui;
 
+import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Canvas;
 import java.awt.Color;
+import java.awt.Composite;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
+import java.awt.RenderingHints;
+import java.awt.Stroke;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
@@ -649,8 +653,100 @@ public class WhiteBoard extends Canvas implements Draggable {
             }
         }
 
+        // Draw overlay for shapes being dragged to trash
+        System.out.println("[WhiteBoard] Paint method - isDragging=" + isDragging + ", isBeingDraggedToTrash="
+                + isBeingDraggedToTrash + ", selectedShapes.isEmpty()=" + selectedShapes.isEmpty());
+        if (isDragging && isBeingDraggedToTrash && !selectedShapes.isEmpty()) {
+            System.out.println("[WhiteBoard] Condition met for drawing trash overlay");
+            Graphics2D g2d = (Graphics2D) offscreenGraphics.create();
+            try {
+                drawTrashOverlay(g2d);
+            } finally {
+                g2d.dispose();
+            }
+        }
+
         // Draw the offscreen buffer to the screen
         g.drawImage(offscreenBuffer, 0, 0, this);
+    }
+
+    /**
+     * Draws an overlay when shapes are being dragged to the trash panel
+     *
+     * @param g2d The graphics context to draw on
+     */
+    private void drawTrashOverlay(Graphics2D g2d) {
+        System.out.println("[WhiteBoard] Drawing trash overlay, isDragging=" + isDragging + ", isBeingDraggedToTrash="
+                + isBeingDraggedToTrash);
+
+        if (dragMediator == null) {
+            System.out.println("[WhiteBoard] Cannot draw trash overlay - dragMediator is null");
+            return;
+        }
+
+        // Enable anti-aliasing for smoother drawing
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        // Save the original graphics state
+        Composite originalComposite = g2d.getComposite();
+        Stroke originalStroke = g2d.getStroke();
+        Color originalColor = g2d.getColor();
+
+        try {
+            // Get the mouse position
+            Point mousePos = getMousePosition();
+            if (mousePos == null) {
+                // If mouse position is not available, use the center of the whiteboard
+                mousePos = new Point(getWidth() / 2, getHeight() / 2);
+            }
+
+            // Set semi-transparent composite for overlay
+            g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.7f));
+
+            // Draw a red overlay for each selected shape
+            for (Shape shape : selectedShapes) {
+                Rectangle bounds = shape.getBounds();
+
+                // Fill with semi-transparent red
+                g2d.setColor(new Color(255, 0, 0, 128)); // Red with 50% transparency
+                g2d.fillRect(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight());
+
+                // Draw border with a thicker stroke
+                g2d.setColor(Color.RED);
+                g2d.setStroke(new BasicStroke(2.0f));
+                g2d.drawRect(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight());
+            }
+
+            // Draw a dashed line from the active shape to the mouse cursor
+            if (activeShape != null) {
+                Rectangle bounds = activeShape.getBounds();
+                int centerX = bounds.getX() + bounds.getWidth() / 2;
+                int centerY = bounds.getY() + bounds.getHeight() / 2;
+
+                // Draw dashed line
+                g2d.setColor(Color.RED);
+                float[] dash = { 5.0f, 5.0f };
+                g2d.setStroke(new BasicStroke(2.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash, 0.0f));
+                g2d.drawLine(centerX, centerY, mousePos.x, mousePos.y);
+
+                // Draw a small trash icon near the cursor
+                int iconSize = 32; // Larger icon for better visibility
+                g2d.setColor(new Color(255, 0, 0, 200));
+                g2d.fillOval(mousePos.x - iconSize / 2, mousePos.y - iconSize / 2, iconSize, iconSize);
+                g2d.setColor(Color.WHITE);
+                g2d.setStroke(new BasicStroke(3.0f)); // Thicker stroke for better visibility
+
+                // Draw an X inside the circle
+                int offset = iconSize / 4;
+                g2d.drawLine(mousePos.x - offset, mousePos.y - offset, mousePos.x + offset, mousePos.y + offset);
+                g2d.drawLine(mousePos.x + offset, mousePos.y - offset, mousePos.x - offset, mousePos.y + offset);
+            }
+        } finally {
+            // Restore the original graphics state
+            g2d.setComposite(originalComposite);
+            g2d.setStroke(originalStroke);
+            g2d.setColor(originalColor);
+        }
     }
 
     /**
@@ -771,6 +867,14 @@ public class WhiteBoard extends Canvas implements Draggable {
         selectedShapes.clear();
         activeShape = null;
 
+        // Reset the dragging to trash state
+        isBeingDraggedToTrash = false;
+
+        // Reset the trash panel visual state if we have a mediator
+        if (dragMediator != null) {
+            dragMediator.resetTrashPanelState();
+        }
+
         // Repaint to show the updated state
         repaint();
 
@@ -833,7 +937,13 @@ public class WhiteBoard extends Canvas implements Draggable {
      * @param isDraggingToTrash Whether the shapes are being dragged to the trash
      */
     public void setDraggingToTrash(boolean isDraggingToTrash) {
-        this.isBeingDraggedToTrash = isDraggingToTrash;
+        if (this.isBeingDraggedToTrash != isDraggingToTrash) {
+            this.isBeingDraggedToTrash = isDraggingToTrash;
+            // Debug output
+            System.out.println("[WhiteBoard] Setting isBeingDraggedToTrash to " + isDraggingToTrash);
+            // Trigger a repaint to show or hide the overlay
+            repaint();
+        }
     }
 
     public void makeResponsiveTo(Frame frame) {

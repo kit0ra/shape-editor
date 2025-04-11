@@ -145,6 +145,9 @@ public class ShapeDragMediator implements DragMediator {
         isDragging = false;
         currentDraggable = null;
 
+        // Always reset the trash panel visual state at the end of a drag operation
+        resetTrashPanelState();
+
         // Request repaint of the source panel
         sourcePanelForDrag.repaint();
         sourcePanelForDrag = null;
@@ -216,6 +219,14 @@ public class ShapeDragMediator implements DragMediator {
         }
 
         return isOverTrash;
+    }
+
+    @Override
+    public void resetTrashPanelState() {
+        if (trashPanel != null) {
+            debugLog("Resetting trash panel visual state");
+            trashPanel.setShapeOverTrash(false);
+        }
     }
 
     @Override
