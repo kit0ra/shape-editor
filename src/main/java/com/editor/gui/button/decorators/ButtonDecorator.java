@@ -22,6 +22,11 @@ public abstract class ButtonDecorator implements IButton {
     }
 
     @Override
+    public boolean isCurrentlyHovered() {
+        return decoratedButton.isCurrentlyHovered();
+    }
+
+    @Override
     public void onClick() {
         decoratedButton.onClick();
     }
@@ -34,5 +39,30 @@ public abstract class ButtonDecorator implements IButton {
     @Override
     public void onMouseOut() {
         decoratedButton.onMouseOut();
+    }
+
+    @Override
+    public int getX() {
+        return decoratedButton.getX();
+    }
+
+    @Override
+    public int getY() {
+        return decoratedButton.getY();
+    }
+
+    @Override
+    public int getWidth() {
+        return decoratedButton.getWidth();
+    }
+
+    @Override
+    public int getHeight() {
+        return decoratedButton.getHeight();
+    }
+
+    @Override
+    public String getText() {
+        return decoratedButton.getText();
     }
 }
