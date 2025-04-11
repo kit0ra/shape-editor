@@ -7,11 +7,16 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 import com.editor.gui.button.CustomButton;
+import com.editor.gui.button.Draggable;
 import com.editor.gui.button.IButton;
 import com.editor.gui.button.decorators.ImageDecorator;
+import com.editor.gui.button.decorators.ShapeCreationButtonDecorator;
 import com.editor.gui.button.decorators.TooltipDecorator;
 import com.editor.gui.panel.HorizontalPanel;
 import com.editor.gui.panel.VerticalPanel;
+import com.editor.shapes.PolygonFactory;
+import com.editor.shapes.RectangleFactory;
+import com.editor.shapes.ShapeFactory;
 import com.editor.utils.ImageLoader;
 
 public class ShapeEditorFrame extends Frame {
@@ -105,13 +110,23 @@ public class ShapeEditorFrame extends Frame {
     private void setupVerticalButtons() {
         int y = VERTICAL_INITIAL_OFFSET;
 
-        // Create rectangle button (icon only)
-        IButton rectangleButton = createIconButton(BUTTON_LEFT_MARGIN, y, "icons/rectangle.png", "Draw a rectangle");
+        // Create rectangle button (icon only with drag capability)
+        IButton rectangleButton = createDraggableShapeButton(
+                BUTTON_LEFT_MARGIN, y,
+                "icons/rectangle.png",
+                "Draw a rectangle",
+                new RectangleFactory(),
+                "Rectangle");
         verticalPanel.addButton(rectangleButton);
 
-        // Create polygon button
+        // Create polygon button (icon only with drag capability)
         y += rectangleButton.getHeight() + VERTICAL_BUTTON_SPACING;
-        IButton polygonButton = createIconButton(BUTTON_LEFT_MARGIN, y, "icons/polygon.png", "Draw a polygon");
+        IButton polygonButton = createDraggableShapeButton(
+                BUTTON_LEFT_MARGIN, y,
+                "icons/polygon.png",
+                "Draw a polygon",
+                new PolygonFactory(),
+                "Polygon");
         verticalPanel.addButton(polygonButton);
     }
 
@@ -138,6 +153,20 @@ public class ShapeEditorFrame extends Frame {
 
         // Add tooltip decoration
         return new TooltipDecorator(button, tooltipText);
+    }
+
+    /**
+     * Helper method to create a draggable shape button with icon and tooltip
+     */
+    private IButton createDraggableShapeButton(int x, int y, String iconPath, String tooltipText,
+            ShapeFactory factory, String shapeType) {
+        // First create a regular icon button
+        IButton button = createIconButton(x, y, iconPath, tooltipText);
+
+        // Add shape creation decorator to make it draggable
+        button = new ShapeCreationButtonDecorator(button, whiteBoard, factory, shapeType);
+
+        return button;
     }
 
     public void launch() {

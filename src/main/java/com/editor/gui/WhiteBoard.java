@@ -15,8 +15,6 @@ import java.awt.event.MouseMotionAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.SwingUtilities;
-
 import com.editor.commands.CommandHistory;
 import com.editor.commands.CreateShapeCommand;
 import com.editor.drawing.AWTDrawing;
@@ -46,7 +44,7 @@ public class WhiteBoard extends Canvas {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                handleMousePress(e);
+                System.out.println("Mouse pressed at: " + e.getX() + ", " + e.getY());
             }
 
             @Override
@@ -61,31 +59,6 @@ public class WhiteBoard extends Canvas {
                 handleMouseDrag(e);
             }
         });
-    }
-
-    private void handleMousePress(MouseEvent e) {
-        if (SwingUtilities.isLeftMouseButton(e)) {
-            // Check for existing shape selection
-            selectedShape = null;
-            for (Shape shape : shapes) {
-                if (shape.isSelected(e.getX(), e.getY())) {
-                    selectedShape = shape;
-                    selectedShape.setSelected(true);
-                    dragStartPoint = e.getPoint();
-                    break;
-                }
-            }
-
-            // Create new shape if none selected and factory is set
-            if (selectedShape == null && currentShapeFactory != null) {
-                Shape newShape = currentShapeFactory.createShape(e.getX(), e.getY());
-                commandHistory.executeCommand(
-                        new CreateShapeCommand(shapes, newShape, e.getX(), e.getY()));
-                selectedShape = newShape;
-                selectedShape.setSelected(true);
-            }
-            repaint();
-        }
     }
 
     private void handleMouseDrag(MouseEvent e) {
@@ -118,7 +91,6 @@ public class WhiteBoard extends Canvas {
             try {
                 g2d.setColor(new Color(0, 0, 255, 50));
                 Rectangle bounds = selectedShape.getBounds();
-                // Use getter methods if fields are private
                 g2d.fillRect(bounds.getX(), bounds.getY(),
                         bounds.getWidth(), bounds.getHeight());
             } finally {
@@ -127,8 +99,38 @@ public class WhiteBoard extends Canvas {
         }
     }
 
+    /**
+     * Sets the current shape factory to use for creating shapes
+     */
     public void setCurrentShapeFactory(ShapeFactory factory) {
         this.currentShapeFactory = factory;
+    }
+
+    /**
+     * Creates a shape at the specified location using the current shape factory
+     */
+    public void createShapeAt(int x, int y) {
+        if (currentShapeFactory != null) {
+            Shape newShape = currentShapeFactory.createShape(x, y);
+            commandHistory.executeCommand(
+                    new CreateShapeCommand(shapes, newShape, x, y));
+            selectedShape = newShape;
+            selectedShape.setSelected(true);
+            repaint();
+        }
+    }
+
+    /**
+     * Adds a shape to the center of the whiteboard using the current shape factory
+     */
+    public void addShapeToCenter() {
+        if (currentShapeFactory != null) {
+            // Calculate the center of the whiteboard
+            int centerX = getWidth() / 2;
+            int centerY = getHeight() / 2;
+
+            createShapeAt(centerX, centerY);
+        }
     }
 
     public void undo() {
