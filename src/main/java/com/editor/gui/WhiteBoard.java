@@ -45,6 +45,7 @@ import com.editor.shapes.Shape;
 import com.editor.shapes.ShapeGroup;
 import com.editor.shapes.ShapePrototypeRegistry;
 import com.editor.gui.button.Draggable;
+import com.editor.gui.panel.ToolbarPanel; // Added import
 import com.editor.mediator.DragMediator;
 
 public class WhiteBoard extends Canvas implements Draggable {
@@ -70,6 +71,9 @@ public class WhiteBoard extends Canvas implements Draggable {
     // Double buffering
     private Image offscreenBuffer;
     private Graphics offscreenGraphics;
+
+    // Reference to ToolbarPanel for adding shapes
+    private ToolbarPanel toolbarPanel;
 
     public WhiteBoard(int width, int height, Color white) {
         this.setPreferredSize(new Dimension(width, height));
@@ -539,33 +543,44 @@ public class WhiteBoard extends Canvas implements Draggable {
             }
 
             // Check if we're dropping shapes on the toolbar panel
-            if (isBeingDraggedToToolbar && dragMediator != null && screenPoint != null) {
+            boolean droppedOnToolbar = false;
+            if (isBeingDraggedToToolbar && dragMediator != null && screenPoint != null && toolbarPanel != null) {
                 try {
                     // Check if we're still over the toolbar panel
                     if (dragMediator.checkPointOverToolbar(screenPoint)) {
-                        System.out.println("[WhiteBoard] Dropping shapes on toolbar panel");
+                        System.out.println("[WhiteBoard] Dropping shapes on toolbar panel - attempting to add");
+                        // Call the toolbar panel's method to add the shapes
+                        droppedOnToolbar = toolbarPanel.addSelectedShapesToToolbar();
 
-                        // Reset drag state variables
+                        // Reset drag state variables immediately after successful drop on toolbar
                         isDragging = false;
                         dragStartPoint = null;
                         originalShapePosition = null;
                         dragOffset = null;
                         originalPositions.clear();
-                        isBeingDraggedToToolbar = false;
+                        isBeingDraggedToToolbar = false; // Reset toolbar drag state
+
+                        // Reset toolbar visual state via mediator
+                        dragMediator.checkPointOverToolbar(new Point(-1, -1)); // Force reset
 
                         // Repaint to update the view
                         repaint();
-                        return;
+                        return; // Exit early, don't treat as a move
                     }
                 } catch (Exception ex) {
-                    // Ignore any exceptions during coordinate conversion
-                    System.out.println("[WhiteBoard] Error checking toolbar panel: " + ex.getMessage());
+                    // Ignore any exceptions during coordinate conversion or toolbar interaction
+                    System.out.println("[WhiteBoard] Error checking/adding to toolbar panel: " + ex.getMessage());
                 }
 
-                // Reset the toolbar panel visual state
+                // Reset the toolbar panel visual state if drop wasn't successful or error
+                // occurred
                 setDraggingToToolbar(false);
+                if (dragMediator != null) {
+                    dragMediator.checkPointOverToolbar(new Point(-1, -1)); // Force reset
+                }
             }
 
+            // If not dropped on trash or toolbar, proceed with move command logic
             // Create a map to store the final positions of all selected shapes
             Map<Shape, Point> finalPositions = new HashMap<>();
             boolean positionsChanged = false;
@@ -948,6 +963,15 @@ public class WhiteBoard extends Canvas implements Draggable {
      */
     public void setDragMediator(DragMediator mediator) {
         this.dragMediator = mediator;
+    }
+
+    /**
+     * Sets the toolbar panel reference for adding shapes
+     *
+     * @param panel The ToolbarPanel instance
+     */
+    public void setToolbarPanel(ToolbarPanel panel) {
+        this.toolbarPanel = panel;
     }
 
     @Override

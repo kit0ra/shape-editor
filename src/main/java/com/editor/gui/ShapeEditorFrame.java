@@ -141,6 +141,12 @@ public class ShapeEditorFrame extends Frame {
         // Register the toolbar panel with the mediator
         dragMediator.registerToolbarPanel(toolbarPanel);
 
+        // Set the prototype registry in the toolbar panel
+        toolbarPanel.setPrototypeRegistry(prototypeRegistry);
+
+        // Set the toolbar panel reference in the whiteboard
+        whiteBoard.setToolbarPanel(toolbarPanel);
+
         System.out.println("Drag mediator initialized and connected to components");
     }
 
