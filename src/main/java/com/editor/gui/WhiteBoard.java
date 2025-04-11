@@ -627,6 +627,15 @@ public class WhiteBoard extends Canvas {
     }
 
     /**
+     * Gets the current prototype registry
+     *
+     * @return The current shape prototype registry
+     */
+    public ShapePrototypeRegistry getPrototypeRegistry() {
+        return this.prototypeRegistry;
+    }
+
+    /**
      * Creates a shape at the specified location using the current shape type
      */
     public void createShapeAt(int x, int y) {

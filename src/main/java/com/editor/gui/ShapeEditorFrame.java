@@ -15,6 +15,8 @@ import com.editor.gui.button.decorators.TooltipDecorator;
 import com.editor.gui.button.decorators.UndoButtonDecorator;
 import com.editor.gui.panel.HorizontalPanel;
 import com.editor.gui.panel.VerticalPanel;
+import com.editor.mediator.DragMediator;
+import com.editor.mediator.ShapeDragMediator;
 import com.editor.shapes.Rectangle;
 import com.editor.shapes.RegularPolygon;
 import com.editor.shapes.ShapePrototypeRegistry;
@@ -25,6 +27,9 @@ public class ShapeEditorFrame extends Frame {
     private HorizontalPanel horizontalPanel;
     private VerticalPanel verticalPanel;
     private WhiteBoard whiteBoard;
+
+    // Mediator for drag operations
+    private DragMediator dragMediator;
 
     // Button spacing and positioning constants
     private static final int HORIZONTAL_BUTTON_SPACING = 10;
@@ -69,6 +74,9 @@ public class ShapeEditorFrame extends Frame {
         // Initialize the shape prototype registry
         initializePrototypeRegistry();
 
+        // Initialize and set up the drag mediator
+        setupDragMediator();
+
         // Add window listener to handle closing properly
         addWindowListener(new WindowAdapter() {
             @Override
@@ -89,6 +97,26 @@ public class ShapeEditorFrame extends Frame {
         // Initialize buttons in both panels
         setupHorizontalButtons();
         setupVerticalButtons();
+    }
+
+    /**
+     * Sets up the drag mediator to handle drag operations between components
+     */
+    private void setupDragMediator() {
+        // Create a new mediator instance
+        dragMediator = new ShapeDragMediator();
+
+        // Enable debug messages
+        dragMediator.setDebugEnabled(true);
+
+        // Register components with the mediator
+        dragMediator.registerWhiteBoard(whiteBoard);
+
+        // Set the mediator in the panels
+        verticalPanel.setDragMediator(dragMediator);
+        horizontalPanel.setDragMediator(dragMediator);
+
+        System.out.println("Drag mediator initialized and connected to components");
     }
 
     /**

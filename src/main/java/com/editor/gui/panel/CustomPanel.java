@@ -15,6 +15,7 @@ import java.util.List;
 import com.editor.gui.WhiteBoard;
 import com.editor.gui.button.Draggable;
 import com.editor.gui.button.IButton;
+import com.editor.mediator.DragMediator;
 
 public class CustomPanel extends Canvas {
     private int relX, relY, relWidth, relHeight;
@@ -26,6 +27,9 @@ public class CustomPanel extends Canvas {
     private WhiteBoard targetWhiteBoard = null;
     private boolean isDragging = false;
     private Point dragOffset = null;
+
+    // Mediator for drag operations
+    private DragMediator dragMediator = null;
 
     public CustomPanel() {
         setBackground(java.awt.Color.decode("#F6E9D7"));
@@ -60,8 +64,14 @@ public class CustomPanel extends Canvas {
                         // Calculer l'offset pour que le glisser soit relatif au point de clic
                         dragOffset = new Point(e.getX() - button.getX(), e.getY() - button.getY());
 
-                        // Notifier le bouton que le glisser commence
-                        currentDraggedButton.startDrag(e.getX(), e.getY());
+                        // Use mediator if available, otherwise use direct approach
+                        if (dragMediator != null) {
+                            dragMediator.startDrag(CustomPanel.this, currentDraggedButton, e.getX(), e.getY());
+                        } else {
+                            // Notifier le bouton que le glisser commence (legacy approach)
+                            currentDraggedButton.startDrag(e.getX(), e.getY());
+                        }
+
                         repaint();
                         break;
                     }
@@ -71,19 +81,25 @@ public class CustomPanel extends Canvas {
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (isDragging && currentDraggedButton != null) {
-                    // Convertir les coordonnées du panneau en coordonnées du whiteboard
-                    if (targetWhiteBoard != null) {
-                        Point whiteboardPoint = convertToWhiteboardCoordinates(e.getPoint());
-                        if (whiteboardPoint != null) {
-                            // Terminer le glisser sur le whiteboard
-                            currentDraggedButton.endDrag(whiteboardPoint.x, whiteboardPoint.y);
+                    // Use mediator if available, otherwise use direct approach
+                    if (dragMediator != null) {
+                        dragMediator.endDrag(e.getX(), e.getY());
+                    } else {
+                        // Legacy approach
+                        // Convertir les coordonnées du panneau en coordonnées du whiteboard
+                        if (targetWhiteBoard != null) {
+                            Point whiteboardPoint = convertToWhiteboardCoordinates(e.getPoint());
+                            if (whiteboardPoint != null) {
+                                // Terminer le glisser sur le whiteboard
+                                currentDraggedButton.endDrag(whiteboardPoint.x, whiteboardPoint.y);
+                            } else {
+                                // Annuler le glisser si on n'est pas sur le whiteboard
+                                currentDraggedButton.endDrag(-1, -1);
+                            }
                         } else {
-                            // Annuler le glisser si on n'est pas sur le whiteboard
+                            // Annuler le glisser si pas de whiteboard cible
                             currentDraggedButton.endDrag(-1, -1);
                         }
-                    } else {
-                        // Annuler le glisser si pas de whiteboard cible
-                        currentDraggedButton.endDrag(-1, -1);
                     }
 
                     // Réinitialiser l'état du glisser
@@ -130,8 +146,13 @@ public class CustomPanel extends Canvas {
             @Override
             public void mouseDragged(MouseEvent e) {
                 if (isDragging && currentDraggedButton != null) {
-                    // Mettre à jour la position du glisser
-                    currentDraggedButton.drag(e.getX(), e.getY());
+                    // Use mediator if available, otherwise use direct approach
+                    if (dragMediator != null) {
+                        dragMediator.drag(e.getX(), e.getY());
+                    } else {
+                        // Legacy approach - direct update
+                        currentDraggedButton.drag(e.getX(), e.getY());
+                    }
                     repaint();
                 }
             }
@@ -158,15 +179,46 @@ public class CustomPanel extends Canvas {
      */
     public void setTargetWhiteBoard(WhiteBoard whiteBoard) {
         this.targetWhiteBoard = whiteBoard;
+
+        // Register with mediator if available
+        if (dragMediator != null) {
+            dragMediator.registerWhiteBoard(whiteBoard);
+        }
+    }
+
+    /**
+     * Sets the drag mediator for this panel
+     *
+     * @param mediator The mediator to use for drag operations
+     */
+    public void setDragMediator(DragMediator mediator) {
+        this.dragMediator = mediator;
+
+        // Register this panel with the mediator
+        if (mediator != null) {
+            mediator.registerPanel(this);
+
+            // Register the whiteboard if it's already set
+            if (targetWhiteBoard != null) {
+                mediator.registerWhiteBoard(targetWhiteBoard);
+            }
+        }
     }
 
     /**
      * Convertit les coordonnées du panneau en coordonnées du whiteboard
      *
      * @param panelPoint Point dans les coordonnées du panneau
-     * @return Point dans les coordonnées du whiteboard, ou null si hors du whiteboard
+     * @return Point dans les coordonnées du whiteboard, ou null si hors du
+     *         whiteboard
      */
     private Point convertToWhiteboardCoordinates(Point panelPoint) {
+        // Use mediator if available
+        if (dragMediator != null) {
+            return dragMediator.convertToWhiteboardCoordinates(this, panelPoint);
+        }
+
+        // Legacy approach
         if (targetWhiteBoard == null) {
             return null;
         }
@@ -178,15 +230,14 @@ public class CustomPanel extends Canvas {
         // Vérifier si le point est dans les limites du whiteboard
         Point whiteboardLocation = targetWhiteBoard.getLocationOnScreen();
         if (screenPoint.x >= whiteboardLocation.x &&
-            screenPoint.x < whiteboardLocation.x + targetWhiteBoard.getWidth() &&
-            screenPoint.y >= whiteboardLocation.y &&
-            screenPoint.y < whiteboardLocation.y + targetWhiteBoard.getHeight()) {
+                screenPoint.x < whiteboardLocation.x + targetWhiteBoard.getWidth() &&
+                screenPoint.y >= whiteboardLocation.y &&
+                screenPoint.y < whiteboardLocation.y + targetWhiteBoard.getHeight()) {
 
             // Convertir en coordonnées relatives au whiteboard
             return new Point(
-                screenPoint.x - whiteboardLocation.x,
-                screenPoint.y - whiteboardLocation.y
-            );
+                    screenPoint.x - whiteboardLocation.x,
+                    screenPoint.y - whiteboardLocation.y);
         }
 
         return null;
