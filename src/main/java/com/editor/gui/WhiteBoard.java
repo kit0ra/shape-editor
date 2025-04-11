@@ -19,6 +19,7 @@ import javax.swing.SwingUtilities;
 
 import com.editor.commands.CommandHistory;
 import com.editor.commands.CreateShapeCommand;
+import com.editor.commands.MoveShapeCommand;
 import com.editor.drawing.AWTDrawing;
 import com.editor.drawing.Drawer;
 import com.editor.shapes.Rectangle;
@@ -33,6 +34,8 @@ public class WhiteBoard extends Canvas {
     private ShapeFactory currentShapeFactory = null;
     private Shape selectedShape;
     private Point dragStartPoint;
+    private Point originalShapePosition;
+    private boolean isDragging = false;
 
     public WhiteBoard(int width, int height, Color white) {
         this.setPreferredSize(new Dimension(width, height));
@@ -51,7 +54,7 @@ public class WhiteBoard extends Canvas {
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                dragStartPoint = null;
+                handleMouseRelease(e);
             }
         });
 
@@ -68,12 +71,25 @@ public class WhiteBoard extends Canvas {
             // Check for existing shape selection
             Shape previouslySelected = selectedShape;
             selectedShape = null;
+            isDragging = false;
+            originalShapePosition = null;
 
+            // Try to select a shape under the mouse cursor
             for (Shape shape : shapes) {
                 if (shape.isSelected(e.getX(), e.getY())) {
                     selectedShape = shape;
                     selectedShape.setSelected(true);
+
+                    // Store the starting point for drag operation
                     dragStartPoint = e.getPoint();
+
+                    // Store the original shape position for undo/redo
+                    Rectangle bounds = selectedShape.getBounds();
+                    originalShapePosition = new Point(bounds.getX(), bounds.getY());
+
+                    // Set dragging state
+                    isDragging = true;
+
                     break;
                 }
             }
@@ -93,11 +109,41 @@ public class WhiteBoard extends Canvas {
     }
 
     private void handleMouseDrag(MouseEvent e) {
-        if (selectedShape != null && dragStartPoint != null) {
+        if (isDragging && selectedShape != null && dragStartPoint != null) {
+            // Calculate the delta movement
             int dx = e.getX() - dragStartPoint.x;
             int dy = e.getY() - dragStartPoint.y;
+
+            // Move the shape by the delta
             selectedShape.move(dx, dy);
+
+            // Update the drag start point for the next drag event
             dragStartPoint = e.getPoint();
+
+            // Request a repaint to show the shape in its new position
+            repaint();
+        }
+    }
+
+    private void handleMouseRelease(MouseEvent e) {
+        if (isDragging && selectedShape != null && originalShapePosition != null) {
+            // Get the final position of the shape
+            Rectangle bounds = selectedShape.getBounds();
+            Point finalPosition = new Point(bounds.getX(), bounds.getY());
+
+            // Create and execute a move command for undo/redo
+            MoveShapeCommand moveCommand = new MoveShapeCommand(
+                    selectedShape,
+                    originalShapePosition.x, originalShapePosition.y,
+                    finalPosition.x, finalPosition.y);
+
+            commandHistory.executeCommand(moveCommand);
+
+            // Reset drag state
+            isDragging = false;
+            dragStartPoint = null;
+            originalShapePosition = null;
+
             repaint();
         }
     }
@@ -120,10 +166,29 @@ public class WhiteBoard extends Canvas {
         if (selectedShape != null) {
             Graphics2D g2d = (Graphics2D) g.create();
             try {
-                g2d.setColor(new Color(0, 0, 255, 50));
                 Rectangle bounds = selectedShape.getBounds();
-                g2d.fillRect(bounds.getX(), bounds.getY(),
-                        bounds.getWidth(), bounds.getHeight());
+
+                if (isDragging) {
+                    // Use a different highlight color and style for dragging
+                    g2d.setColor(new Color(255, 165, 0, 80)); // Orange with transparency
+                    g2d.fillRect(bounds.getX(), bounds.getY(),
+                            bounds.getWidth(), bounds.getHeight());
+
+                    // Draw a thicker border
+                    g2d.setColor(new Color(255, 165, 0));
+                    g2d.drawRect(bounds.getX() - 1, bounds.getY() - 1,
+                            bounds.getWidth() + 2, bounds.getHeight() + 2);
+                } else {
+                    // Normal selection highlight
+                    g2d.setColor(new Color(0, 0, 255, 50)); // Blue with transparency
+                    g2d.fillRect(bounds.getX(), bounds.getY(),
+                            bounds.getWidth(), bounds.getHeight());
+
+                    // Draw a border
+                    g2d.setColor(new Color(0, 0, 255));
+                    g2d.drawRect(bounds.getX(), bounds.getY(),
+                            bounds.getWidth(), bounds.getHeight());
+                }
             } finally {
                 g2d.dispose();
             }
