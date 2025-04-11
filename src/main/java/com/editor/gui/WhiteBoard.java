@@ -40,8 +40,10 @@ import com.editor.shapes.Rectangle;
 import com.editor.shapes.Shape;
 import com.editor.shapes.ShapeGroup;
 import com.editor.shapes.ShapePrototypeRegistry;
+import com.editor.gui.button.Draggable;
+import com.editor.mediator.DragMediator;
 
-public class WhiteBoard extends Canvas {
+public class WhiteBoard extends Canvas implements Draggable {
     private double relX, relY, relW, relH;
     private Color backgroundColor = Color.WHITE;
     private List<Shape> shapes = new ArrayList<>();
@@ -405,6 +407,23 @@ public class WhiteBoard extends Canvas {
                 }
             }
 
+            // Check if we're dragging shapes to the trash panel
+            if (dragMediator != null && !selectedShapes.isEmpty()) {
+                // Convert whiteboard coordinates to screen coordinates
+                Point screenPoint = new Point(e.getX(), e.getY());
+                try {
+                    screenPoint.translate(getLocationOnScreen().x, getLocationOnScreen().y);
+
+                    // Use the mediator to check if we're over the trash panel
+                    boolean isOverTrash = dragMediator.checkPointOverTrash(screenPoint);
+
+                    // Update the trash panel visual state and our internal state
+                    setDraggingToTrash(isOverTrash);
+                } catch (Exception ex) {
+                    // Ignore any exceptions during coordinate conversion
+                }
+            }
+
             // Request a repaint to show the shapes in their new positions
             repaint();
         }
@@ -463,6 +482,38 @@ public class WhiteBoard extends Canvas {
 
         // Check if a drag operation was in progress and completed
         if (isDragging && activeShape != null && !originalPositions.isEmpty()) {
+            // Check if we're dropping shapes on the trash panel
+            if (isBeingDraggedToTrash && dragMediator != null) {
+                // Convert whiteboard coordinates to screen coordinates
+                Point screenPoint = new Point(e.getX(), e.getY());
+                try {
+                    screenPoint.translate(getLocationOnScreen().x, getLocationOnScreen().y);
+
+                    // Check if we're still over the trash panel
+                    if (dragMediator.checkPointOverTrash(screenPoint)) {
+                        // Delete the selected shapes
+                        deleteSelectedShapes();
+
+                        // Reset drag state variables
+                        isDragging = false;
+                        dragStartPoint = null;
+                        originalShapePosition = null;
+                        dragOffset = null;
+                        originalPositions.clear();
+                        isBeingDraggedToTrash = false;
+
+                        // Repaint to update the view
+                        repaint();
+                        return;
+                    }
+                } catch (Exception ex) {
+                    // Ignore any exceptions during coordinate conversion
+                }
+
+                // Reset the trash panel visual state
+                setDraggingToTrash(false);
+            }
+
             // Create a map to store the final positions of all selected shapes
             Map<Shape, Point> finalPositions = new HashMap<>();
             boolean positionsChanged = false;
@@ -731,6 +782,58 @@ public class WhiteBoard extends Canvas {
         this.relY = yPercent / 100.0;
         this.relW = widthPercent / 100.0;
         this.relH = heightPercent / 100.0;
+    }
+
+    // Draggable interface implementation
+    private boolean isBeingDraggedToTrash = false;
+    private DragMediator dragMediator;
+
+    /**
+     * Sets the drag mediator for this whiteboard
+     *
+     * @param mediator The mediator to use
+     */
+    public void setDragMediator(DragMediator mediator) {
+        this.dragMediator = mediator;
+    }
+
+    @Override
+    public void startDrag(int x, int y) {
+        // This method is called when a shape is being dragged from the whiteboard
+        // We don't need to do anything special here as the mouse handlers already
+        // handle selection
+    }
+
+    @Override
+    public void drag(int x, int y) {
+        // This method is called when a shape is being dragged
+        // The actual dragging is handled by the mouse motion handlers
+    }
+
+    @Override
+    public void endDrag(int x, int y) {
+        // This method is called when a shape drag operation ends
+        // If the shape was being dragged to the trash, delete it
+        if (isBeingDraggedToTrash) {
+            deleteSelectedShapes();
+            isBeingDraggedToTrash = false;
+        }
+    }
+
+    @Override
+    public String getShapeType() {
+        // For the whiteboard, we don't have a specific shape type
+        // This is used when dragging shapes from the whiteboard to the trash
+        return "SelectedShapes";
+    }
+
+    /**
+     * Sets whether the selected shapes are being dragged to the trash
+     *
+     * @param isDraggingToTrash Whether the shapes are being dragged to the trash
+     */
+    public void setDraggingToTrash(boolean isDraggingToTrash) {
+        this.isBeingDraggedToTrash = isDraggingToTrash;
     }
 
     public void makeResponsiveTo(Frame frame) {

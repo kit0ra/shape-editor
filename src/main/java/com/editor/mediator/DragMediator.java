@@ -72,6 +72,14 @@ public interface DragMediator {
     void registerTrashPanel(TrashPanel trashPanel);
 
     /**
+     * Check if a point in screen coordinates is over the trash panel
+     *
+     * @param screenPoint The point in screen coordinates
+     * @return true if the point is over the trash panel, false otherwise
+     */
+    boolean checkPointOverTrash(Point screenPoint);
+
+    /**
      * Enable or disable debug messages
      *
      * @param enabled Whether debug messages should be enabled

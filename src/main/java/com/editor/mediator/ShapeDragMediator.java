@@ -201,6 +201,24 @@ public class ShapeDragMediator implements DragMediator {
     }
 
     @Override
+    public boolean checkPointOverTrash(Point screenPoint) {
+        if (trashPanel == null) {
+            debugLog("ERROR: Cannot check if point is over trash - TrashPanel not registered");
+            return false;
+        }
+
+        boolean isOverTrash = trashPanel.isPointOverTrash(screenPoint);
+        if (isOverTrash) {
+            debugLog("Point is over trash panel");
+            trashPanel.setShapeOverTrash(true);
+        } else {
+            trashPanel.setShapeOverTrash(false);
+        }
+
+        return isOverTrash;
+    }
+
+    @Override
     public void setDebugEnabled(boolean enabled) {
         this.debugEnabled = enabled;
         debugLog("Debug " + (enabled ? "enabled" : "disabled"));

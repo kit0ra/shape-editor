@@ -119,10 +119,11 @@ public class ShapeEditorFrame extends Frame {
         // Register components with the mediator
         dragMediator.registerWhiteBoard(whiteBoard);
 
-        // Set the mediator in the panels
+        // Set the mediator in the panels and whiteboard
         verticalPanel.setDragMediator(dragMediator);
         horizontalPanel.setDragMediator(dragMediator);
         trashPanel.setDragMediator(dragMediator);
+        whiteBoard.setDragMediator(dragMediator);
 
         // Register the trash panel with the mediator
         dragMediator.registerTrashPanel(trashPanel);
