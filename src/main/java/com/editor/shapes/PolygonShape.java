@@ -84,4 +84,19 @@ public class PolygonShape implements Shape {
         return nPoints;
     }
 
+    @Override
+    public Shape clone() {
+        // Create deep copies of the arrays
+        int[] newXPoints = new int[xPoints.length];
+        int[] newYPoints = new int[yPoints.length];
+
+        // Copy the array values
+        System.arraycopy(xPoints, 0, newXPoints, 0, xPoints.length);
+        System.arraycopy(yPoints, 0, newYPoints, 0, yPoints.length);
+
+        // Create a new PolygonShape with the copied arrays
+        PolygonShape clone = new PolygonShape(newXPoints, newYPoints, nPoints);
+        clone.setSelected(selected);
+        return clone;
+    }
 }

@@ -24,14 +24,15 @@ import com.editor.drawing.AWTDrawing;
 import com.editor.drawing.Drawer;
 import com.editor.shapes.Rectangle;
 import com.editor.shapes.Shape;
-import com.editor.shapes.ShapeFactory;
+import com.editor.shapes.ShapePrototypeRegistry;
 
 public class WhiteBoard extends Canvas {
     private double relX, relY, relW, relH;
     private Color backgroundColor = Color.WHITE;
     private List<Shape> shapes = new ArrayList<>();
     private CommandHistory commandHistory = new CommandHistory();
-    private ShapeFactory currentShapeFactory = null;
+    private ShapePrototypeRegistry prototypeRegistry = null;
+    private String currentShapeType = null;
     private Shape selectedShape;
     private Point dragStartPoint; // Where the mouse was initially pressed
     private Point originalShapePosition; // Top-left corner of the shape when drag started
@@ -106,8 +107,8 @@ public class WhiteBoard extends Canvas {
                 previouslySelected.setSelected(false);
             }
 
-            // Create new shape if none selected and factory is set
-            if (selectedShape == null && currentShapeFactory != null) {
+            // Create new shape if none selected and a shape type is selected
+            if (selectedShape == null && currentShapeType != null && prototypeRegistry != null) {
                 createShapeAt(e.getX(), e.getY());
             }
 
@@ -207,18 +208,29 @@ public class WhiteBoard extends Canvas {
     }
 
     /**
-     * Sets the current shape factory to use for creating shapes
+     * Sets the current shape type to use for creating shapes
+     *
+     * @param shapeType The type of shape to create (key in the prototype registry)
      */
-    public void setCurrentShapeFactory(ShapeFactory factory) {
-        this.currentShapeFactory = factory;
+    public void setCurrentShapeType(String shapeType) {
+        this.currentShapeType = shapeType;
     }
 
     /**
-     * Creates a shape at the specified location using the current shape factory
+     * Sets the prototype registry to use for creating shapes
+     *
+     * @param registry The shape prototype registry
+     */
+    public void setPrototypeRegistry(ShapePrototypeRegistry registry) {
+        this.prototypeRegistry = registry;
+    }
+
+    /**
+     * Creates a shape at the specified location using the current shape type
      */
     public void createShapeAt(int x, int y) {
-        if (currentShapeFactory != null) {
-            Shape newShape = currentShapeFactory.createShape(x, y);
+        if (currentShapeType != null && prototypeRegistry != null) {
+            Shape newShape = prototypeRegistry.createShape(currentShapeType, x, y);
             commandHistory.executeCommand(
                     new CreateShapeCommand(shapes, newShape, x, y));
             selectedShape = newShape;
@@ -228,10 +240,10 @@ public class WhiteBoard extends Canvas {
     }
 
     /**
-     * Adds a shape to the center of the whiteboard using the current shape factory
+     * Adds a shape to the center of the whiteboard using the current shape type
      */
     public void addShapeToCenter() {
-        if (currentShapeFactory != null) {
+        if (currentShapeType != null && prototypeRegistry != null) {
             // Calculate the center of the whiteboard
             int centerX = getWidth() / 2;
             int centerY = getHeight() / 2;

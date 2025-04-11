@@ -8,7 +8,7 @@ import java.awt.Graphics2D;
 import com.editor.gui.WhiteBoard;
 import com.editor.gui.button.Draggable;
 import com.editor.gui.button.IButton;
-import com.editor.shapes.ShapeFactory;
+import com.editor.shapes.ShapePrototypeRegistry;
 
 /**
  * A decorator that adds drag-and-drop shape creation functionality to a button.
@@ -17,7 +17,7 @@ import com.editor.shapes.ShapeFactory;
  */
 public class ShapeCreationButtonDecorator extends ButtonDecorator implements Draggable {
     private final WhiteBoard targetWhiteBoard;
-    private final ShapeFactory shapeFactory;
+    private final ShapePrototypeRegistry prototypeRegistry;
     private final String shapeType;
     private boolean isDragging = false;
     private int dragX, dragY;
@@ -25,19 +25,19 @@ public class ShapeCreationButtonDecorator extends ButtonDecorator implements Dra
     /**
      * Creates a new ShapeCreationButtonDecorator
      *
-     * @param decoratedButton  The button to decorate
-     * @param targetWhiteBoard The whiteboard where shapes will be created
-     * @param shapeFactory     The factory to create shapes
-     * @param shapeType        A string identifier for the type of shape
+     * @param decoratedButton   The button to decorate
+     * @param targetWhiteBoard  The whiteboard where shapes will be created
+     * @param prototypeRegistry The registry containing shape prototypes
+     * @param shapeType         A string identifier for the type of shape
      */
     public ShapeCreationButtonDecorator(
             IButton decoratedButton,
             WhiteBoard targetWhiteBoard,
-            ShapeFactory shapeFactory,
+            ShapePrototypeRegistry prototypeRegistry,
             String shapeType) {
         super(decoratedButton);
         this.targetWhiteBoard = targetWhiteBoard;
-        this.shapeFactory = shapeFactory;
+        this.prototypeRegistry = prototypeRegistry;
         this.shapeType = shapeType;
     }
 
@@ -71,13 +71,14 @@ public class ShapeCreationButtonDecorator extends ButtonDecorator implements Dra
     @Override
     public void onClick() {
         // When clicked, create a shape at the center of the whiteboard
-        targetWhiteBoard.setCurrentShapeFactory(shapeFactory);
+        targetWhiteBoard.setPrototypeRegistry(prototypeRegistry);
+        targetWhiteBoard.setCurrentShapeType(shapeType);
         targetWhiteBoard.addShapeToCenter();
 
-        // Reset the current shape factory to null after adding the shape
+        // Reset the current shape type to null after adding the shape
         // This ensures that clicking on the whiteboard won't add another shape
         // but clicking the button again will
-        targetWhiteBoard.setCurrentShapeFactory(null);
+        targetWhiteBoard.setCurrentShapeType(null);
     }
 
     @Override
@@ -86,8 +87,9 @@ public class ShapeCreationButtonDecorator extends ButtonDecorator implements Dra
         dragX = x;
         dragY = y;
 
-        // Set the current shape factory in the whiteboard
-        targetWhiteBoard.setCurrentShapeFactory(shapeFactory);
+        // Set the current shape type in the whiteboard
+        targetWhiteBoard.setPrototypeRegistry(prototypeRegistry);
+        targetWhiteBoard.setCurrentShapeType(shapeType);
     }
 
     @Override
@@ -103,8 +105,8 @@ public class ShapeCreationButtonDecorator extends ButtonDecorator implements Dra
         // Create the shape at the drop location
         targetWhiteBoard.createShapeAt(x, y);
 
-        // Reset the current shape factory to null after adding the shape
-        targetWhiteBoard.setCurrentShapeFactory(null);
+        // Reset the current shape type to null after adding the shape
+        targetWhiteBoard.setCurrentShapeType(null);
     }
 
     @Override

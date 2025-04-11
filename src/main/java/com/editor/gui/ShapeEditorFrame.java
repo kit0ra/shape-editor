@@ -7,16 +7,15 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 import com.editor.gui.button.CustomButton;
-import com.editor.gui.button.Draggable;
 import com.editor.gui.button.IButton;
 import com.editor.gui.button.decorators.ImageDecorator;
 import com.editor.gui.button.decorators.ShapeCreationButtonDecorator;
 import com.editor.gui.button.decorators.TooltipDecorator;
 import com.editor.gui.panel.HorizontalPanel;
 import com.editor.gui.panel.VerticalPanel;
-import com.editor.shapes.PolygonFactory;
-import com.editor.shapes.RectangleFactory;
-import com.editor.shapes.ShapeFactory;
+import com.editor.shapes.PolygonShape;
+import com.editor.shapes.Rectangle;
+import com.editor.shapes.ShapePrototypeRegistry;
 import com.editor.utils.ImageLoader;
 
 public class ShapeEditorFrame extends Frame {
@@ -28,6 +27,9 @@ public class ShapeEditorFrame extends Frame {
     // Button spacing and positioning constants
     private static final int HORIZONTAL_BUTTON_SPACING = 10;
     private static final int VERTICAL_BUTTON_SPACING = 15;
+
+    // Shape prototype registry
+    private ShapePrototypeRegistry prototypeRegistry;
     private static final int HORIZONTAL_INITIAL_OFFSET = 10;
     private static final int VERTICAL_INITIAL_OFFSET = 60; // Initial Y offset to position below horizontal panel
     private static final int BUTTON_LEFT_MARGIN = 10; // Left margin for buttons in vertical panel
@@ -61,6 +63,9 @@ public class ShapeEditorFrame extends Frame {
                 "icons/rectangle.png",
                 "icons/polygon.png");
 
+        // Initialize the shape prototype registry
+        initializePrototypeRegistry();
+
         // ✅ Add this to close properly
         addWindowListener(new WindowAdapter() {
             @Override
@@ -76,6 +81,26 @@ public class ShapeEditorFrame extends Frame {
         // Initialize buttons in both panels
         setupHorizontalButtons();
         setupVerticalButtons();
+    }
+
+    /**
+     * Initializes the shape prototype registry with predefined shapes
+     */
+    private void initializePrototypeRegistry() {
+        prototypeRegistry = new ShapePrototypeRegistry();
+
+        // Register a rectangle prototype
+        Rectangle rectanglePrototype = new Rectangle(0, 0, 80, 60);
+        prototypeRegistry.registerPrototype("Rectangle", rectanglePrototype);
+
+        // Register a polygon (triangle) prototype
+        int[] xPoints = { 0, -40, 40 };
+        int[] yPoints = { -40, 40, 40 };
+        PolygonShape polygonPrototype = new PolygonShape(xPoints, yPoints, 3);
+        prototypeRegistry.registerPrototype("Polygon", polygonPrototype);
+
+        // Set the prototype registry in the whiteboard
+        whiteBoard.setPrototypeRegistry(prototypeRegistry);
     }
 
     /**
@@ -115,7 +140,6 @@ public class ShapeEditorFrame extends Frame {
                 BUTTON_LEFT_MARGIN, y,
                 "icons/rectangle.png",
                 "Draw a rectangle",
-                new RectangleFactory(),
                 "Rectangle");
         verticalPanel.addButton(rectangleButton);
 
@@ -125,7 +149,6 @@ public class ShapeEditorFrame extends Frame {
                 BUTTON_LEFT_MARGIN, y,
                 "icons/polygon.png",
                 "Draw a polygon",
-                new PolygonFactory(),
                 "Polygon");
         verticalPanel.addButton(polygonButton);
     }
@@ -159,12 +182,12 @@ public class ShapeEditorFrame extends Frame {
      * Helper method to create a draggable shape button with icon and tooltip
      */
     private IButton createDraggableShapeButton(int x, int y, String iconPath, String tooltipText,
-            ShapeFactory factory, String shapeType) {
+            String shapeType) {
         // First create a regular icon button
         IButton button = createIconButton(x, y, iconPath, tooltipText);
 
         // Add shape creation decorator to make it draggable
-        button = new ShapeCreationButtonDecorator(button, whiteBoard, factory, shapeType);
+        button = new ShapeCreationButtonDecorator(button, whiteBoard, prototypeRegistry, shapeType);
 
         return button;
     }

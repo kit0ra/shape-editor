@@ -51,6 +51,14 @@ public class Rectangle implements Shape {
         return new Rectangle(x, y, width, height);
     }
 
+    @Override
+    public Shape clone() {
+        // Create a new Rectangle with the same properties
+        Rectangle clone = new Rectangle(x, y, width, height);
+        clone.setSelected(selected);
+        return clone;
+    }
+
     public int getX() {
         return x;
     }
