@@ -1,7 +1,6 @@
 package com.editor.utils;
 
 import java.awt.Image;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -24,27 +23,11 @@ public class ImageLoader {
             return imageCache.get(path);
         }
 
-        // Try to load the image from resources first
+        // Try to load the image
         try (InputStream is = ImageLoader.class.getResourceAsStream("/" + path)) {
             if (is == null) {
-                // If not found in resources, try to load from the file system
-                try {
-                    File file = new File("src/main/java/" + path);
-                    if (file.exists()) {
-                        Image image = ImageIO.read(file);
-                        if (image != null) {
-                            imageCache.put(path, image); // Cache the image
-                        }
-                        return image;
-                    } else {
-                        System.err.println("Image not found: " + path);
-                        return null;
-                    }
-                } catch (IOException e) {
-                    System.err.println("Error loading image from file system: " + path);
-                    e.printStackTrace();
-                    return null;
-                }
+                System.err.println("Image not found: " + path);
+                return null;
             }
 
             Image image = ImageIO.read(is);
