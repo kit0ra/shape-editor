@@ -19,9 +19,10 @@ import com.editor.gui.panel.TrashPanel;
 import com.editor.gui.panel.VerticalPanel;
 import com.editor.mediator.DragMediator;
 import com.editor.mediator.ShapeDragMediator;
+import com.editor.shapes.CompositeShapePrototypeRegistry;
 import com.editor.shapes.Rectangle;
 import com.editor.shapes.RegularPolygon;
-import com.editor.shapes.ShapePrototypeRegistry;
+import com.editor.shapes.ShapePrototypeRegistry; // Added
 import com.editor.utils.ImageLoader;
 
 public class ShapeEditorFrame extends Frame {
@@ -38,8 +39,9 @@ public class ShapeEditorFrame extends Frame {
     // Button spacing and positioning constants
     private static final int HORIZONTAL_BUTTON_SPACING = 10;
 
-    // Shape prototype registry
+    // Shape prototype registries
     private ShapePrototypeRegistry prototypeRegistry;
+    private CompositeShapePrototypeRegistry compositeRegistry; // Added
     private static final int HORIZONTAL_INITIAL_OFFSET = 10;
     private static final int BUTTON_LEFT_MARGIN = 10; // Left margin for buttons in panels
 
@@ -87,8 +89,9 @@ public class ShapeEditorFrame extends Frame {
                 "icons/rectangle.png",
                 "icons/polygon.png");
 
-        // Initialize the shape prototype registry
+        // Initialize the shape prototype registries
         initializePrototypeRegistry();
+        initializeCompositeRegistry(); // Added call
 
         // Initialize and set up the drag mediator
         setupDragMediator();
@@ -147,6 +150,9 @@ public class ShapeEditorFrame extends Frame {
         // Set the toolbar panel reference in the whiteboard
         whiteBoard.setToolbarPanel(toolbarPanel);
 
+        // Set the composite registry in the toolbar panel
+        toolbarPanel.setCompositePrototypeRegistry(compositeRegistry); // Added
+
         System.out.println("Drag mediator initialized and connected to components");
     }
 
@@ -174,6 +180,16 @@ public class ShapeEditorFrame extends Frame {
 
         // Set the prototype registry in the whiteboard
         whiteBoard.setPrototypeRegistry(prototypeRegistry);
+    }
+
+    /**
+     * Initializes the composite shape prototype registry.
+     */
+    private void initializeCompositeRegistry() {
+        compositeRegistry = new CompositeShapePrototypeRegistry();
+        // Initially empty, prototypes are added dynamically when groups are dragged to
+        // the toolbar.
+        System.out.println("Composite shape registry initialized.");
     }
 
     /**

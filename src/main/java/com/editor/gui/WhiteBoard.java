@@ -854,6 +854,26 @@ public class WhiteBoard extends Canvas implements Draggable {
     }
 
     /**
+     * Gets the command history manager for this whiteboard.
+     *
+     * @return The CommandHistory instance.
+     */
+    public CommandHistory getCommandHistory() {
+        return this.commandHistory;
+    }
+
+    /**
+     * Gets the list of shapes currently on the whiteboard.
+     * Note: Modifying this list directly bypasses the command pattern.
+     * Use commands for adding/removing shapes where possible.
+     *
+     * @return The list of shapes.
+     */
+    public List<Shape> getShapesList() {
+        return this.shapes;
+    }
+
+    /**
      * Creates a shape at the specified location using the current shape type
      */
     public void createShapeAt(int x, int y) {
@@ -1017,6 +1037,36 @@ public class WhiteBoard extends Canvas implements Draggable {
      */
     public List<Shape> getSelectedShapes() {
         return new ArrayList<>(selectedShapes);
+    }
+
+    /**
+     * Clears the current selection, deselecting all shapes.
+     */
+    public void clearSelection() {
+        if (!selectedShapes.isEmpty()) {
+            for (Shape s : selectedShapes) {
+                s.setSelected(false);
+            }
+            selectedShapes.clear();
+            activeShape = null; // Ensure no shape remains active
+            System.out.println("[WhiteBoard] Selection cleared.");
+            // No repaint here, let the caller decide when to repaint
+        }
+    }
+
+    /**
+     * Adds a single shape to the current selection.
+     * Does not clear previous selections.
+     *
+     * @param shape The shape to add to the selection.
+     */
+    public void addSelectedShape(Shape shape) {
+        if (shape != null && !selectedShapes.contains(shape)) {
+            selectedShapes.add(shape);
+            shape.setSelected(true); // Ensure the shape knows it's selected
+            System.out.println("[WhiteBoard] Added shape to selection: " + shape);
+            // No repaint here, let the caller decide
+        }
     }
 
     /**
