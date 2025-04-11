@@ -227,12 +227,13 @@ public class CustomPanel extends Canvas {
         Point screenPoint = new Point(panelPoint);
         screenPoint.translate(getLocationOnScreen().x, getLocationOnScreen().y);
 
-        // Vérifier si le point est dans les limites du whiteboard
+        // Vérifier si le point est dans les limites du whiteboard avec une marge
         Point whiteboardLocation = targetWhiteBoard.getLocationOnScreen();
-        if (screenPoint.x >= whiteboardLocation.x &&
-                screenPoint.x < whiteboardLocation.x + targetWhiteBoard.getWidth() &&
-                screenPoint.y >= whiteboardLocation.y &&
-                screenPoint.y < whiteboardLocation.y + targetWhiteBoard.getHeight()) {
+        int margin = 10; // 10-pixel margin around the whiteboard
+        if (screenPoint.x >= whiteboardLocation.x - margin &&
+                screenPoint.x < whiteboardLocation.x + targetWhiteBoard.getWidth() + margin &&
+                screenPoint.y >= whiteboardLocation.y - margin &&
+                screenPoint.y < whiteboardLocation.y + targetWhiteBoard.getHeight() + margin) {
 
             // Convertir en coordonnées relatives au whiteboard
             return new Point(

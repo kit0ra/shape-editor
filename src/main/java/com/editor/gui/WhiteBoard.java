@@ -380,6 +380,9 @@ public class WhiteBoard extends Canvas {
 
             // Si une seule forme est sélectionnée, déplacer uniquement cette forme
             if (selectedShapes.size() == 1) {
+                // Ensure the shape stays within the whiteboard bounds with a small margin
+                newX = Math.max(-20, Math.min(newX, getWidth() - 20));
+                newY = Math.max(-20, Math.min(newY, getHeight() - 20));
                 activeShape.setPosition(newX, newY);
             }
             // Si plusieurs formes sont sélectionnées, les déplacer toutes ensemble
@@ -392,6 +395,11 @@ public class WhiteBoard extends Canvas {
                         // Calculer la nouvelle position en ajoutant le delta à la position d'origine
                         int shapeNewX = originalPos.x + deltaX;
                         int shapeNewY = originalPos.y + deltaY;
+
+                        // Ensure the shape stays within the whiteboard bounds with a small margin
+                        shapeNewX = Math.max(-20, Math.min(shapeNewX, getWidth() - 20));
+                        shapeNewY = Math.max(-20, Math.min(shapeNewY, getHeight() - 20));
+
                         shape.setPosition(shapeNewX, shapeNewY);
                     }
                 }
