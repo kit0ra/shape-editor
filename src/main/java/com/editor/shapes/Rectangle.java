@@ -19,7 +19,13 @@ public class Rectangle implements Shape {
     }
 
     @Override
-    public void move(int x, int y) {
+    public void move(int dx, int dy) {
+        this.x += dx;
+        this.y += dy;
+    }
+
+    @Override
+    public void setPosition(int x, int y) {
         this.x = x;
         this.y = y;
     }

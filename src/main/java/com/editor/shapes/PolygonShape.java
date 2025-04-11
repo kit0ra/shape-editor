@@ -29,6 +29,19 @@ public class PolygonShape implements Shape {
     }
 
     @Override
+    public void setPosition(int x, int y) {
+        Rectangle bounds = getBounds();
+        int currentX = bounds.getX();
+        int currentY = bounds.getY();
+
+        int dx = x - currentX;
+        int dy = y - currentY;
+
+        // Use the existing move method to shift all points
+        move(dx, dy);
+    }
+
+    @Override
     public boolean isSelected(int x, int y) {
         Polygon poly = new Polygon();
         for (int i = 0; i < nPoints; i++) {

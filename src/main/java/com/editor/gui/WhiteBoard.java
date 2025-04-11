@@ -33,8 +33,9 @@ public class WhiteBoard extends Canvas {
     private CommandHistory commandHistory = new CommandHistory();
     private ShapeFactory currentShapeFactory = null;
     private Shape selectedShape;
-    private Point dragStartPoint;
-    private Point originalShapePosition;
+    private Point dragStartPoint; // Where the mouse was initially pressed
+    private Point originalShapePosition; // Top-left corner of the shape when drag started
+    private Point dragOffset; // Difference between dragStartPoint and originalShapePosition
     private boolean isDragging = false;
 
     public WhiteBoard(int width, int height, Color white) {
@@ -73,6 +74,8 @@ public class WhiteBoard extends Canvas {
             selectedShape = null;
             isDragging = false;
             originalShapePosition = null;
+            dragStartPoint = null;
+            dragOffset = null;
 
             // Try to select a shape under the mouse cursor
             for (Shape shape : shapes) {
@@ -83,13 +86,17 @@ public class WhiteBoard extends Canvas {
                     // Store the starting point for drag operation
                     dragStartPoint = e.getPoint();
 
-                    // Store the original shape position for undo/redo
+                    // Store the original shape position for undo/redo and offset calculation
                     Rectangle bounds = selectedShape.getBounds();
                     originalShapePosition = new Point(bounds.getX(), bounds.getY());
 
+                    // Calculate the offset between the click point and the shape's origin
+                    dragOffset = new Point(
+                            dragStartPoint.x - originalShapePosition.x,
+                            dragStartPoint.y - originalShapePosition.y);
+
                     // Set dragging state
                     isDragging = true;
-
                     break;
                 }
             }
@@ -109,16 +116,15 @@ public class WhiteBoard extends Canvas {
     }
 
     private void handleMouseDrag(MouseEvent e) {
-        if (isDragging && selectedShape != null && dragStartPoint != null) {
-            // Calculate the delta movement
-            int dx = e.getX() - dragStartPoint.x;
-            int dy = e.getY() - dragStartPoint.y;
+        // Ensure dragging state, a shape is selected, and we have the offset
+        if (isDragging && selectedShape != null && dragOffset != null) {
+            // Calculate the new top-left position based on mouse position and initial
+            // offset
+            int newX = e.getX() - dragOffset.x;
+            int newY = e.getY() - dragOffset.y;
 
-            // Move the shape by the delta
-            selectedShape.move(dx, dy);
-
-            // Update the drag start point for the next drag event
-            dragStartPoint = e.getPoint();
+            // Set the shape's position directly for smooth visual feedback
+            selectedShape.setPosition(newX, newY);
 
             // Request a repaint to show the shape in its new position
             repaint();
@@ -126,24 +132,29 @@ public class WhiteBoard extends Canvas {
     }
 
     private void handleMouseRelease(MouseEvent e) {
+        // Check if a drag operation was in progress and completed
         if (isDragging && selectedShape != null && originalShapePosition != null) {
-            // Get the final position of the shape
+            // Get the final position of the shape after dragging
             Rectangle bounds = selectedShape.getBounds();
             Point finalPosition = new Point(bounds.getX(), bounds.getY());
 
-            // Create and execute a move command for undo/redo
-            MoveShapeCommand moveCommand = new MoveShapeCommand(
-                    selectedShape,
-                    originalShapePosition.x, originalShapePosition.y,
-                    finalPosition.x, finalPosition.y);
+            // Only create and execute a command if the position actually changed
+            if (!originalShapePosition.equals(finalPosition)) {
+                MoveShapeCommand moveCommand = new MoveShapeCommand(
+                        selectedShape,
+                        originalShapePosition, // Use Point constructor
+                        finalPosition); // Use Point constructor
 
-            commandHistory.executeCommand(moveCommand);
+                commandHistory.executeCommand(moveCommand);
+            }
 
-            // Reset drag state
+            // Reset drag state variables regardless of whether a move occurred
             isDragging = false;
             dragStartPoint = null;
             originalShapePosition = null;
+            dragOffset = null;
 
+            // Repaint to potentially remove drag-specific highlighting
             repaint();
         }
     }

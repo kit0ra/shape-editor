@@ -5,7 +5,9 @@ import com.editor.drawing.Drawer;
 public interface Shape {
     void draw(Drawer drawer);
 
-    void move(int x, int y);
+    void move(int dx, int dy); // Moves the shape by a delta
+
+    void setPosition(int x, int y); // Sets the shape's top-left corner to (x, y)
 
     boolean isSelected(int x, int y); // Check if point (x,y) is within the shape
 
