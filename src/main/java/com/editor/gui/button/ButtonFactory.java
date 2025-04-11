@@ -2,6 +2,7 @@ package com.editor.gui.button;
 
 import java.awt.Image;
 
+import com.editor.gui.button.decorators.ImageDecorator;
 import com.editor.utils.ImageLoader;
 
 public class ButtonFactory {

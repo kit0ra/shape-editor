@@ -1,4 +1,8 @@
-package com.editor.shapes;
+package com.editor.shapes.factory;
+
+import com.editor.shapes.Rectangle;
+import com.editor.shapes.Shape;
+import com.editor.shapes.ShapeFactory;
 
 public class RectangleFactory implements ShapeFactory {
     @Override

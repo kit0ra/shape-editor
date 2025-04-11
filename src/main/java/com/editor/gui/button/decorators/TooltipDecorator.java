@@ -1,8 +1,10 @@
-package com.editor.gui.button;
+package com.editor.gui.button.decorators;
 
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
+
+import com.editor.gui.button.IButton;
 
 /**
  * A decorator that adds tooltip functionality to a button.

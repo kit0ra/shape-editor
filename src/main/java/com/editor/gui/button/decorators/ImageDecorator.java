@@ -1,7 +1,9 @@
-package com.editor.gui.button;
+package com.editor.gui.button.decorators;
 
 import java.awt.Graphics;
 import java.awt.Image;
+
+import com.editor.gui.button.IButton;
 
 public class ImageDecorator extends ButtonDecorator {
     public enum ImageMode {
