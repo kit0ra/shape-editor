@@ -66,10 +66,15 @@ public class ShapeEditorFrame extends Frame {
         // Initialize the shape prototype registry
         initializePrototypeRegistry();
 
-        // ✅ Add this to close properly
+        // Add window listener to handle closing properly
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
+                // Clean up resources
+                if (whiteBoard != null) {
+                    whiteBoard.dispose();
+                }
+                dispose();
                 System.exit(0);
             }
         });

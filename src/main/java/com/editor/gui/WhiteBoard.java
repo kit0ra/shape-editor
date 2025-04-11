@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Point;
 import java.awt.BasicStroke;
 import java.awt.event.ComponentAdapter;
@@ -240,15 +241,26 @@ public class WhiteBoard extends Canvas {
     }
 
     @Override
+    public void update(Graphics g) {
+        // Override update to prevent clearing the screen before painting
+        paint(g);
+    }
+
+    @Override
     public void paint(Graphics g) {
-        super.paint(g);
+        // Create offscreen buffer if it doesn't exist or if size has changed
+        if (offscreenBuffer == null ||
+                offscreenBuffer.getWidth(null) != getWidth() ||
+                offscreenBuffer.getHeight(null) != getHeight()) {
+            createOffscreenBuffer();
+        }
 
-        // Clear the background
-        g.setColor(backgroundColor);
-        g.fillRect(0, 0, getWidth(), getHeight());
+        // Clear the offscreen buffer
+        offscreenGraphics.setColor(backgroundColor);
+        offscreenGraphics.fillRect(0, 0, getWidth(), getHeight());
 
-        // Draw all shapes
-        Drawer drawer = new AWTDrawing((Graphics2D) g);
+        // Draw all shapes to the offscreen buffer
+        Drawer drawer = new AWTDrawing((Graphics2D) offscreenGraphics);
         for (Shape shape : shapes) {
             shape.draw(drawer);
         }
@@ -285,6 +297,23 @@ public class WhiteBoard extends Canvas {
             } finally {
                 g2d.dispose();
             }
+        }
+
+        // Draw the offscreen buffer to the screen
+        g.drawImage(offscreenBuffer, 0, 0, this);
+    }
+
+    /**
+     * Creates or recreates the offscreen buffer with the current component
+     * dimensions
+     */
+    private void createOffscreenBuffer() {
+        offscreenBuffer = createImage(getWidth(), getHeight());
+        if (offscreenBuffer != null) {
+            if (offscreenGraphics != null) {
+                offscreenGraphics.dispose();
+            }
+            offscreenGraphics = offscreenBuffer.getGraphics();
         }
     }
 
@@ -397,6 +426,20 @@ public class WhiteBoard extends Canvas {
         int height = (int) (h * relH);
 
         setBounds(x, y, width, height);
+
+        // Recreate the offscreen buffer when size changes
+        createOffscreenBuffer();
         repaint();
+    }
+
+    /**
+     * Cleans up resources used by this component
+     */
+    public void dispose() {
+        if (offscreenGraphics != null) {
+            offscreenGraphics.dispose();
+            offscreenGraphics = null;
+        }
+        offscreenBuffer = null;
     }
 }
