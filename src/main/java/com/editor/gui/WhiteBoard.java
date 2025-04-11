@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Point;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
@@ -39,12 +40,19 @@ public class WhiteBoard extends Canvas {
     private Point dragOffset; // Difference between dragStartPoint and originalShapePosition
     private boolean isDragging = false;
 
+    // Double buffering variables
+    private Image offscreenBuffer;
+    private Graphics offscreenGraphics;
+
     public WhiteBoard(int width, int height, Color white) {
         this.setPreferredSize(new Dimension(width, height));
         this.backgroundColor = white;
         this.setBackground(white);
 
         setupMouseListeners();
+
+        // Enable double buffering
+        setIgnoreRepaint(false);
     }
 
     private void setupMouseListeners() {
@@ -172,22 +180,33 @@ public class WhiteBoard extends Canvas {
     }
 
     @Override
+    public void update(Graphics g) {
+        // Override update to prevent clearing the screen before painting
+        paint(g);
+    }
+
+    @Override
     public void paint(Graphics g) {
-        super.paint(g);
+        // Create offscreen buffer if it doesn't exist or if size has changed
+        if (offscreenBuffer == null ||
+                offscreenBuffer.getWidth(null) != getWidth() ||
+                offscreenBuffer.getHeight(null) != getHeight()) {
+            createOffscreenBuffer();
+        }
 
-        // Clear the background
-        g.setColor(backgroundColor);
-        g.fillRect(0, 0, getWidth(), getHeight());
+        // Clear the offscreen buffer
+        offscreenGraphics.setColor(backgroundColor);
+        offscreenGraphics.fillRect(0, 0, getWidth(), getHeight());
 
-        // Draw all shapes
-        Drawer drawer = new AWTDrawing((Graphics2D) g);
+        // Draw all shapes to the offscreen buffer
+        Drawer drawer = new AWTDrawing((Graphics2D) offscreenGraphics);
         for (Shape shape : shapes) {
             shape.draw(drawer);
         }
 
-        // Highlight selected shape
+        // Highlight selected shape on the offscreen buffer
         if (selectedShape != null) {
-            Graphics2D g2d = (Graphics2D) g.create();
+            Graphics2D g2d = (Graphics2D) offscreenGraphics.create();
             try {
                 Rectangle bounds = selectedShape.getBounds();
 
@@ -215,6 +234,23 @@ public class WhiteBoard extends Canvas {
             } finally {
                 g2d.dispose();
             }
+        }
+
+        // Draw the offscreen buffer to the screen
+        g.drawImage(offscreenBuffer, 0, 0, this);
+    }
+
+    /**
+     * Creates or recreates the offscreen buffer with the current component
+     * dimensions
+     */
+    private void createOffscreenBuffer() {
+        offscreenBuffer = createImage(getWidth(), getHeight());
+        if (offscreenBuffer != null) {
+            if (offscreenGraphics != null) {
+                offscreenGraphics.dispose();
+            }
+            offscreenGraphics = offscreenBuffer.getGraphics();
         }
     }
 
@@ -318,6 +354,20 @@ public class WhiteBoard extends Canvas {
         int height = (int) (h * relH);
 
         setBounds(x, y, width, height);
+
+        // Recreate the offscreen buffer when size changes
+        createOffscreenBuffer();
         repaint();
+    }
+
+    /**
+     * Cleans up resources used by this component
+     */
+    public void dispose() {
+        if (offscreenGraphics != null) {
+            offscreenGraphics.dispose();
+            offscreenGraphics = null;
+        }
+        offscreenBuffer = null;
     }
 }
