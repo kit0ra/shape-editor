@@ -85,7 +85,7 @@ public class TooltipDecorator extends ButtonDecorator {
 
     /**
      * The tooltip is shown when the button is hovered over
-     * 
+     *
      * @return true if the tooltip is currently being shown
      */
     public boolean isTooltipVisible() {
@@ -120,4 +120,5 @@ public class TooltipDecorator extends ButtonDecorator {
     public String getTooltip() {
         return tooltip;
     }
+
 }

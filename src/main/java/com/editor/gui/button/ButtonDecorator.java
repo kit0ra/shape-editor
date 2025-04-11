@@ -38,4 +38,35 @@ public abstract class ButtonDecorator implements IButton {
     public void onMouseOut() {
         decoratedButton.onMouseOut();
     }
+
+    @Override
+    public void setOnAction(Runnable action) {
+        decoratedButton.setOnAction(action);
+    }
+
+    // Delegate other IButton methods if they are missing
+    @Override
+    public int getX() {
+        return decoratedButton.getX();
+    }
+
+    @Override
+    public int getY() {
+        return decoratedButton.getY();
+    }
+
+    @Override
+    public int getWidth() {
+        return decoratedButton.getWidth();
+    }
+
+    @Override
+    public int getHeight() {
+        return decoratedButton.getHeight();
+    }
+
+    @Override
+    public String getText() {
+        return decoratedButton.getText();
+    }
 }

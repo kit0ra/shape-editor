@@ -10,6 +10,7 @@ import com.editor.gui.button.IButton;
 import com.editor.gui.button.TooltipDecorator;
 import com.editor.gui.panel.HorizontalPanel;
 import com.editor.gui.panel.VerticalPanel;
+import com.editor.shapes.RectangleFactory;
 import com.editor.utils.ImageLoader;
 
 public class ShapeEditorFrame extends Frame {
@@ -30,17 +31,21 @@ public class ShapeEditorFrame extends Frame {
         setLayout(null);
 
         whiteBoard = new WhiteBoard(800, 600, Color.WHITE);
-        whiteBoard.setRelativeBounds(20, 20, 80, 90); // fill remaining space
+        // Position whiteboard below horizontal panel (y=10) and right of vertical panel
+        // (x=20)
+        whiteBoard.setRelativeBounds(20, 10, 80, 90);
         whiteBoard.makeResponsiveTo(this);
         add(whiteBoard);
 
         horizontalPanel = new HorizontalPanel();
-        horizontalPanel.setRelativeBounds(0, 10, 100, 10); // x=10%, y=10%, width=80%, height=10%
+        // Position horizontal panel at the top
+        horizontalPanel.setRelativeBounds(0, 0, 100, 10); // x=0%, y=0%, width=100%, height=10%
         horizontalPanel.makeResponsiveTo(this);
         add(horizontalPanel);
 
         verticalPanel = new VerticalPanel();
-        verticalPanel.setRelativeBounds(0, 10, 20, 90); // x=10%, y=10%, width=10%, height=80%
+        // Position vertical panel below horizontal (y=10), on the left (x=0)
+        verticalPanel.setRelativeBounds(0, 10, 20, 90); // x=0%, y=10%, width=20%, height=90%
         verticalPanel.makeResponsiveTo(this);
         add(verticalPanel);
 
@@ -131,6 +136,10 @@ public class ShapeEditorFrame extends Frame {
 
         // Add tooltip to rectangle button
         rectangleButton = new TooltipDecorator(rectangleButton, "Draw a rectangle");
+        // Use setOnAction to assign the click behavior
+        rectangleButton.setOnAction(() -> {
+            whiteBoard.setCurrentShapeFactory(new RectangleFactory());
+        });
 
         // Add to panel
         verticalPanel.addButton(rectangleButton);

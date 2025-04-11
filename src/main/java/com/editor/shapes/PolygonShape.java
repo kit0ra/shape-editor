@@ -46,4 +46,29 @@ public class PolygonShape implements Shape {
     public boolean isSelected() {
         return selected;
     }
+
+    @Override
+    public Rectangle getBounds() {
+        int minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE, maxX = Integer.MIN_VALUE, maxY = Integer.MIN_VALUE;
+        for (int i = 0; i < nPoints; i++) {
+            minX = Math.min(minX, xPoints[i]);
+            minY = Math.min(minY, yPoints[i]);
+            maxX = Math.max(maxX, xPoints[i]);
+            maxY = Math.max(maxY, yPoints[i]);
+        }
+        return new Rectangle(minX, minY, maxX - minX, maxY - minY);
+    }
+
+    public int[] getXPoints() {
+        return xPoints;
+    }
+
+    public int[] getYPoints() {
+        return yPoints;
+    }
+
+    public int getNPoints() {
+        return nPoints;
+    }
+
 }

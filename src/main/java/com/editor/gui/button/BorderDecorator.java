@@ -49,4 +49,13 @@ public class BorderDecorator extends ButtonDecorator {
     public String getText() {
         return decoratedButton.getText();
     }
+
+    public Color getBorderColor() {
+        return borderColor;
+    }
+
+    public int getThickness() {
+        return thickness;
+    }
+
 }

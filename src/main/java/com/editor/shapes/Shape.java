@@ -13,4 +13,5 @@ public interface Shape {
 
     boolean isSelected(); // Get current selection state
 
+    Rectangle getBounds(); // Get the bounding rectangle of the shape
 }
