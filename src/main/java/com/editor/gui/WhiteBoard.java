@@ -703,6 +703,29 @@ public class WhiteBoard extends Canvas {
         repaint();
     }
 
+    /**
+     * Deletes all currently selected shapes from the whiteboard
+     *
+     * @return true if any shapes were deleted, false otherwise
+     */
+    public boolean deleteSelectedShapes() {
+        if (selectedShapes.isEmpty()) {
+            return false;
+        }
+
+        // Remove all selected shapes from the shapes list
+        boolean removed = shapes.removeAll(selectedShapes);
+
+        // Clear the selection
+        selectedShapes.clear();
+        activeShape = null;
+
+        // Repaint to show the updated state
+        repaint();
+
+        return removed;
+    }
+
     public void setRelativeBounds(double xPercent, double yPercent, double widthPercent, double heightPercent) {
         this.relX = xPercent / 100.0;
         this.relY = yPercent / 100.0;

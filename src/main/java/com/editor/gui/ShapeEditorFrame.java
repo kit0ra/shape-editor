@@ -14,6 +14,7 @@ import com.editor.gui.button.decorators.ShapeCreationButtonDecorator;
 import com.editor.gui.button.decorators.TooltipDecorator;
 import com.editor.gui.button.decorators.UndoButtonDecorator;
 import com.editor.gui.panel.HorizontalPanel;
+import com.editor.gui.panel.TrashPanel;
 import com.editor.gui.panel.VerticalPanel;
 import com.editor.mediator.DragMediator;
 import com.editor.mediator.ShapeDragMediator;
@@ -26,6 +27,7 @@ public class ShapeEditorFrame extends Frame {
 
     private HorizontalPanel horizontalPanel;
     private VerticalPanel verticalPanel;
+    private TrashPanel trashPanel;
     private WhiteBoard whiteBoard;
 
     // Mediator for drag operations
@@ -59,6 +61,13 @@ public class ShapeEditorFrame extends Frame {
         verticalPanel.makeResponsiveTo(this);
         verticalPanel.setTargetWhiteBoard(whiteBoard); // Définir le whiteboard comme cible pour le glisser-déposer
         add(verticalPanel);
+
+        // Initialize the trash panel at the bottom left
+        trashPanel = new TrashPanel();
+        trashPanel.setRelativeBounds(0, 90, 20, 10); // x=0%, y=90% (bottom), width=20%, height=10%
+        trashPanel.makeResponsiveTo(this);
+        trashPanel.setTargetWhiteBoard(whiteBoard);
+        add(trashPanel);
 
         // Preload all icons
         ImageLoader.preloadImages(
@@ -113,6 +122,10 @@ public class ShapeEditorFrame extends Frame {
         // Set the mediator in the panels
         verticalPanel.setDragMediator(dragMediator);
         horizontalPanel.setDragMediator(dragMediator);
+        trashPanel.setDragMediator(dragMediator);
+
+        // Register the trash panel with the mediator
+        dragMediator.registerTrashPanel(trashPanel);
 
         System.out.println("Drag mediator initialized and connected to components");
     }

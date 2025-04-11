@@ -7,6 +7,7 @@ import java.util.List;
 import com.editor.gui.WhiteBoard;
 import com.editor.gui.button.Draggable;
 import com.editor.gui.panel.CustomPanel;
+import com.editor.gui.panel.TrashPanel;
 
 /**
  * Concrete implementation of the DragMediator interface.
@@ -19,6 +20,7 @@ public class ShapeDragMediator implements DragMediator {
     private CustomPanel sourcePanelForDrag;
     private boolean isDragging = false;
     private boolean debugEnabled = false;
+    private TrashPanel trashPanel = null;
 
     @Override
     public void registerPanel(CustomPanel panel) {
@@ -67,6 +69,22 @@ public class ShapeDragMediator implements DragMediator {
         // Update the draggable with the new position
         currentDraggable.drag(x, y);
 
+        // Check if the drag is over the trash panel
+        if (trashPanel != null && sourcePanelForDrag != null) {
+            try {
+                // Convert panel coordinates to screen coordinates
+                Point screenPoint = new Point(x, y);
+                screenPoint.translate(sourcePanelForDrag.getLocationOnScreen().x,
+                        sourcePanelForDrag.getLocationOnScreen().y);
+
+                // Check if the point is over the trash panel
+                boolean isOverTrash = trashPanel.isPointOverTrash(screenPoint);
+                trashPanel.setShapeOverTrash(isOverTrash);
+            } catch (Exception e) {
+                debugLog("Error checking if shape is over trash: " + e.getMessage());
+            }
+        }
+
         debugLog("Dragging: " + currentDraggable.getShapeType() + " at (" + x + ", " + y + ")");
 
         // Request repaint of the source panel
@@ -81,20 +99,43 @@ public class ShapeDragMediator implements DragMediator {
             return;
         }
 
-        // Convert panel coordinates to whiteboard coordinates if needed
-        Point whiteboardPoint = null;
-        if (x >= 0 && y >= 0) {
-            whiteboardPoint = convertToWhiteboardCoordinates(sourcePanelForDrag, new Point(x, y));
+        // Check if the drag ended over the trash panel
+        boolean deletedShape = false;
+        if (trashPanel != null) {
+            try {
+                // Convert panel coordinates to screen coordinates
+                Point screenPoint = new Point(x, y);
+                screenPoint.translate(sourcePanelForDrag.getLocationOnScreen().x,
+                        sourcePanelForDrag.getLocationOnScreen().y);
+
+                // Check if the point is over the trash panel
+                if (trashPanel.isPointOverTrash(screenPoint)) {
+                    debugLog("Ending drag over trash panel - deleting shape(s)");
+                    deletedShape = trashPanel.deleteSelectedShapes();
+                    trashPanel.setShapeOverTrash(false); // Reset the trash panel visual state
+                }
+            } catch (Exception e) {
+                debugLog("Error checking if shape is over trash: " + e.getMessage());
+            }
         }
 
-        if (whiteboardPoint != null) {
-            debugLog("Ending drag on whiteboard at (" + whiteboardPoint.x + ", " + whiteboardPoint.y + ")");
-            // End the drag on the whiteboard
-            currentDraggable.endDrag(whiteboardPoint.x, whiteboardPoint.y);
-        } else {
-            debugLog("Cancelling drag operation (not over whiteboard)");
-            // Cancel the drag
-            currentDraggable.endDrag(-1, -1);
+        // If the shape wasn't deleted, handle normal drag end
+        if (!deletedShape) {
+            // Convert panel coordinates to whiteboard coordinates if needed
+            Point whiteboardPoint = null;
+            if (x >= 0 && y >= 0) {
+                whiteboardPoint = convertToWhiteboardCoordinates(sourcePanelForDrag, new Point(x, y));
+            }
+
+            if (whiteboardPoint != null) {
+                debugLog("Ending drag on whiteboard at (" + whiteboardPoint.x + ", " + whiteboardPoint.y + ")");
+                // End the drag on the whiteboard
+                currentDraggable.endDrag(whiteboardPoint.x, whiteboardPoint.y);
+            } else {
+                debugLog("Cancelling drag operation (not over whiteboard)");
+                // Cancel the drag
+                currentDraggable.endDrag(-1, -1);
+            }
         }
 
         // Reset the whiteboard's current shape type
@@ -154,6 +195,12 @@ public class ShapeDragMediator implements DragMediator {
     }
 
     @Override
+    public void registerTrashPanel(TrashPanel trashPanel) {
+        this.trashPanel = trashPanel;
+        debugLog("Trash panel registered with mediator");
+    }
+
+    @Override
     public void setDebugEnabled(boolean enabled) {
         this.debugEnabled = enabled;
         debugLog("Debug " + (enabled ? "enabled" : "disabled"));
@@ -161,7 +208,7 @@ public class ShapeDragMediator implements DragMediator {
 
     /**
      * Log a debug message if debug is enabled
-     * 
+     *
      * @param message The message to log
      */
     private void debugLog(String message) {
