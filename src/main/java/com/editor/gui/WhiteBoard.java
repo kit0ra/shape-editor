@@ -7,8 +7,12 @@ import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.BasicStroke;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
@@ -30,14 +34,16 @@ public class WhiteBoard extends Canvas {
     private double relX, relY, relW, relH;
     private Color backgroundColor = Color.WHITE;
     private List<Shape> shapes = new ArrayList<>();
+    private List<Shape> selectedShapes = new ArrayList<>(); // Liste des formes sélectionnées
     private CommandHistory commandHistory = new CommandHistory();
     private ShapePrototypeRegistry prototypeRegistry = null;
     private String currentShapeType = null;
-    private Shape selectedShape;
+    private Shape activeShape; // La forme actuellement active pour le déplacement
     private Point dragStartPoint; // Where the mouse was initially pressed
     private Point originalShapePosition; // Top-left corner of the shape when drag started
     private Point dragOffset; // Difference between dragStartPoint and originalShapePosition
     private boolean isDragging = false;
+    private boolean isCtrlPressed = false; // Pour la sélection multiple
 
     public WhiteBoard(int width, int height, Color white) {
         this.setPreferredSize(new Dimension(width, height));
@@ -45,12 +51,17 @@ public class WhiteBoard extends Canvas {
         this.setBackground(white);
 
         setupMouseListeners();
+        setupKeyListeners();
+
+        // Pour permettre au composant de recevoir les événements clavier
+        setFocusable(true);
     }
 
     private void setupMouseListeners() {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
+                requestFocusInWindow(); // Pour s'assurer que le composant reçoit les événements clavier
                 handleMousePress(e);
             }
 
@@ -68,10 +79,28 @@ public class WhiteBoard extends Canvas {
         });
     }
 
+    private void setupKeyListeners() {
+        addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_CONTROL) {
+                    isCtrlPressed = true;
+                }
+            }
+
+            @Override
+            public void keyReleased(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_CONTROL) {
+                    isCtrlPressed = false;
+                }
+            }
+        });
+    }
+
     private void handleMousePress(MouseEvent e) {
         if (SwingUtilities.isLeftMouseButton(e)) {
-            // Store the currently selected shape
-            Shape previouslySelected = selectedShape;
+            // Vérifier si Ctrl est enfoncé pour la sélection multiple
+            isCtrlPressed = (e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) != 0;
 
             // Reset drag state variables
             isDragging = false;
@@ -85,41 +114,59 @@ public class WhiteBoard extends Canvas {
                 if (shape.isSelected(e.getX(), e.getY())) {
                     // Found a shape under the cursor
                     foundShape = true;
-                    selectedShape = shape;
-                    selectedShape.setSelected(true);
 
-                    // Store the starting point for drag operation
-                    dragStartPoint = e.getPoint();
+                    // Si la forme est déjà sélectionnée et que Ctrl est enfoncé, on la désélectionne
+                    if (selectedShapes.contains(shape) && isCtrlPressed) {
+                        selectedShapes.remove(shape);
+                        shape.setSelected(false);
+                    } else {
+                        // Si Ctrl n'est pas enfoncé, on désélectionne toutes les autres formes
+                        if (!isCtrlPressed) {
+                            for (Shape s : selectedShapes) {
+                                s.setSelected(false);
+                            }
+                            selectedShapes.clear();
+                        }
 
-                    // Store the original shape position for undo/redo and offset calculation
-                    Rectangle bounds = selectedShape.getBounds();
-                    originalShapePosition = new Point(bounds.getX(), bounds.getY());
+                        // Sélectionner la forme actuelle
+                        if (!selectedShapes.contains(shape)) {
+                            selectedShapes.add(shape);
+                            shape.setSelected(true);
+                        }
 
-                    // Calculate the offset between the click point and the shape's origin
-                    dragOffset = new Point(
-                            dragStartPoint.x - originalShapePosition.x,
-                            dragStartPoint.y - originalShapePosition.y);
+                        // Définir la forme active pour le déplacement
+                        activeShape = shape;
 
-                    // Set dragging state
-                    isDragging = true;
+                        // Store the starting point for drag operation
+                        dragStartPoint = e.getPoint();
+
+                        // Store the original shape position for undo/redo and offset calculation
+                        Rectangle bounds = activeShape.getBounds();
+                        originalShapePosition = new Point(bounds.getX(), bounds.getY());
+
+                        // Calculate the offset between the click point and the shape's origin
+                        dragOffset = new Point(
+                                dragStartPoint.x - originalShapePosition.x,
+                                dragStartPoint.y - originalShapePosition.y);
+
+                        // Set dragging state
+                        isDragging = true;
+                    }
                     break;
                 }
             }
 
-            // If no shape was found under the cursor, deselect the current shape
-            if (!foundShape) {
-                // Only deselect if we're clicking on empty space
-                if (previouslySelected != null) {
-                    previouslySelected.setSelected(false);
+            // If no shape was found under the cursor and Ctrl is not pressed, deselect all shapes
+            if (!foundShape && !isCtrlPressed) {
+                for (Shape s : selectedShapes) {
+                    s.setSelected(false);
                 }
-                selectedShape = null;
-            } else if (previouslySelected != null && previouslySelected != selectedShape) {
-                // If we selected a different shape, deselect the previous one
-                previouslySelected.setSelected(false);
+                selectedShapes.clear();
+                activeShape = null;
             }
 
             // Create new shape if none selected and a shape type is selected
-            if (selectedShape == null && currentShapeType != null && prototypeRegistry != null) {
+            if (selectedShapes.isEmpty() && currentShapeType != null && prototypeRegistry != null) {
                 createShapeAt(e.getX(), e.getY());
             }
 
@@ -129,31 +176,52 @@ public class WhiteBoard extends Canvas {
 
     private void handleMouseDrag(MouseEvent e) {
         // Ensure dragging state, a shape is selected, and we have the offset
-        if (isDragging && selectedShape != null && dragOffset != null) {
+        if (isDragging && activeShape != null && dragOffset != null) {
             // Calculate the new top-left position based on mouse position and initial
             // offset
             int newX = e.getX() - dragOffset.x;
             int newY = e.getY() - dragOffset.y;
 
-            // Set the shape's position directly for smooth visual feedback
-            selectedShape.setPosition(newX, newY);
+            // Calculer le déplacement par rapport à la position d'origine
+            int deltaX = newX - originalShapePosition.x;
+            int deltaY = newY - originalShapePosition.y;
 
-            // Request a repaint to show the shape in its new position
+            // Si une seule forme est sélectionnée, déplacer uniquement cette forme
+            if (selectedShapes.size() == 1) {
+                activeShape.setPosition(newX, newY);
+            }
+            // Si plusieurs formes sont sélectionnées, les déplacer toutes ensemble
+            else if (selectedShapes.size() > 1) {
+                // Déplacer la forme active à la nouvelle position
+                activeShape.setPosition(newX, newY);
+
+                // Déplacer toutes les autres formes sélectionnées du même delta
+                for (Shape shape : selectedShapes) {
+                    if (shape != activeShape) {
+                        Rectangle bounds = shape.getBounds();
+                        shape.setPosition(bounds.getX() + deltaX, bounds.getY() + deltaY);
+                    }
+                }
+            }
+
+            // Request a repaint to show the shapes in their new positions
             repaint();
         }
     }
 
     private void handleMouseRelease(MouseEvent e) {
         // Check if a drag operation was in progress and completed
-        if (isDragging && selectedShape != null && originalShapePosition != null) {
-            // Get the final position of the shape after dragging
-            Rectangle bounds = selectedShape.getBounds();
+        if (isDragging && activeShape != null && originalShapePosition != null) {
+            // Get the final position of the active shape after dragging
+            Rectangle bounds = activeShape.getBounds();
             Point finalPosition = new Point(bounds.getX(), bounds.getY());
 
             // Only create and execute a command if the position actually changed
             if (!originalShapePosition.equals(finalPosition)) {
+                // Pour l'instant, on ne gère que le déplacement de la forme active
+                // TODO: Implémenter une commande pour déplacer plusieurs formes
                 MoveShapeCommand moveCommand = new MoveShapeCommand(
-                        selectedShape,
+                        activeShape,
                         originalShapePosition,
                         finalPosition);
 
@@ -185,32 +253,34 @@ public class WhiteBoard extends Canvas {
             shape.draw(drawer);
         }
 
-        // Highlight selected shape
-        if (selectedShape != null) {
+        // Highlight selected shapes with dashed border
+        if (!selectedShapes.isEmpty()) {
             Graphics2D g2d = (Graphics2D) g.create();
             try {
-                Rectangle bounds = selectedShape.getBounds();
+                // Définir le style de trait en pointillés
+                float[] dash = { 5.0f, 5.0f };
+                g2d.setStroke(new BasicStroke(2.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash, 0.0f));
 
-                if (isDragging) {
-                    // Use a different highlight color and style for dragging
-                    g2d.setColor(new Color(255, 165, 0, 80)); // Orange with transparency
-                    g2d.fillRect(bounds.getX(), bounds.getY(),
-                            bounds.getWidth(), bounds.getHeight());
+                // Dessiner un contour en pointillés autour de chaque forme sélectionnée
+                for (Shape shape : selectedShapes) {
+                    Rectangle bounds = shape.getBounds();
 
-                    // Draw a thicker border
-                    g2d.setColor(new Color(255, 165, 0));
-                    g2d.drawRect(bounds.getX() - 1, bounds.getY() - 1,
-                            bounds.getWidth() + 2, bounds.getHeight() + 2);
-                } else {
-                    // Normal selection highlight
-                    g2d.setColor(new Color(0, 0, 255, 50)); // Blue with transparency
-                    g2d.fillRect(bounds.getX(), bounds.getY(),
-                            bounds.getWidth(), bounds.getHeight());
+                    if (isDragging && shape == activeShape) {
+                        // Style spécifique pour la forme en cours de déplacement
+                        g2d.setColor(new Color(255, 165, 0)); // Orange
+                    } else {
+                        // Style normal pour les formes sélectionnées
+                        g2d.setColor(new Color(0, 0, 255)); // Bleu
+                    }
 
-                    // Draw a border
-                    g2d.setColor(new Color(0, 0, 255));
-                    g2d.drawRect(bounds.getX(), bounds.getY(),
-                            bounds.getWidth(), bounds.getHeight());
+                    // Dessiner le contour en pointillés légèrement plus grand que la forme
+                    g2d.drawRect(bounds.getX() - 2, bounds.getY() - 2,
+                            bounds.getWidth() + 4, bounds.getHeight() + 4);
+
+                    // Dessiner un point rouge au centre de la forme (comme dans les images)
+                    g2d.setColor(Color.RED);
+                    g2d.fillOval(bounds.getX() + bounds.getWidth()/2 - 3,
+                                bounds.getY() + bounds.getHeight()/2 - 3, 6, 6);
                 }
             } finally {
                 g2d.dispose();
@@ -244,8 +314,17 @@ public class WhiteBoard extends Canvas {
             Shape newShape = prototypeRegistry.createShape(currentShapeType, x, y);
             commandHistory.executeCommand(
                     new CreateShapeCommand(shapes, newShape, x, y));
-            selectedShape = newShape;
-            selectedShape.setSelected(true);
+
+            // Désélectionner toutes les formes précédemment sélectionnées
+            for (Shape s : selectedShapes) {
+                s.setSelected(false);
+            }
+            selectedShapes.clear();
+
+            // Sélectionner la nouvelle forme
+            selectedShapes.add(newShape);
+            activeShape = newShape;
+            newShape.setSelected(true);
             repaint();
         }
     }
