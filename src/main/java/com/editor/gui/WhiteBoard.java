@@ -9,6 +9,8 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.InputEvent;
@@ -22,16 +24,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 
 import com.editor.commands.CommandHistory;
 import com.editor.commands.CreateShapeCommand;
+import com.editor.commands.GroupShapesCommand;
 import com.editor.commands.MoveShapeCommand;
 import com.editor.commands.MoveShapesCommand;
+import com.editor.commands.UngroupShapesCommand;
 import com.editor.drawing.AWTDrawing;
 import com.editor.drawing.Drawer;
 import com.editor.shapes.Rectangle;
 import com.editor.shapes.Shape;
+import com.editor.shapes.ShapeGroup;
 import com.editor.shapes.ShapePrototypeRegistry;
 
 public class WhiteBoard extends Canvas {
@@ -75,7 +82,13 @@ public class WhiteBoard extends Canvas {
             @Override
             public void mousePressed(MouseEvent e) {
                 requestFocusInWindow(); // Pour s'assurer que le composant reçoit les événements clavier
-                handleMousePress(e);
+
+                // Gérer le clic droit pour le menu contextuel
+                if (SwingUtilities.isRightMouseButton(e)) {
+                    handleRightClick(e);
+                } else {
+                    handleMousePress(e);
+                }
             }
 
             @Override
@@ -90,6 +103,130 @@ public class WhiteBoard extends Canvas {
                 handleMouseDrag(e);
             }
         });
+    }
+
+    /**
+     * Gère le clic droit pour afficher le menu contextuel
+     */
+    private void handleRightClick(MouseEvent e) {
+        // Vérifier si on a cliqué sur une forme sélectionnée
+        boolean clickedOnSelected = false;
+        for (Shape shape : selectedShapes) {
+            if (shape.isSelected(e.getX(), e.getY())) {
+                clickedOnSelected = true;
+                break;
+            }
+        }
+
+        // Si on a cliqué sur une forme sélectionnée, afficher le menu contextuel
+        if (clickedOnSelected) {
+            showContextMenu(e.getX(), e.getY());
+        }
+    }
+
+    /**
+     * Affiche le menu contextuel aux coordonnées spécifiées
+     */
+    private void showContextMenu(int x, int y) {
+        JPopupMenu contextMenu = new JPopupMenu();
+
+        // Option Group
+        JMenuItem groupItem = new JMenuItem("Group");
+        groupItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                groupSelectedShapes();
+            }
+        });
+        contextMenu.add(groupItem);
+
+        // Option Ungroup (activée uniquement si une forme sélectionnée est un groupe)
+        JMenuItem ungroupItem = new JMenuItem("Ungroup");
+        ungroupItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ungroupSelectedShapes();
+            }
+        });
+
+        // Vérifier si au moins une forme sélectionnée est un groupe
+        boolean hasGroup = false;
+        for (Shape shape : selectedShapes) {
+            if (shape instanceof ShapeGroup) {
+                hasGroup = true;
+                break;
+            }
+        }
+        ungroupItem.setEnabled(hasGroup);
+        contextMenu.add(ungroupItem);
+
+        // Afficher le menu contextuel
+        contextMenu.show(this, x, y);
+    }
+
+    /**
+     * Groupe les formes sélectionnées
+     */
+    private void groupSelectedShapes() {
+        if (selectedShapes.size() < 2) {
+            return; // Il faut au moins 2 formes pour créer un groupe
+        }
+
+        // Créer et exécuter la commande de groupement
+        GroupShapesCommand command = new GroupShapesCommand(shapes, new ArrayList<>(selectedShapes));
+        commandHistory.executeCommand(command);
+
+        // Mettre à jour la sélection pour ne contenir que le groupe
+        for (Shape shape : selectedShapes) {
+            shape.setSelected(false);
+        }
+        selectedShapes.clear();
+
+        ShapeGroup group = command.getGroup();
+        group.setSelected(true);
+        selectedShapes.add(group);
+        activeShape = group;
+
+        repaint();
+    }
+
+    /**
+     * Dégroupe les groupes sélectionnés
+     */
+    private void ungroupSelectedShapes() {
+        List<Shape> newSelection = new ArrayList<>();
+        List<UngroupShapesCommand> commands = new ArrayList<>();
+
+        // Trouver tous les groupes sélectionnés et les dégrouper
+        for (Shape shape : selectedShapes) {
+            if (shape instanceof ShapeGroup) {
+                ShapeGroup group = (ShapeGroup) shape;
+                UngroupShapesCommand command = new UngroupShapesCommand(shapes, group);
+                commands.add(command);
+                commandHistory.executeCommand(command);
+
+                // Ajouter les formes dégroupées à la nouvelle sélection
+                newSelection.addAll(command.getUngroupedShapes());
+            } else {
+                newSelection.add(shape);
+            }
+        }
+
+        // Mettre à jour la sélection
+        for (Shape shape : selectedShapes) {
+            shape.setSelected(false);
+        }
+        selectedShapes.clear();
+
+        for (Shape shape : newSelection) {
+            shape.setSelected(true);
+            selectedShapes.add(shape);
+        }
+
+        // Réinitialiser la forme active
+        activeShape = null;
+
+        repaint();
     }
 
     private void setupKeyListeners() {
