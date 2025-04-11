@@ -15,6 +15,8 @@ import java.awt.event.MouseMotionAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.SwingUtilities;
+
 import com.editor.commands.CommandHistory;
 import com.editor.commands.CreateShapeCommand;
 import com.editor.drawing.AWTDrawing;
@@ -44,7 +46,7 @@ public class WhiteBoard extends Canvas {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                System.out.println("Mouse pressed at: " + e.getX() + ", " + e.getY());
+                handleMousePress(e);
             }
 
             @Override
@@ -59,6 +61,35 @@ public class WhiteBoard extends Canvas {
                 handleMouseDrag(e);
             }
         });
+    }
+
+    private void handleMousePress(MouseEvent e) {
+        if (SwingUtilities.isLeftMouseButton(e)) {
+            // Check for existing shape selection
+            Shape previouslySelected = selectedShape;
+            selectedShape = null;
+
+            for (Shape shape : shapes) {
+                if (shape.isSelected(e.getX(), e.getY())) {
+                    selectedShape = shape;
+                    selectedShape.setSelected(true);
+                    dragStartPoint = e.getPoint();
+                    break;
+                }
+            }
+
+            // Deselect previous shape if a new one was selected or none was selected
+            if (previouslySelected != null && previouslySelected != selectedShape) {
+                previouslySelected.setSelected(false);
+            }
+
+            // Create new shape if none selected and factory is set
+            if (selectedShape == null && currentShapeFactory != null) {
+                createShapeAt(e.getX(), e.getY());
+            }
+
+            repaint();
+        }
     }
 
     private void handleMouseDrag(MouseEvent e) {

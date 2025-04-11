@@ -73,6 +73,11 @@ public class ShapeCreationButtonDecorator extends ButtonDecorator implements Dra
         // When clicked, create a shape at the center of the whiteboard
         targetWhiteBoard.setCurrentShapeFactory(shapeFactory);
         targetWhiteBoard.addShapeToCenter();
+
+        // Reset the current shape factory to null after adding the shape
+        // This ensures that clicking on the whiteboard won't add another shape
+        // but clicking the button again will
+        targetWhiteBoard.setCurrentShapeFactory(null);
     }
 
     @Override
@@ -97,6 +102,9 @@ public class ShapeCreationButtonDecorator extends ButtonDecorator implements Dra
 
         // Create the shape at the drop location
         targetWhiteBoard.createShapeAt(x, y);
+
+        // Reset the current shape factory to null after adding the shape
+        targetWhiteBoard.setCurrentShapeFactory(null);
     }
 
     @Override
