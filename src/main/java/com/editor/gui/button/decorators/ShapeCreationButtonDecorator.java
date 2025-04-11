@@ -1,6 +1,7 @@
 package com.editor.gui.button.decorators;
 
 import java.awt.AlphaComposite;
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -52,16 +53,37 @@ public class ShapeCreationButtonDecorator extends ButtonDecorator implements Dra
             try {
                 // Draw a semi-transparent shape preview at the drag location
                 g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
-                g2d.setColor(Color.BLUE);
 
-                // Draw a simple shape indicator based on the shape type
+                // Utiliser des couleurs différentes selon le type de forme
                 if ("Rectangle".equals(shapeType)) {
-                    g2d.fillRect(dragX - 20, dragY - 20, 40, 40);
+                    g2d.setColor(new Color(0, 0, 255, 128)); // Bleu semi-transparent
+                    g2d.fillRect(dragX - 30, dragY - 20, 60, 40);
+                    g2d.setColor(Color.BLUE);
+                    g2d.drawRect(dragX - 30, dragY - 20, 60, 40);
                 } else if ("Polygon".equals(shapeType)) {
-                    int[] xPoints = { dragX, dragX - 20, dragX + 20 };
-                    int[] yPoints = { dragY - 20, dragY + 20, dragY + 20 };
-                    g2d.fillPolygon(xPoints, yPoints, 3);
+                    // Dessiner un hexagone pour le polygone
+                    int radius = 30;
+                    int sides = 6;
+                    int[] xPoints = new int[sides];
+                    int[] yPoints = new int[sides];
+
+                    for (int i = 0; i < sides; i++) {
+                        double angle = 2.0 * Math.PI * i / sides;
+                        xPoints[i] = (int) (dragX + radius * Math.cos(angle));
+                        yPoints[i] = (int) (dragY + radius * Math.sin(angle));
+                    }
+
+                    g2d.setColor(new Color(0, 255, 0, 128)); // Vert semi-transparent
+                    g2d.fillPolygon(xPoints, yPoints, sides);
+                    g2d.setColor(Color.GREEN);
+                    g2d.drawPolygon(xPoints, yPoints, sides);
                 }
+
+                // Dessiner une ligne pointillée pour indiquer le glisser-déposer
+                g2d.setColor(Color.DARK_GRAY);
+                float[] dash = { 5.0f, 5.0f };
+                g2d.setStroke(new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash, 0.0f));
+                g2d.drawLine(getX() + getWidth() / 2, getY() + getHeight() / 2, dragX, dragY);
             } finally {
                 g2d.dispose();
             }
@@ -102,8 +124,11 @@ public class ShapeCreationButtonDecorator extends ButtonDecorator implements Dra
     public void endDrag(int x, int y) {
         isDragging = false;
 
-        // Create the shape at the drop location
-        targetWhiteBoard.createShapeAt(x, y);
+        // Vérifier si les coordonnées sont valides (pas -1, -1 qui indique une annulation)
+        if (x >= 0 && y >= 0) {
+            // Create the shape at the drop location
+            targetWhiteBoard.createShapeAt(x, y);
+        }
 
         // Reset the current shape type to null after adding the shape
         targetWhiteBoard.setCurrentShapeType(null);

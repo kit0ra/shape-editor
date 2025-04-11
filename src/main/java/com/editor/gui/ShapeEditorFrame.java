@@ -54,6 +54,7 @@ public class ShapeEditorFrame extends Frame {
         verticalPanel = new VerticalPanel();
         verticalPanel.setRelativeBounds(0, 10, 20, 90); // x=10%, y=10%, width=10%, height=80%
         verticalPanel.makeResponsiveTo(this);
+        verticalPanel.setTargetWhiteBoard(whiteBoard); // Définir le whiteboard comme cible pour le glisser-déposer
         add(verticalPanel);
 
         // Preload all icons
