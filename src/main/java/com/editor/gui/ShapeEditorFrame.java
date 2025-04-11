@@ -33,13 +33,11 @@ public class ShapeEditorFrame extends Frame {
 
     // Button spacing and positioning constants
     private static final int HORIZONTAL_BUTTON_SPACING = 10;
-    private static final int VERTICAL_BUTTON_SPACING = 15;
 
     // Shape prototype registry
     private ShapePrototypeRegistry prototypeRegistry;
     private static final int HORIZONTAL_INITIAL_OFFSET = 10;
-    private static final int VERTICAL_INITIAL_OFFSET = 60; // Initial Y offset to position below horizontal panel
-    private static final int BUTTON_LEFT_MARGIN = 10; // Left margin for buttons in vertical panel
+    private static final int BUTTON_LEFT_MARGIN = 10; // Left margin for buttons in panels
 
     public ShapeEditorFrame() {
         super("Shape Editor");
@@ -47,7 +45,7 @@ public class ShapeEditorFrame extends Frame {
         setLayout(null);
 
         whiteBoard = new WhiteBoard(800, 600, Color.WHITE);
-        whiteBoard.setRelativeBounds(20, 20, 80, 90); // fill remaining space
+        whiteBoard.setRelativeBounds(20, 30, 80, 70); // x=20%, y=30% (below vertical panel), width=80%, height=70%
         whiteBoard.makeResponsiveTo(this);
         add(whiteBoard);
 
@@ -57,7 +55,7 @@ public class ShapeEditorFrame extends Frame {
         add(horizontalPanel);
 
         verticalPanel = new VerticalPanel();
-        verticalPanel.setRelativeBounds(0, 10, 20, 90); // x=10%, y=10%, width=10%, height=80%
+        verticalPanel.setRelativeBounds(0, 20, 20, 10); // x=0%, y=20% (below horizontal panel), width=20%, height=10%
         verticalPanel.makeResponsiveTo(this);
         verticalPanel.setTargetWhiteBoard(whiteBoard); // Définir le whiteboard comme cible pour le glisser-déposer
         add(verticalPanel);
@@ -174,23 +172,27 @@ public class ShapeEditorFrame extends Frame {
     }
 
     /**
-     * Sets up the vertical panel buttons (rectangle, polygon)
+     * Sets up the vertical panel buttons (rectangle, polygon) in a horizontal
+     * layout
      */
     private void setupVerticalButtons() {
-        int y = VERTICAL_INITIAL_OFFSET;
+        // Center buttons vertically in the panel
+        int y = 5; // Small top margin
+        int x = BUTTON_LEFT_MARGIN;
 
         // Create rectangle button (icon only with drag capability)
         IButton rectangleButton = createDraggableShapeButton(
-                BUTTON_LEFT_MARGIN, y,
+                x, y,
                 "icons/rectangle.png",
                 "Draw a rectangle",
                 "Rectangle");
         verticalPanel.addButton(rectangleButton);
 
-        // Create polygon button (icon only with drag capability)
-        y += rectangleButton.getHeight() + VERTICAL_BUTTON_SPACING;
+        // Create polygon button (icon only with drag capability) - positioned
+        // horizontally
+        x += rectangleButton.getWidth() + HORIZONTAL_BUTTON_SPACING;
         IButton polygonButton = createDraggableShapeButton(
-                BUTTON_LEFT_MARGIN, y,
+                x, y,
                 "icons/polygon.png",
                 "Draw a polygon",
                 "Polygon");
