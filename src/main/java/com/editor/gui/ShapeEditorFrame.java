@@ -14,6 +14,7 @@ import com.editor.gui.button.decorators.ShapeCreationButtonDecorator;
 import com.editor.gui.button.decorators.TooltipDecorator;
 import com.editor.gui.button.decorators.UndoButtonDecorator;
 import com.editor.gui.panel.HorizontalPanel;
+import com.editor.gui.panel.ToolbarPanel;
 import com.editor.gui.panel.TrashPanel;
 import com.editor.gui.panel.VerticalPanel;
 import com.editor.mediator.DragMediator;
@@ -27,6 +28,7 @@ public class ShapeEditorFrame extends Frame {
 
     private HorizontalPanel horizontalPanel;
     private VerticalPanel verticalPanel;
+    private ToolbarPanel toolbarPanel;
     private TrashPanel trashPanel;
     private WhiteBoard whiteBoard;
 
@@ -61,6 +63,12 @@ public class ShapeEditorFrame extends Frame {
         verticalPanel.makeResponsiveTo(this);
         verticalPanel.setTargetWhiteBoard(whiteBoard); // Définir le whiteboard comme cible pour le glisser-déposer
         add(verticalPanel);
+
+        // Initialize the toolbar panel in the middle of the left side
+        toolbarPanel = new ToolbarPanel();
+        toolbarPanel.setRelativeBounds(0, 30, 20, 60); // x=0%, y=30% (below vertical panel), width=20%, height=60%
+        toolbarPanel.makeResponsiveTo(this);
+        add(toolbarPanel);
 
         // Initialize the trash panel at the bottom left
         trashPanel = new TrashPanel();
