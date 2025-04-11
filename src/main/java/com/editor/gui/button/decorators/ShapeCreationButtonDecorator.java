@@ -73,7 +73,7 @@ public class ShapeCreationButtonDecorator extends ButtonDecorator implements Dra
         // When clicked, create a shape at the center of the whiteboard
         targetWhiteBoard.setPrototypeRegistry(prototypeRegistry);
         targetWhiteBoard.setCurrentShapeType(shapeType);
-        targetWhiteBoard.addShapeToCenter();
+        targetWhiteBoard.addShapeToCenter(); // Use addShapeToCenter to place in the middle
 
         // Reset the current shape type to null after adding the shape
         // This ensures that clicking on the whiteboard won't add another shape

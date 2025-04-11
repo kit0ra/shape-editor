@@ -70,17 +70,21 @@ public class WhiteBoard extends Canvas {
 
     private void handleMousePress(MouseEvent e) {
         if (SwingUtilities.isLeftMouseButton(e)) {
-            // Check for existing shape selection
+            // Store the currently selected shape
             Shape previouslySelected = selectedShape;
-            selectedShape = null;
+
+            // Reset drag state variables
             isDragging = false;
             originalShapePosition = null;
             dragStartPoint = null;
             dragOffset = null;
 
             // Try to select a shape under the mouse cursor
+            boolean foundShape = false;
             for (Shape shape : shapes) {
                 if (shape.isSelected(e.getX(), e.getY())) {
+                    // Found a shape under the cursor
+                    foundShape = true;
                     selectedShape = shape;
                     selectedShape.setSelected(true);
 
@@ -102,8 +106,15 @@ public class WhiteBoard extends Canvas {
                 }
             }
 
-            // Deselect previous shape if a new one was selected or none was selected
-            if (previouslySelected != null && previouslySelected != selectedShape) {
+            // If no shape was found under the cursor, deselect the current shape
+            if (!foundShape) {
+                // Only deselect if we're clicking on empty space
+                if (previouslySelected != null) {
+                    previouslySelected.setSelected(false);
+                }
+                selectedShape = null;
+            } else if (previouslySelected != null && previouslySelected != selectedShape) {
+                // If we selected a different shape, deselect the previous one
                 previouslySelected.setSelected(false);
             }
 
@@ -143,8 +154,8 @@ public class WhiteBoard extends Canvas {
             if (!originalShapePosition.equals(finalPosition)) {
                 MoveShapeCommand moveCommand = new MoveShapeCommand(
                         selectedShape,
-                        originalShapePosition, // Use Point constructor
-                        finalPosition); // Use Point constructor
+                        originalShapePosition,
+                        finalPosition);
 
                 commandHistory.executeCommand(moveCommand);
             }
