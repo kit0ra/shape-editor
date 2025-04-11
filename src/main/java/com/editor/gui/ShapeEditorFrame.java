@@ -13,8 +13,8 @@ import com.editor.gui.button.decorators.ShapeCreationButtonDecorator;
 import com.editor.gui.button.decorators.TooltipDecorator;
 import com.editor.gui.panel.HorizontalPanel;
 import com.editor.gui.panel.VerticalPanel;
-import com.editor.shapes.PolygonShape;
 import com.editor.shapes.Rectangle;
+import com.editor.shapes.RegularPolygon;
 import com.editor.shapes.ShapePrototypeRegistry;
 import com.editor.utils.ImageLoader;
 
@@ -91,13 +91,18 @@ public class ShapeEditorFrame extends Frame {
 
         // Register a rectangle prototype
         Rectangle rectanglePrototype = new Rectangle(0, 0, 80, 60);
+        rectanglePrototype.setFillColor(Color.BLUE);
+        rectanglePrototype.setBorderColor(Color.BLACK);
         prototypeRegistry.registerPrototype("Rectangle", rectanglePrototype);
 
-        // Register a polygon (square) prototype - more similar to rectangle
-        int size = 60;
-        int[] xPoints = { 0, size, size, 0 };
-        int[] yPoints = { 0, 0, size, size };
-        PolygonShape polygonPrototype = new PolygonShape(xPoints, yPoints, 4);
+        // Register a regular polygon (hexagon) prototype
+        int radius = 40; // Radius of the hexagon
+        int numPoints = 6; // Hexagon has 6 points
+
+        // Create a regular hexagon centered at (0, 0) with radius 40
+        RegularPolygon polygonPrototype = new RegularPolygon(0, 0, radius, numPoints);
+        polygonPrototype.setFillColor(Color.GREEN);
+        polygonPrototype.setBorderColor(Color.BLACK);
         prototypeRegistry.registerPrototype("Polygon", polygonPrototype);
 
         // Set the prototype registry in the whiteboard

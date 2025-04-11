@@ -1,10 +1,13 @@
 package com.editor.shapes;
 
+import java.awt.Color;
 import com.editor.drawing.Drawer;
 
 public class Rectangle implements Shape {
     private int x, y, width, height;
     private boolean selected;
+    private Color fillColor = Color.BLUE; // Default fill color for rectangles
+    private Color borderColor = Color.BLACK; // Default border color
 
     public Rectangle(int x, int y, int width, int height) {
         this.x = x;
@@ -15,7 +18,7 @@ public class Rectangle implements Shape {
 
     @Override
     public void draw(Drawer drawer) {
-        drawer.drawRectangle(x, y, width, height);
+        drawer.drawRectangle(this);
     }
 
     @Override
@@ -56,7 +59,45 @@ public class Rectangle implements Shape {
         // Create a new Rectangle with the same properties
         Rectangle clone = new Rectangle(x, y, width, height);
         clone.setSelected(selected);
+        clone.setFillColor(fillColor);
+        clone.setBorderColor(borderColor);
         return clone;
+    }
+
+    /**
+     * Sets the fill color for this rectangle
+     *
+     * @param color The new fill color
+     */
+    public void setFillColor(Color color) {
+        this.fillColor = color;
+    }
+
+    /**
+     * Sets the border color for this rectangle
+     *
+     * @param color The new border color
+     */
+    public void setBorderColor(Color color) {
+        this.borderColor = color;
+    }
+
+    /**
+     * Gets the fill color for this rectangle
+     *
+     * @return The current fill color
+     */
+    public Color getFillColor() {
+        return fillColor;
+    }
+
+    /**
+     * Gets the border color for this rectangle
+     *
+     * @return The current border color
+     */
+    public Color getBorderColor() {
+        return borderColor;
     }
 
     public int getX() {
