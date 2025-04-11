@@ -1,5 +1,6 @@
 package com.editor.gui;
 
+import java.awt.BasicStroke;
 import java.awt.Canvas;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -8,7 +9,6 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
-import java.awt.BasicStroke;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.InputEvent;
@@ -27,6 +27,7 @@ import javax.swing.SwingUtilities;
 import com.editor.commands.CommandHistory;
 import com.editor.commands.CreateShapeCommand;
 import com.editor.commands.MoveShapeCommand;
+import com.editor.commands.MoveShapesCommand;
 import com.editor.drawing.AWTDrawing;
 import com.editor.drawing.Drawer;
 import com.editor.shapes.Rectangle;
@@ -109,7 +110,8 @@ public class WhiteBoard extends Canvas {
         });
     }
 
-    // Stocke les positions originales de toutes les formes sélectionnées pour le déplacement multiple
+    // Stocke les positions originales de toutes les formes sélectionnées pour le
+    // déplacement multiple
     private Map<Shape, Point> originalPositions = new HashMap<>();
 
     private void handleMousePress(MouseEvent e) {
@@ -131,15 +133,28 @@ public class WhiteBoard extends Canvas {
 
             // Try to select a shape under the mouse cursor
             boolean foundShape = false;
+            Shape clickedShape = null;
+
             for (Shape shape : shapes) {
                 if (shape.isSelected(e.getX(), e.getY())) {
                     // Found a shape under the cursor
                     foundShape = true;
+                    clickedShape = shape;
+                    break;
+                }
+            }
 
-                    // Si la forme est déjà sélectionnée et que Ctrl est enfoncé, on la désélectionne
-                    if (selectedShapes.contains(shape) && isCtrlPressed) {
-                        selectedShapes.remove(shape);
-                        shape.setSelected(false);
+            if (foundShape) {
+                // Si la forme est déjà sélectionnée et que Ctrl est enfoncé, on la
+                // désélectionne
+                if (selectedShapes.contains(clickedShape) && isCtrlPressed) {
+                    selectedShapes.remove(clickedShape);
+                    clickedShape.setSelected(false);
+                } else {
+                    // Si la forme est déjà sélectionnée, on commence simplement le déplacement
+                    if (selectedShapes.contains(clickedShape)) {
+                        // Définir la forme active pour le déplacement
+                        activeShape = clickedShape;
                     } else {
                         // Si Ctrl n'est pas enfoncé, on désélectionne toutes les autres formes
                         if (!isCtrlPressed) {
@@ -150,36 +165,33 @@ public class WhiteBoard extends Canvas {
                         }
 
                         // Sélectionner la forme actuelle
-                        if (!selectedShapes.contains(shape)) {
-                            selectedShapes.add(shape);
-                            shape.setSelected(true);
-                        }
+                        selectedShapes.add(clickedShape);
+                        clickedShape.setSelected(true);
 
                         // Définir la forme active pour le déplacement
-                        activeShape = shape;
-
-                        // Store the starting point for drag operation
-                        dragStartPoint = e.getPoint();
-
-                        // Store the original shape position for undo/redo and offset calculation
-                        Rectangle bounds = activeShape.getBounds();
-                        originalShapePosition = new Point(bounds.getX(), bounds.getY());
-
-                        // Calculate the offset between the click point and the shape's origin
-                        dragOffset = new Point(
-                                dragStartPoint.x - originalShapePosition.x,
-                                dragStartPoint.y - originalShapePosition.y);
-
-                        // Stocker les positions originales de toutes les formes sélectionnées
-                        for (Shape s : selectedShapes) {
-                            Rectangle b = s.getBounds();
-                            originalPositions.put(s, new Point(b.getX(), b.getY()));
-                        }
-
-                        // Set dragging state
-                        isDragging = true;
+                        activeShape = clickedShape;
                     }
-                    break;
+
+                    // Store the starting point for drag operation
+                    dragStartPoint = e.getPoint();
+
+                    // Store the original shape position for undo/redo and offset calculation
+                    Rectangle bounds = activeShape.getBounds();
+                    originalShapePosition = new Point(bounds.getX(), bounds.getY());
+
+                    // Calculate the offset between the click point and the shape's origin
+                    dragOffset = new Point(
+                            dragStartPoint.x - originalShapePosition.x,
+                            dragStartPoint.y - originalShapePosition.y);
+
+                    // Stocker les positions originales de toutes les formes sélectionnées
+                    for (Shape s : selectedShapes) {
+                        Rectangle b = s.getBounds();
+                        originalPositions.put(s, new Point(b.getX(), b.getY()));
+                    }
+
+                    // Set dragging state
+                    isDragging = true;
                 }
             }
 
@@ -235,7 +247,8 @@ public class WhiteBoard extends Canvas {
             }
             // Si plusieurs formes sont sélectionnées, les déplacer toutes ensemble
             else if (selectedShapes.size() > 1) {
-                // Déplacer toutes les formes sélectionnées en fonction de leur position d'origine
+                // Déplacer toutes les formes sélectionnées en fonction de leur position
+                // d'origine
                 for (Shape shape : selectedShapes) {
                     Point originalPos = originalPositions.get(shape);
                     if (originalPos != null) {
@@ -284,7 +297,7 @@ public class WhiteBoard extends Canvas {
 
                 // Vérifier si la forme est dans le rectangle de sélection
                 if (bounds.getX() >= x1 && bounds.getX() + bounds.getWidth() <= x2 &&
-                    bounds.getY() >= y1 && bounds.getY() + bounds.getHeight() <= y2) {
+                        bounds.getY() >= y1 && bounds.getY() + bounds.getHeight() <= y2) {
 
                     // Ajouter la forme à la sélection si elle n'y est pas déjà
                     if (!selectedShapes.contains(shape)) {
@@ -304,21 +317,43 @@ public class WhiteBoard extends Canvas {
         }
 
         // Check if a drag operation was in progress and completed
-        if (isDragging && activeShape != null && originalShapePosition != null) {
-            // Get the final position of the active shape after dragging
-            Rectangle bounds = activeShape.getBounds();
-            Point finalPosition = new Point(bounds.getX(), bounds.getY());
+        if (isDragging && activeShape != null && !originalPositions.isEmpty()) {
+            // Create a map to store the final positions of all selected shapes
+            Map<Shape, Point> finalPositions = new HashMap<>();
+            boolean positionsChanged = false;
 
-            // Only create and execute a command if the position actually changed
-            if (!originalShapePosition.equals(finalPosition)) {
-                // Pour l'instant, on ne gère que le déplacement de la forme active
-                // TODO: Implémenter une commande pour déplacer plusieurs formes
-                MoveShapeCommand moveCommand = new MoveShapeCommand(
-                        activeShape,
-                        originalShapePosition,
-                        finalPosition);
+            // Collect the final positions of all selected shapes
+            for (Shape shape : selectedShapes) {
+                Rectangle bounds = shape.getBounds();
+                Point finalPosition = new Point(bounds.getX(), bounds.getY());
+                finalPositions.put(shape, finalPosition);
 
-                commandHistory.executeCommand(moveCommand);
+                // Check if at least one shape has moved
+                Point originalPos = originalPositions.get(shape);
+                if (originalPos != null && !originalPos.equals(finalPosition)) {
+                    positionsChanged = true;
+                }
+            }
+
+            // Only create and execute a command if at least one position actually changed
+            if (positionsChanged) {
+                if (selectedShapes.size() == 1) {
+                    // If only one shape is selected, use the simpler MoveShapeCommand
+                    MoveShapeCommand moveCommand = new MoveShapeCommand(
+                            activeShape,
+                            originalPositions.get(activeShape),
+                            finalPositions.get(activeShape));
+
+                    commandHistory.executeCommand(moveCommand);
+                } else {
+                    // If multiple shapes are selected, use MoveShapesCommand
+                    MoveShapesCommand moveShapesCommand = new MoveShapesCommand(
+                            selectedShapes,
+                            originalPositions,
+                            finalPositions);
+
+                    commandHistory.executeCommand(moveShapesCommand);
+                }
             }
 
             // Reset drag state variables regardless of whether a move occurred
@@ -326,6 +361,7 @@ public class WhiteBoard extends Canvas {
             dragStartPoint = null;
             originalShapePosition = null;
             dragOffset = null;
+            originalPositions.clear();
 
             // Repaint to potentially remove drag-specific highlighting
             repaint();
@@ -383,8 +419,8 @@ public class WhiteBoard extends Canvas {
 
                     // Dessiner un point rouge au centre de la forme (comme dans les images)
                     g2d.setColor(Color.RED);
-                    g2d.fillOval(bounds.getX() + bounds.getWidth()/2 - 3,
-                                bounds.getY() + bounds.getHeight()/2 - 3, 6, 6);
+                    g2d.fillOval(bounds.getX() + bounds.getWidth() / 2 - 3,
+                            bounds.getY() + bounds.getHeight() / 2 - 3, 6, 6);
                 }
             } finally {
                 g2d.dispose();
