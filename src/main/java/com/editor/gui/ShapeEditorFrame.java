@@ -9,6 +9,7 @@ import java.awt.event.WindowEvent;
 import com.editor.gui.button.CustomButton;
 import com.editor.gui.button.IButton;
 import com.editor.gui.button.decorators.ImageDecorator;
+import com.editor.gui.button.decorators.TooltipDecorator;
 import com.editor.gui.panel.HorizontalPanel;
 import com.editor.gui.panel.VerticalPanel;
 import com.editor.utils.ImageLoader;
@@ -18,6 +19,13 @@ public class ShapeEditorFrame extends Frame {
     private HorizontalPanel horizontalPanel;
     private VerticalPanel verticalPanel;
     private WhiteBoard whiteBoard;
+
+    // Button spacing and positioning constants
+    private static final int HORIZONTAL_BUTTON_SPACING = 10;
+    private static final int VERTICAL_BUTTON_SPACING = 15;
+    private static final int HORIZONTAL_INITIAL_OFFSET = 10;
+    private static final int VERTICAL_INITIAL_OFFSET = 60; // Initial Y offset to position below horizontal panel
+    private static final int BUTTON_LEFT_MARGIN = 10; // Left margin for buttons in vertical panel
 
     public ShapeEditorFrame() {
         super("Shape Editor");
@@ -39,25 +47,14 @@ public class ShapeEditorFrame extends Frame {
         verticalPanel.makeResponsiveTo(this);
         add(verticalPanel);
 
-        // Load the icon
-        Image saveIcon = ImageLoader.loadImage("icons/save.png");
-
-        // Create the base button (make it wider to fit icon + text)
-        IButton saveButton = new CustomButton(0, 0, 130, 30, "Save"); // Wider width (130 instead of 100)
-
-        // Decorate with icon if loaded
-        if (saveIcon != null) {
-            saveButton = new ImageDecorator(
-                    saveButton,
-                    saveIcon,
-                    20, 20, // Icon dimensions
-                    5 // Padding between icon and text
-            );
-        }
-
-        horizontalPanel.addButton(saveButton);
-
-        IButton loadButton = new CustomButton(0, 30, 100, 30, "Load");
+        // Preload all icons
+        ImageLoader.preloadImages(
+                "icons/save.png",
+                "icons/load.png",
+                "icons/undo.png",
+                "icons/redo.png",
+                "icons/rectangle.png",
+                "icons/polygon.png");
 
         // ✅ Add this to close properly
         addWindowListener(new WindowAdapter() {
@@ -71,8 +68,76 @@ public class ShapeEditorFrame extends Frame {
     }
 
     private void init() {
-        // Initialize the shape editor frame components
-        // ...
+        // Initialize buttons in both panels
+        setupHorizontalButtons();
+        setupVerticalButtons();
+    }
+
+    /**
+     * Sets up the horizontal panel buttons (save, load, undo, redo)
+     */
+    private void setupHorizontalButtons() {
+        int x = HORIZONTAL_INITIAL_OFFSET;
+
+        // Create save button (icon only)
+        IButton saveButton = createIconButton(x, 5, "icons/save.png", "Save the current drawing");
+        horizontalPanel.addButton(saveButton);
+
+        // Create load button
+        x += saveButton.getWidth() + HORIZONTAL_BUTTON_SPACING;
+        IButton loadButton = createIconButton(x, 5, "icons/load.png", "Load a saved drawing");
+        horizontalPanel.addButton(loadButton);
+
+        // Create undo button
+        x += loadButton.getWidth() + HORIZONTAL_BUTTON_SPACING;
+        IButton undoButton = createIconButton(x, 5, "icons/undo.png", "Undo the last action");
+        horizontalPanel.addButton(undoButton);
+
+        // Create redo button
+        x += undoButton.getWidth() + HORIZONTAL_BUTTON_SPACING;
+        IButton redoButton = createIconButton(x, 5, "icons/redo.png", "Redo the last undone action");
+        horizontalPanel.addButton(redoButton);
+    }
+
+    /**
+     * Sets up the vertical panel buttons (rectangle, polygon)
+     */
+    private void setupVerticalButtons() {
+        int y = VERTICAL_INITIAL_OFFSET;
+
+        // Create rectangle button (icon only)
+        IButton rectangleButton = createIconButton(BUTTON_LEFT_MARGIN, y, "icons/rectangle.png", "Draw a rectangle");
+        verticalPanel.addButton(rectangleButton);
+
+        // Create polygon button
+        y += rectangleButton.getHeight() + VERTICAL_BUTTON_SPACING;
+        IButton polygonButton = createIconButton(BUTTON_LEFT_MARGIN, y, "icons/polygon.png", "Draw a polygon");
+        verticalPanel.addButton(polygonButton);
+    }
+
+    /**
+     * Helper method to create an icon-only button with tooltip
+     */
+    private IButton createIconButton(int x, int y, String iconPath, String tooltipText) {
+        // Load the icon
+        Image icon = ImageLoader.loadImage(iconPath);
+
+        // Create base button
+        IButton button = new CustomButton(x, y, 40, 40, "");
+
+        // Add icon decoration
+        if (icon != null) {
+            button = new ImageDecorator(
+                    button,
+                    icon,
+                    24, 24, // Icon dimensions
+                    8, // Padding
+                    ImageDecorator.ImageMode.ICON_ONLY // Icon-only mode
+            );
+        }
+
+        // Add tooltip decoration
+        return new TooltipDecorator(button, tooltipText);
     }
 
     public void launch() {
