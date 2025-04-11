@@ -411,7 +411,7 @@ public class WhiteBoard extends Canvas implements Draggable {
                 }
             }
 
-            // Check if we're dragging shapes to the trash panel
+            // Check if we're dragging shapes to the trash panel or toolbar panel
             if (dragMediator != null && !selectedShapes.isEmpty()) {
                 // Convert whiteboard coordinates to screen coordinates
                 Point screenPoint = new Point(e.getX(), e.getY());
@@ -423,8 +423,21 @@ public class WhiteBoard extends Canvas implements Draggable {
 
                     // Update the trash panel visual state and our internal state
                     setDraggingToTrash(isOverTrash);
+
+                    // If not over trash, check if we're over the toolbar panel
+                    if (!isOverTrash) {
+                        // Use the mediator to check if we're over the toolbar panel
+                        boolean isOverToolbar = dragMediator.checkPointOverToolbar(screenPoint);
+
+                        // Update the toolbar panel visual state and our internal state
+                        setDraggingToToolbar(isOverToolbar);
+                    } else {
+                        // If over trash, make sure we're not also over toolbar
+                        setDraggingToToolbar(false);
+                    }
                 } catch (Exception ex) {
                     // Ignore any exceptions during coordinate conversion
+                    System.out.println("[WhiteBoard] Error checking drag position: " + ex.getMessage());
                 }
             }
 
@@ -486,15 +499,21 @@ public class WhiteBoard extends Canvas implements Draggable {
 
         // Check if a drag operation was in progress and completed
         if (isDragging && activeShape != null && !originalPositions.isEmpty()) {
-            // Check if we're dropping shapes on the trash panel
-            if (isBeingDraggedToTrash && dragMediator != null) {
-                // Convert whiteboard coordinates to screen coordinates
-                Point screenPoint = new Point(e.getX(), e.getY());
-                try {
-                    screenPoint.translate(getLocationOnScreen().x, getLocationOnScreen().y);
+            // Convert whiteboard coordinates to screen coordinates for checking panels
+            Point screenPoint = new Point(e.getX(), e.getY());
+            try {
+                screenPoint.translate(getLocationOnScreen().x, getLocationOnScreen().y);
+            } catch (Exception ex) {
+                // Ignore any exceptions during coordinate conversion
+                System.out.println("[WhiteBoard] Error converting coordinates: " + ex.getMessage());
+            }
 
+            // Check if we're dropping shapes on the trash panel
+            if (isBeingDraggedToTrash && dragMediator != null && screenPoint != null) {
+                try {
                     // Check if we're still over the trash panel
                     if (dragMediator.checkPointOverTrash(screenPoint)) {
+                        System.out.println("[WhiteBoard] Dropping shapes on trash panel");
                         // Delete the selected shapes
                         deleteSelectedShapes();
 
@@ -512,10 +531,39 @@ public class WhiteBoard extends Canvas implements Draggable {
                     }
                 } catch (Exception ex) {
                     // Ignore any exceptions during coordinate conversion
+                    System.out.println("[WhiteBoard] Error checking trash panel: " + ex.getMessage());
                 }
 
                 // Reset the trash panel visual state
                 setDraggingToTrash(false);
+            }
+
+            // Check if we're dropping shapes on the toolbar panel
+            if (isBeingDraggedToToolbar && dragMediator != null && screenPoint != null) {
+                try {
+                    // Check if we're still over the toolbar panel
+                    if (dragMediator.checkPointOverToolbar(screenPoint)) {
+                        System.out.println("[WhiteBoard] Dropping shapes on toolbar panel");
+
+                        // Reset drag state variables
+                        isDragging = false;
+                        dragStartPoint = null;
+                        originalShapePosition = null;
+                        dragOffset = null;
+                        originalPositions.clear();
+                        isBeingDraggedToToolbar = false;
+
+                        // Repaint to update the view
+                        repaint();
+                        return;
+                    }
+                } catch (Exception ex) {
+                    // Ignore any exceptions during coordinate conversion
+                    System.out.println("[WhiteBoard] Error checking toolbar panel: " + ex.getMessage());
+                }
+
+                // Reset the toolbar panel visual state
+                setDraggingToToolbar(false);
             }
 
             // Create a map to store the final positions of all selected shapes
@@ -890,6 +938,7 @@ public class WhiteBoard extends Canvas implements Draggable {
 
     // Draggable interface implementation
     private boolean isBeingDraggedToTrash = false;
+    private boolean isBeingDraggedToToolbar = false;
     private DragMediator dragMediator;
 
     /**
@@ -922,6 +971,12 @@ public class WhiteBoard extends Canvas implements Draggable {
             deleteSelectedShapes();
             isBeingDraggedToTrash = false;
         }
+
+        // Reset the toolbar drag state
+        if (isBeingDraggedToToolbar) {
+            System.out.println("[WhiteBoard] Ending drag to toolbar");
+            isBeingDraggedToToolbar = false;
+        }
     }
 
     @Override
@@ -929,6 +984,15 @@ public class WhiteBoard extends Canvas implements Draggable {
         // For the whiteboard, we don't have a specific shape type
         // This is used when dragging shapes from the whiteboard to the trash
         return "SelectedShapes";
+    }
+
+    /**
+     * Gets a list of all currently selected shapes
+     *
+     * @return A list of selected shapes
+     */
+    public List<Shape> getSelectedShapes() {
+        return new ArrayList<>(selectedShapes);
     }
 
     /**
@@ -941,6 +1005,22 @@ public class WhiteBoard extends Canvas implements Draggable {
             this.isBeingDraggedToTrash = isDraggingToTrash;
             // Debug output
             System.out.println("[WhiteBoard] Setting isBeingDraggedToTrash to " + isDraggingToTrash);
+            // Trigger a repaint to show or hide the overlay
+            repaint();
+        }
+    }
+
+    /**
+     * Sets whether the selected shapes are being dragged to the toolbar
+     *
+     * @param isDraggingToToolbar Whether the shapes are being dragged to the
+     *                            toolbar
+     */
+    public void setDraggingToToolbar(boolean isDraggingToToolbar) {
+        if (this.isBeingDraggedToToolbar != isDraggingToToolbar) {
+            this.isBeingDraggedToToolbar = isDraggingToToolbar;
+            // Debug output
+            System.out.println("[WhiteBoard] Setting isBeingDraggedToToolbar to " + isDraggingToToolbar);
             // Trigger a repaint to show or hide the overlay
             repaint();
         }

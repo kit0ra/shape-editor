@@ -5,6 +5,7 @@ import java.awt.Point;
 import com.editor.gui.WhiteBoard;
 import com.editor.gui.button.Draggable;
 import com.editor.gui.panel.CustomPanel;
+import com.editor.gui.panel.ToolbarPanel;
 import com.editor.gui.panel.TrashPanel;
 
 /**
@@ -83,6 +84,21 @@ public interface DragMediator {
      * Reset the trash panel's visual state
      */
     void resetTrashPanelState();
+
+    /**
+     * Register a toolbar panel with the mediator
+     *
+     * @param toolbarPanel The toolbar panel to register
+     */
+    void registerToolbarPanel(ToolbarPanel toolbarPanel);
+
+    /**
+     * Check if a point in screen coordinates is over the toolbar panel
+     *
+     * @param screenPoint The point in screen coordinates
+     * @return true if the point is over the toolbar panel, false otherwise
+     */
+    boolean checkPointOverToolbar(Point screenPoint);
 
     /**
      * Enable or disable debug messages

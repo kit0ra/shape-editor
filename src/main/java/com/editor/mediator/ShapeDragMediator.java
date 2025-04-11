@@ -7,6 +7,7 @@ import java.util.List;
 import com.editor.gui.WhiteBoard;
 import com.editor.gui.button.Draggable;
 import com.editor.gui.panel.CustomPanel;
+import com.editor.gui.panel.ToolbarPanel;
 import com.editor.gui.panel.TrashPanel;
 
 /**
@@ -21,6 +22,7 @@ public class ShapeDragMediator implements DragMediator {
     private boolean isDragging = false;
     private boolean debugEnabled = false;
     private TrashPanel trashPanel = null;
+    private ToolbarPanel toolbarPanel = null;
 
     @Override
     public void registerPanel(CustomPanel panel) {
@@ -69,19 +71,37 @@ public class ShapeDragMediator implements DragMediator {
         // Update the draggable with the new position
         currentDraggable.drag(x, y);
 
-        // Check if the drag is over the trash panel
-        if (trashPanel != null && sourcePanelForDrag != null) {
+        // Convert panel coordinates to screen coordinates for checking panels
+        Point screenPoint = null;
+        if (sourcePanelForDrag != null) {
             try {
-                // Convert panel coordinates to screen coordinates
-                Point screenPoint = new Point(x, y);
+                screenPoint = new Point(x, y);
                 screenPoint.translate(sourcePanelForDrag.getLocationOnScreen().x,
                         sourcePanelForDrag.getLocationOnScreen().y);
+            } catch (Exception e) {
+                debugLog("Error converting coordinates: " + e.getMessage());
+            }
+        }
 
+        // Check if the drag is over the trash panel
+        if (trashPanel != null && screenPoint != null) {
+            try {
                 // Check if the point is over the trash panel
                 boolean isOverTrash = trashPanel.isPointOverTrash(screenPoint);
                 trashPanel.setShapeOverTrash(isOverTrash);
             } catch (Exception e) {
                 debugLog("Error checking if shape is over trash: " + e.getMessage());
+            }
+        }
+
+        // Check if the drag is over the toolbar panel
+        if (toolbarPanel != null && screenPoint != null) {
+            try {
+                // Check if the point is over the toolbar panel
+                boolean isOverToolbar = toolbarPanel.isPointOverToolbar(screenPoint);
+                toolbarPanel.setShapeOverToolbar(isOverToolbar);
+            } catch (Exception e) {
+                debugLog("Error checking if shape is over toolbar: " + e.getMessage());
             }
         }
 
@@ -99,15 +119,22 @@ public class ShapeDragMediator implements DragMediator {
             return;
         }
 
-        // Check if the drag ended over the trash panel
-        boolean deletedShape = false;
-        if (trashPanel != null) {
+        // Convert panel coordinates to screen coordinates for checking panels
+        Point screenPoint = null;
+        if (sourcePanelForDrag != null) {
             try {
-                // Convert panel coordinates to screen coordinates
-                Point screenPoint = new Point(x, y);
+                screenPoint = new Point(x, y);
                 screenPoint.translate(sourcePanelForDrag.getLocationOnScreen().x,
                         sourcePanelForDrag.getLocationOnScreen().y);
+            } catch (Exception e) {
+                debugLog("Error converting coordinates: " + e.getMessage());
+            }
+        }
 
+        // Check if the drag ended over the trash panel
+        boolean deletedShape = false;
+        if (trashPanel != null && screenPoint != null) {
+            try {
                 // Check if the point is over the trash panel
                 if (trashPanel.isPointOverTrash(screenPoint)) {
                     debugLog("Ending drag over trash panel - deleting shape(s)");
@@ -119,8 +146,23 @@ public class ShapeDragMediator implements DragMediator {
             }
         }
 
-        // If the shape wasn't deleted, handle normal drag end
-        if (!deletedShape) {
+        // Check if the drag ended over the toolbar panel
+        boolean addedToToolbar = false;
+        if (toolbarPanel != null && screenPoint != null && !deletedShape) {
+            try {
+                // Check if the point is over the toolbar panel
+                if (toolbarPanel.isPointOverToolbar(screenPoint)) {
+                    debugLog("Ending drag over toolbar panel - adding shape(s) to toolbar");
+                    addedToToolbar = toolbarPanel.addSelectedShapesToToolbar();
+                    toolbarPanel.setShapeOverToolbar(false); // Reset the toolbar panel visual state
+                }
+            } catch (Exception e) {
+                debugLog("Error checking if shape is over toolbar: " + e.getMessage());
+            }
+        }
+
+        // If the shape wasn't deleted or added to toolbar, handle normal drag end
+        if (!deletedShape && !addedToToolbar) {
             // Convert panel coordinates to whiteboard coordinates if needed
             Point whiteboardPoint = null;
             if (x >= 0 && y >= 0) {
@@ -227,6 +269,30 @@ public class ShapeDragMediator implements DragMediator {
             debugLog("Resetting trash panel visual state");
             trashPanel.setShapeOverTrash(false);
         }
+    }
+
+    @Override
+    public void registerToolbarPanel(ToolbarPanel toolbarPanel) {
+        this.toolbarPanel = toolbarPanel;
+        debugLog("Toolbar panel registered with mediator");
+    }
+
+    @Override
+    public boolean checkPointOverToolbar(Point screenPoint) {
+        if (toolbarPanel == null) {
+            debugLog("ERROR: Cannot check if point is over toolbar - ToolbarPanel not registered");
+            return false;
+        }
+
+        boolean isOverToolbar = toolbarPanel.isPointOverToolbar(screenPoint);
+        if (isOverToolbar) {
+            debugLog("Point is over toolbar panel");
+            toolbarPanel.setShapeOverToolbar(true);
+        } else {
+            toolbarPanel.setShapeOverToolbar(false);
+        }
+
+        return isOverToolbar;
     }
 
     @Override

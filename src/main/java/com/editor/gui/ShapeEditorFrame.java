@@ -68,6 +68,7 @@ public class ShapeEditorFrame extends Frame {
         toolbarPanel = new ToolbarPanel();
         toolbarPanel.setRelativeBounds(0, 30, 20, 60); // x=0%, y=30% (below vertical panel), width=20%, height=60%
         toolbarPanel.makeResponsiveTo(this);
+        toolbarPanel.setTargetWhiteBoard(whiteBoard);
         add(toolbarPanel);
 
         // Initialize the trash panel at the bottom left
@@ -131,10 +132,14 @@ public class ShapeEditorFrame extends Frame {
         verticalPanel.setDragMediator(dragMediator);
         horizontalPanel.setDragMediator(dragMediator);
         trashPanel.setDragMediator(dragMediator);
+        toolbarPanel.setDragMediator(dragMediator);
         whiteBoard.setDragMediator(dragMediator);
 
         // Register the trash panel with the mediator
         dragMediator.registerTrashPanel(trashPanel);
+
+        // Register the toolbar panel with the mediator
+        dragMediator.registerToolbarPanel(toolbarPanel);
 
         System.out.println("Drag mediator initialized and connected to components");
     }
