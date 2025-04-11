@@ -18,7 +18,7 @@ public class RegularPolygon implements Shape {
 
     /**
      * Creates a new regular polygon.
-     * 
+     *
      * @param x The x-coordinate of the center
      * @param y The y-coordinate of the center
      * @param radius The radius of the polygon
@@ -44,8 +44,10 @@ public class RegularPolygon implements Shape {
 
     @Override
     public void setPosition(int x, int y) {
-        this.x = x;
-        this.y = y;
+        // Convertir les coordonnées du coin supérieur gauche en coordonnées du centre
+        // x et y sont les coordonnées du coin supérieur gauche du rectangle englobant
+        this.x = x + radius;
+        this.y = y + radius;
     }
 
     @Override
@@ -82,7 +84,7 @@ public class RegularPolygon implements Shape {
         int minY = y - radius;
         int width = radius * 2;
         int height = radius * 2;
-        
+
         return new Rectangle(minX, minY, width, height);
     }
 
@@ -97,7 +99,7 @@ public class RegularPolygon implements Shape {
 
     /**
      * Gets the x-coordinate of the center.
-     * 
+     *
      * @return The x-coordinate
      */
     public int getX() {
@@ -106,7 +108,7 @@ public class RegularPolygon implements Shape {
 
     /**
      * Gets the y-coordinate of the center.
-     * 
+     *
      * @return The y-coordinate
      */
     public int getY() {
@@ -115,7 +117,7 @@ public class RegularPolygon implements Shape {
 
     /**
      * Gets the radius of the polygon.
-     * 
+     *
      * @return The radius
      */
     public int getRadius() {
@@ -124,7 +126,7 @@ public class RegularPolygon implements Shape {
 
     /**
      * Gets the number of sides of the polygon.
-     * 
+     *
      * @return The number of sides
      */
     public int getNumberOfSides() {
@@ -133,7 +135,7 @@ public class RegularPolygon implements Shape {
 
     /**
      * Sets the fill color for this polygon.
-     * 
+     *
      * @param color The new fill color
      */
     public void setFillColor(Color color) {
@@ -142,7 +144,7 @@ public class RegularPolygon implements Shape {
 
     /**
      * Sets the border color for this polygon.
-     * 
+     *
      * @param color The new border color
      */
     public void setBorderColor(Color color) {
@@ -151,7 +153,7 @@ public class RegularPolygon implements Shape {
 
     /**
      * Gets the fill color for this polygon.
-     * 
+     *
      * @return The current fill color
      */
     public Color getFillColor() {
@@ -160,7 +162,7 @@ public class RegularPolygon implements Shape {
 
     /**
      * Gets the border color for this polygon.
-     * 
+     *
      * @return The current border color
      */
     public Color getBorderColor() {

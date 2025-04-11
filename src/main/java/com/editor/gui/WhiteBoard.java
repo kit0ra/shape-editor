@@ -18,7 +18,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.SwingUtilities;
 
@@ -107,6 +109,9 @@ public class WhiteBoard extends Canvas {
         });
     }
 
+    // Stocke les positions originales de toutes les formes sélectionnées pour le déplacement multiple
+    private Map<Shape, Point> originalPositions = new HashMap<>();
+
     private void handleMousePress(MouseEvent e) {
         if (SwingUtilities.isLeftMouseButton(e)) {
             // Vérifier si Ctrl est enfoncé pour la sélection multiple
@@ -117,6 +122,7 @@ public class WhiteBoard extends Canvas {
             originalShapePosition = null;
             dragStartPoint = null;
             dragOffset = null;
+            originalPositions.clear();
 
             // Réinitialiser les variables du rectangle de sélection
             isSelectionRectActive = false;
@@ -163,6 +169,12 @@ public class WhiteBoard extends Canvas {
                         dragOffset = new Point(
                                 dragStartPoint.x - originalShapePosition.x,
                                 dragStartPoint.y - originalShapePosition.y);
+
+                        // Stocker les positions originales de toutes les formes sélectionnées
+                        for (Shape s : selectedShapes) {
+                            Rectangle b = s.getBounds();
+                            originalPositions.put(s, new Point(b.getX(), b.getY()));
+                        }
 
                         // Set dragging state
                         isDragging = true;
@@ -223,14 +235,14 @@ public class WhiteBoard extends Canvas {
             }
             // Si plusieurs formes sont sélectionnées, les déplacer toutes ensemble
             else if (selectedShapes.size() > 1) {
-                // Déplacer la forme active à la nouvelle position
-                activeShape.setPosition(newX, newY);
-
-                // Déplacer toutes les autres formes sélectionnées du même delta
+                // Déplacer toutes les formes sélectionnées en fonction de leur position d'origine
                 for (Shape shape : selectedShapes) {
-                    if (shape != activeShape) {
-                        Rectangle bounds = shape.getBounds();
-                        shape.setPosition(bounds.getX() + deltaX, bounds.getY() + deltaY);
+                    Point originalPos = originalPositions.get(shape);
+                    if (originalPos != null) {
+                        // Calculer la nouvelle position en ajoutant le delta à la position d'origine
+                        int shapeNewX = originalPos.x + deltaX;
+                        int shapeNewY = originalPos.y + deltaY;
+                        shape.setPosition(shapeNewX, shapeNewY);
                     }
                 }
             }
