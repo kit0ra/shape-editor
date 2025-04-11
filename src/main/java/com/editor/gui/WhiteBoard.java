@@ -263,6 +263,20 @@ public class WhiteBoard extends Canvas {
         }
     }
 
+    /**
+     * Adds a shape to the top-left corner of the whiteboard using the current shape
+     * type
+     */
+    public void addShapeToTopLeft() {
+        if (currentShapeType != null && prototypeRegistry != null) {
+            // Use a small margin from the top-left corner
+            int marginX = 20;
+            int marginY = 20;
+
+            createShapeAt(marginX, marginY);
+        }
+    }
+
     public void undo() {
         commandHistory.undo();
         repaint();

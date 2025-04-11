@@ -93,10 +93,11 @@ public class ShapeEditorFrame extends Frame {
         Rectangle rectanglePrototype = new Rectangle(0, 0, 80, 60);
         prototypeRegistry.registerPrototype("Rectangle", rectanglePrototype);
 
-        // Register a polygon (triangle) prototype
-        int[] xPoints = { 0, -40, 40 };
-        int[] yPoints = { -40, 40, 40 };
-        PolygonShape polygonPrototype = new PolygonShape(xPoints, yPoints, 3);
+        // Register a polygon (square) prototype - more similar to rectangle
+        int size = 60;
+        int[] xPoints = { 0, size, size, 0 };
+        int[] yPoints = { 0, 0, size, size };
+        PolygonShape polygonPrototype = new PolygonShape(xPoints, yPoints, 4);
         prototypeRegistry.registerPrototype("Polygon", polygonPrototype);
 
         // Set the prototype registry in the whiteboard

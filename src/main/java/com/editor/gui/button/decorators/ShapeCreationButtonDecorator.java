@@ -70,10 +70,10 @@ public class ShapeCreationButtonDecorator extends ButtonDecorator implements Dra
 
     @Override
     public void onClick() {
-        // When clicked, create a shape at the center of the whiteboard
+        // When clicked, create a shape at the top-left corner of the whiteboard
         targetWhiteBoard.setPrototypeRegistry(prototypeRegistry);
         targetWhiteBoard.setCurrentShapeType(shapeType);
-        targetWhiteBoard.addShapeToCenter(); // Use addShapeToCenter to place in the middle
+        targetWhiteBoard.addShapeToTopLeft(); // Use addShapeToTopLeft to place in the top-left corner
 
         // Reset the current shape type to null after adding the shape
         // This ensures that clicking on the whiteboard won't add another shape
