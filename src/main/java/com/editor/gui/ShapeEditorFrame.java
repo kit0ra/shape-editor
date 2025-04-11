@@ -9,8 +9,10 @@ import java.awt.event.WindowEvent;
 import com.editor.gui.button.CustomButton;
 import com.editor.gui.button.IButton;
 import com.editor.gui.button.decorators.ImageDecorator;
+import com.editor.gui.button.decorators.RedoButtonDecorator;
 import com.editor.gui.button.decorators.ShapeCreationButtonDecorator;
 import com.editor.gui.button.decorators.TooltipDecorator;
+import com.editor.gui.button.decorators.UndoButtonDecorator;
 import com.editor.gui.panel.HorizontalPanel;
 import com.editor.gui.panel.VerticalPanel;
 import com.editor.shapes.Rectangle;
@@ -132,11 +134,13 @@ public class ShapeEditorFrame extends Frame {
         // Create undo button
         x += loadButton.getWidth() + HORIZONTAL_BUTTON_SPACING;
         IButton undoButton = createIconButton(x, 5, "icons/undo.png", "Undo the last action");
+        undoButton = new UndoButtonDecorator(undoButton, whiteBoard);
         horizontalPanel.addButton(undoButton);
 
         // Create redo button
         x += undoButton.getWidth() + HORIZONTAL_BUTTON_SPACING;
         IButton redoButton = createIconButton(x, 5, "icons/redo.png", "Redo the last undone action");
+        redoButton = new RedoButtonDecorator(redoButton, whiteBoard);
         horizontalPanel.addButton(redoButton);
     }
 
