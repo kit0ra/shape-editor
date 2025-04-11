@@ -46,6 +46,15 @@ public class WhiteBoard extends Canvas {
     private boolean isDragging = false;
     private boolean isCtrlPressed = false; // Pour la sélection multiple
 
+    // Variables pour le rectangle de sélection
+    private Point selectionStart; // Point de départ du rectangle de sélection
+    private Point selectionEnd; // Point actuel pendant le glissement
+    private boolean isSelectionRectActive = false; // Indique si on dessine un rectangle de sélection
+
+    // Double buffering
+    private Image offscreenBuffer;
+    private Graphics offscreenGraphics;
+
     public WhiteBoard(int width, int height, Color white) {
         this.setPreferredSize(new Dimension(width, height));
         this.backgroundColor = white;
@@ -109,6 +118,11 @@ public class WhiteBoard extends Canvas {
             dragStartPoint = null;
             dragOffset = null;
 
+            // Réinitialiser les variables du rectangle de sélection
+            isSelectionRectActive = false;
+            selectionStart = null;
+            selectionEnd = null;
+
             // Try to select a shape under the mouse cursor
             boolean foundShape = false;
             for (Shape shape : shapes) {
@@ -157,13 +171,21 @@ public class WhiteBoard extends Canvas {
                 }
             }
 
-            // If no shape was found under the cursor and Ctrl is not pressed, deselect all shapes
-            if (!foundShape && !isCtrlPressed) {
-                for (Shape s : selectedShapes) {
-                    s.setSelected(false);
+            // Si aucune forme n'a été trouvée sous le curseur
+            if (!foundShape) {
+                // Si Ctrl n'est pas enfoncé, désélectionner toutes les formes
+                if (!isCtrlPressed) {
+                    for (Shape s : selectedShapes) {
+                        s.setSelected(false);
+                    }
+                    selectedShapes.clear();
+                    activeShape = null;
                 }
-                selectedShapes.clear();
-                activeShape = null;
+
+                // Initialiser le rectangle de sélection
+                selectionStart = e.getPoint();
+                selectionEnd = e.getPoint(); // Au début, le point de fin est le même que le point de départ
+                isSelectionRectActive = true;
             }
 
             // Create new shape if none selected and a shape type is selected
@@ -176,6 +198,14 @@ public class WhiteBoard extends Canvas {
     }
 
     private void handleMouseDrag(MouseEvent e) {
+        // Si on est en train de dessiner un rectangle de sélection
+        if (isSelectionRectActive && selectionStart != null) {
+            // Mettre à jour le point de fin du rectangle de sélection
+            selectionEnd = e.getPoint();
+            repaint();
+            return;
+        }
+
         // Ensure dragging state, a shape is selected, and we have the offset
         if (isDragging && activeShape != null && dragOffset != null) {
             // Calculate the new top-left position based on mouse position and initial
@@ -211,6 +241,56 @@ public class WhiteBoard extends Canvas {
     }
 
     private void handleMouseRelease(MouseEvent e) {
+        // Si on a dessiné un rectangle de sélection
+        if (isSelectionRectActive && selectionStart != null && selectionEnd != null) {
+            // Calculer les coordonnées du rectangle de sélection
+            int x1 = Math.min(selectionStart.x, selectionEnd.x);
+            int y1 = Math.min(selectionStart.y, selectionEnd.y);
+            int x2 = Math.max(selectionStart.x, selectionEnd.x);
+            int y2 = Math.max(selectionStart.y, selectionEnd.y);
+
+            // Si le rectangle est trop petit, c'est probablement un clic accidentel
+            if (x2 - x1 < 5 || y2 - y1 < 5) {
+                isSelectionRectActive = false;
+                selectionStart = null;
+                selectionEnd = null;
+                repaint();
+                return;
+            }
+
+            // Si Ctrl n'est pas enfoncé, désélectionner toutes les formes d'abord
+            if (!isCtrlPressed) {
+                for (Shape s : selectedShapes) {
+                    s.setSelected(false);
+                }
+                selectedShapes.clear();
+            }
+
+            // Sélectionner toutes les formes qui se trouvent dans le rectangle
+            for (Shape shape : shapes) {
+                Rectangle bounds = shape.getBounds();
+
+                // Vérifier si la forme est dans le rectangle de sélection
+                if (bounds.getX() >= x1 && bounds.getX() + bounds.getWidth() <= x2 &&
+                    bounds.getY() >= y1 && bounds.getY() + bounds.getHeight() <= y2) {
+
+                    // Ajouter la forme à la sélection si elle n'y est pas déjà
+                    if (!selectedShapes.contains(shape)) {
+                        selectedShapes.add(shape);
+                        shape.setSelected(true);
+                    }
+                }
+            }
+
+            // Réinitialiser les variables du rectangle de sélection
+            isSelectionRectActive = false;
+            selectionStart = null;
+            selectionEnd = null;
+
+            repaint();
+            return;
+        }
+
         // Check if a drag operation was in progress and completed
         if (isDragging && activeShape != null && originalShapePosition != null) {
             // Get the final position of the active shape after dragging
@@ -267,7 +347,7 @@ public class WhiteBoard extends Canvas {
 
         // Highlight selected shapes with dashed border
         if (!selectedShapes.isEmpty()) {
-            Graphics2D g2d = (Graphics2D) g.create();
+            Graphics2D g2d = (Graphics2D) offscreenGraphics.create();
             try {
                 // Définir le style de trait en pointillés
                 float[] dash = { 5.0f, 5.0f };
@@ -294,6 +374,32 @@ public class WhiteBoard extends Canvas {
                     g2d.fillOval(bounds.getX() + bounds.getWidth()/2 - 3,
                                 bounds.getY() + bounds.getHeight()/2 - 3, 6, 6);
                 }
+            } finally {
+                g2d.dispose();
+            }
+        }
+
+        // Dessiner le rectangle de sélection s'il est actif
+        if (isSelectionRectActive && selectionStart != null && selectionEnd != null) {
+            Graphics2D g2d = (Graphics2D) offscreenGraphics.create();
+            try {
+                // Calculer les coordonnées du rectangle
+                int x = Math.min(selectionStart.x, selectionEnd.x);
+                int y = Math.min(selectionStart.y, selectionEnd.y);
+                int width = Math.abs(selectionEnd.x - selectionStart.x);
+                int height = Math.abs(selectionEnd.y - selectionStart.y);
+
+                // Définir le style de trait en pointillés
+                float[] dash = { 5.0f, 5.0f };
+                g2d.setStroke(new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash, 0.0f));
+
+                // Dessiner le rectangle de sélection avec un fond semi-transparent
+                g2d.setColor(new Color(0, 0, 255, 30)); // Bleu semi-transparent
+                g2d.fillRect(x, y, width, height);
+
+                // Dessiner le contour du rectangle
+                g2d.setColor(new Color(0, 0, 255)); // Bleu
+                g2d.drawRect(x, y, width, height);
             } finally {
                 g2d.dispose();
             }
