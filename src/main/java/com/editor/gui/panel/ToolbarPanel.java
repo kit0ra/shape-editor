@@ -181,9 +181,20 @@ public class ToolbarPanel extends CustomPanel {
 
             if (prototypeRegistry.hasPrototype(shapeTypeKey)) {
                 System.out.println("[ToolbarPanel] Creating single shape button for type: " + shapeTypeKey);
+
+                // Clone the selected shape to preserve its properties (color, rotation, etc.)
+                Shape clonedShape = singleShape.clone();
+
+                // Create a unique key for this specific shape with its properties
+                String uniqueShapeKey = shapeTypeKey + "_" + UUID.randomUUID().toString();
+
+                // Register this specific shape as a prototype
+                prototypeRegistry.registerPrototype(uniqueShapeKey, clonedShape);
+
+                // Create a button that will use this specific shape prototype
                 newButton = createDraggableShapeButton(BUTTON_X_MARGIN, nextButtonY, iconPath,
-                        "Create a " + shapeTypeKey, shapeTypeKey);
-                newKey = shapeTypeKey;
+                        "Create a " + shapeTypeKey, uniqueShapeKey, clonedShape);
+                newKey = uniqueShapeKey;
                 buttonAdded = (newButton != null);
             } else {
                 System.err.println(
@@ -278,14 +289,27 @@ public class ToolbarPanel extends CustomPanel {
     }
 
     private IButton createDraggableShapeButton(int x, int y, String iconPath, String tooltipText, String shapeTypeKey) {
+        return createDraggableShapeButton(x, y, iconPath, tooltipText, shapeTypeKey, null);
+    }
+
+    private IButton createDraggableShapeButton(int x, int y, String iconPath, String tooltipText, String shapeTypeKey,
+            Shape customShapePrototype) {
         IButton button = new CustomButton(x, y, 40, 40, "");
         Shape shapePrototype = null;
-        if (prototypeRegistry != null && prototypeRegistry.hasPrototype(shapeTypeKey)) {
+
+        // If a custom shape prototype is provided, use it directly
+        if (customShapePrototype != null) {
+            shapePrototype = customShapePrototype;
+        }
+        // Otherwise, get the shape from the registry
+        else if (prototypeRegistry != null && prototypeRegistry.hasPrototype(shapeTypeKey)) {
             try {
                 shapePrototype = prototypeRegistry.createShape(shapeTypeKey, 0, 0);
             } catch (Exception e) {
-                /* Log error */ }
+                System.err.println("[ToolbarPanel] Error creating shape from registry: " + e.getMessage());
+            }
         }
+
         if (shapePrototype != null) {
             button = new ShapeDrawingButtonDecorator(button, shapePrototype, 0.5, 4);
         } else {

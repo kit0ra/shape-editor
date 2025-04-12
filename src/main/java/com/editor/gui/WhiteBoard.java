@@ -223,11 +223,19 @@ public class WhiteBoard extends Canvas implements Draggable {
         editDialog.setLayout(new GridLayout(4, 2, 10, 10));
         editDialog.setSize(400, 300);
 
+        // Get the current properties from the first selected shape
+        Shape firstShape = selectedShapes.get(0);
+        Color currentBorderColor = getBorderColor(firstShape);
+        Color currentFillColor = getFillColor(firstShape);
+        double currentRotation = getRotation(firstShape);
+
         // Ajouter des contrôles pour éditer la couleur de bordure
         editDialog.add(new Label("Border Color:"));
         Panel borderColorPanel = new Panel(new BorderLayout());
         Button borderColorButton = new Button("Choose Border Color");
-        final Color[] selectedBorderColor = { Color.BLACK }; // Default border color
+        final Color[] selectedBorderColor = { currentBorderColor }; // Initialize with current border color
+        borderColorButton.setBackground(currentBorderColor);
+        borderColorButton.setForeground(getContrastColor(currentBorderColor));
 
         borderColorButton.addActionListener(new ActionListener() {
             @Override
@@ -281,7 +289,9 @@ public class WhiteBoard extends Canvas implements Draggable {
         editDialog.add(new Label("Fill Color:"));
         Panel fillColorPanel = new Panel(new BorderLayout());
         Button fillColorButton = new Button("Choose Fill Color");
-        final Color[] selectedFillColor = { Color.WHITE }; // Default fill color
+        final Color[] selectedFillColor = { currentFillColor }; // Initialize with current fill color
+        fillColorButton.setBackground(currentFillColor);
+        fillColorButton.setForeground(getContrastColor(currentFillColor));
 
         fillColorButton.addActionListener(new ActionListener() {
             @Override
@@ -334,7 +344,7 @@ public class WhiteBoard extends Canvas implements Draggable {
         // Ajouter des contrôles pour éditer la rotation
         editDialog.add(new Label("Rotation (degrees):"));
         Panel rotationPanel = new Panel(new BorderLayout());
-        TextField rotationField = new TextField("0", 5);
+        TextField rotationField = new TextField(String.valueOf(currentRotation), 5);
         rotationPanel.add(rotationField, BorderLayout.CENTER);
         editDialog.add(rotationPanel);
 
@@ -420,6 +430,46 @@ public class WhiteBoard extends Canvas implements Draggable {
         // (0.299*R + 0.587*G + 0.114*B)
         double brightness = (0.299 * color.getRed() + 0.587 * color.getGreen() + 0.114 * color.getBlue()) / 255;
         return brightness > 0.5 ? Color.BLACK : Color.WHITE;
+    }
+
+    /**
+     * Gets the border color of a shape
+     */
+    private Color getBorderColor(Shape shape) {
+        if (shape instanceof Rectangle) {
+            return ((Rectangle) shape).getBorderColor();
+        } else if (shape instanceof RegularPolygon) {
+            return ((RegularPolygon) shape).getBorderColor();
+        } else if (shape instanceof ShapeGroup) {
+            return ((ShapeGroup) shape).getBorderColor();
+        }
+        return Color.BLACK; // Default
+    }
+
+    /**
+     * Gets the fill color of a shape
+     */
+    private Color getFillColor(Shape shape) {
+        if (shape instanceof Rectangle) {
+            return ((Rectangle) shape).getFillColor();
+        } else if (shape instanceof RegularPolygon) {
+            return ((RegularPolygon) shape).getFillColor();
+        }
+        return Color.WHITE; // Default
+    }
+
+    /**
+     * Gets the rotation of a shape
+     */
+    private double getRotation(Shape shape) {
+        if (shape instanceof Rectangle) {
+            return ((Rectangle) shape).getRotation();
+        } else if (shape instanceof RegularPolygon) {
+            return ((RegularPolygon) shape).getRotation();
+        } else if (shape instanceof ShapeGroup) {
+            return ((ShapeGroup) shape).getRotation();
+        }
+        return 0.0; // Default
     }
 
     /**
