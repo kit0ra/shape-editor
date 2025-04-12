@@ -65,6 +65,7 @@ import com.editor.commands.UngroupShapesCommand;
 import com.editor.drawing.AWTDrawing;
 import com.editor.drawing.Drawer;
 import com.editor.memento.ShapeMemento; // Added Memento import
+import com.editor.shapes.Circle;
 import com.editor.shapes.Rectangle;
 import com.editor.shapes.RegularPolygon;
 import com.editor.shapes.Shape;
@@ -473,6 +474,8 @@ public class WhiteBoard extends Canvas implements Draggable {
             return ((Rectangle) shape).getBorderColor();
         } else if (shape instanceof RegularPolygon) {
             return ((RegularPolygon) shape).getBorderColor();
+        } else if (shape instanceof Circle) {
+            return ((Circle) shape).getBorderColor();
         } else if (shape instanceof ShapeGroup) {
             return ((ShapeGroup) shape).getBorderColor();
         }
@@ -487,6 +490,8 @@ public class WhiteBoard extends Canvas implements Draggable {
             return ((Rectangle) shape).getFillColor();
         } else if (shape instanceof RegularPolygon) {
             return ((RegularPolygon) shape).getFillColor();
+        } else if (shape instanceof Circle) {
+            return ((Circle) shape).getFillColor();
         }
         return Color.WHITE; // Default
     }
@@ -499,6 +504,8 @@ public class WhiteBoard extends Canvas implements Draggable {
             return ((Rectangle) shape).getRotation();
         } else if (shape instanceof RegularPolygon) {
             return ((RegularPolygon) shape).getRotation();
+        } else if (shape instanceof Circle) {
+            return ((Circle) shape).getRotation();
         } else if (shape instanceof ShapeGroup) {
             return ((ShapeGroup) shape).getRotation();
         }

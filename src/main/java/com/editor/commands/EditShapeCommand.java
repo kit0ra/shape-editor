@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.editor.shapes.Circle;
 import com.editor.shapes.Rectangle;
 import com.editor.shapes.RegularPolygon;
 import com.editor.shapes.Shape;
@@ -105,6 +106,8 @@ public class EditShapeCommand implements Command {
             return ((Rectangle) shape).getBorderColor();
         } else if (shape instanceof RegularPolygon) {
             return ((RegularPolygon) shape).getBorderColor();
+        } else if (shape instanceof Circle) {
+            return ((Circle) shape).getBorderColor();
         }
         return Color.BLACK; // Default
     }
@@ -114,6 +117,8 @@ public class EditShapeCommand implements Command {
             return ((Rectangle) shape).getFillColor();
         } else if (shape instanceof RegularPolygon) {
             return ((RegularPolygon) shape).getFillColor();
+        } else if (shape instanceof Circle) {
+            return ((Circle) shape).getFillColor();
         }
         return Color.WHITE; // Default
     }
@@ -123,6 +128,8 @@ public class EditShapeCommand implements Command {
             return ((Rectangle) shape).getRotation();
         } else if (shape instanceof RegularPolygon) {
             return ((RegularPolygon) shape).getRotation();
+        } else if (shape instanceof Circle) {
+            return ((Circle) shape).getRotation();
         }
         return 0.0; // Default
     }
@@ -132,6 +139,8 @@ public class EditShapeCommand implements Command {
             ((Rectangle) shape).setFillColor(color);
         } else if (shape instanceof RegularPolygon) {
             ((RegularPolygon) shape).setFillColor(color);
+        } else if (shape instanceof Circle) {
+            ((Circle) shape).setFillColor(color);
         }
     }
 
@@ -140,6 +149,8 @@ public class EditShapeCommand implements Command {
             ((Rectangle) shape).setRotation(rotation);
         } else if (shape instanceof RegularPolygon) {
             ((RegularPolygon) shape).setRotation(rotation);
+        } else if (shape instanceof Circle) {
+            ((Circle) shape).setRotation(rotation);
         }
     }
 
