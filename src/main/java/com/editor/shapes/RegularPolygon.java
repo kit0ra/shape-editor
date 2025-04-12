@@ -16,6 +16,7 @@ public class RegularPolygon implements Shape {
     private boolean selected;
     private Color fillColor = Color.GREEN; // Default fill color for polygons
     private Color borderColor = Color.BLACK; // Default border color
+    private double rotation = 0.0; // Rotation in degrees
 
     /**
      * Creates a new regular polygon.
@@ -95,6 +96,7 @@ public class RegularPolygon implements Shape {
         clone.setSelected(selected);
         clone.setFillColor(fillColor);
         clone.setBorderColor(borderColor);
+        clone.setRotation(rotation);
         return clone;
     }
 
@@ -168,5 +170,25 @@ public class RegularPolygon implements Shape {
      */
     public Color getBorderColor() {
         return borderColor;
+    }
+
+    /**
+     * Sets the rotation angle for this polygon
+     *
+     * @param degrees The rotation angle in degrees
+     */
+    @Override
+    public void setRotation(double degrees) {
+        this.rotation = degrees;
+    }
+
+    /**
+     * Gets the rotation angle for this polygon
+     *
+     * @return The current rotation angle in degrees
+     */
+    @Override
+    public double getRotation() {
+        return rotation;
     }
 }

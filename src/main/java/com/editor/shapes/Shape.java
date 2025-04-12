@@ -22,6 +22,11 @@ public interface Shape extends Cloneable, Serializable {
     // Color methods
     void setBorderColor(java.awt.Color color); // Set the border color
 
+    // Rotation methods
+    void setRotation(double degrees); // Set rotation in degrees
+
+    double getRotation(); // Get current rotation in degrees
+
     /**
      * Creates a deep clone of this shape.
      *

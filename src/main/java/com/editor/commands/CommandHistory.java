@@ -12,6 +12,17 @@ public class CommandHistory {
         redoStack.clear();
     }
 
+    /**
+     * Adds a command to the history without executing it
+     * Used when a command has already been executed
+     *
+     * @param command The command to add to history
+     */
+    public void addCommand(Command command) {
+        history.push(command);
+        redoStack.clear();
+    }
+
     public void undo() {
         if (!history.isEmpty()) {
             Command command = history.pop();

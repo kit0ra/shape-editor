@@ -16,6 +16,7 @@ public class ShapeGroup implements Shape, Serializable { // Implement Serializab
     private List<Shape> shapes = new ArrayList<>();
     private boolean selected;
     private Color borderColor = Color.BLACK;
+    private double rotation = 0.0; // Rotation in degrees
 
     /**
      * Creates a new empty shape group.
@@ -152,6 +153,9 @@ public class ShapeGroup implements Shape, Serializable { // Implement Serializab
                 clone.addShape(shape.clone());
             }
 
+            // Copy rotation property
+            clone.rotation = this.rotation;
+
             return clone;
         } catch (CloneNotSupportedException e) {
             // This should never happen since we implement Cloneable
@@ -175,5 +179,30 @@ public class ShapeGroup implements Shape, Serializable { // Implement Serializab
      */
     public Color getBorderColor() {
         return borderColor;
+    }
+
+    /**
+     * Sets the rotation angle for this group
+     * This will rotate all shapes in the group around their own centers
+     *
+     * @param degrees The rotation angle in degrees
+     */
+    @Override
+    public void setRotation(double degrees) {
+        this.rotation = degrees;
+        // Apply rotation to all shapes in the group
+        for (Shape shape : shapes) {
+            shape.setRotation(degrees);
+        }
+    }
+
+    /**
+     * Gets the rotation angle for this group
+     *
+     * @return The current rotation angle in degrees
+     */
+    @Override
+    public double getRotation() {
+        return rotation;
     }
 }

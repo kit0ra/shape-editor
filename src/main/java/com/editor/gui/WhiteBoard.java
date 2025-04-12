@@ -2,6 +2,7 @@ package com.editor.gui;
 
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
+import java.awt.BorderLayout;
 import java.awt.Button;
 import java.awt.Canvas;
 import java.awt.Choice;
@@ -21,6 +22,7 @@ import java.awt.Point;
 import java.awt.PopupMenu;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
+import java.awt.TextField;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter; // Already exists, ensure it's used
@@ -40,6 +42,7 @@ import javax.swing.SwingUtilities;
 
 import com.editor.commands.CommandHistory;
 import com.editor.commands.CreateShapeCommand;
+import com.editor.commands.EditShapeCommand;
 import com.editor.commands.GroupShapesCommand;
 import com.editor.commands.MoveShapeCommand;
 import com.editor.commands.MoveShapesCommand;
@@ -217,27 +220,123 @@ public class WhiteBoard extends Canvas implements Draggable {
         // sélectionnées
         Frame parentFrame = (Frame) SwingUtilities.getWindowAncestor(this);
         Dialog editDialog = new Dialog(parentFrame, "Edit Shape", true);
-        editDialog.setLayout(new GridLayout(3, 2, 10, 10));
-        editDialog.setSize(300, 150);
+        editDialog.setLayout(new GridLayout(4, 2, 10, 10));
+        editDialog.setSize(400, 300);
 
         // Ajouter des contrôles pour éditer la couleur de bordure
         editDialog.add(new Label("Border Color:"));
-        Choice borderColorChoice = new Choice();
-        borderColorChoice.add("Black");
-        borderColorChoice.add("Red");
-        borderColorChoice.add("Green");
-        borderColorChoice.add("Blue");
-        editDialog.add(borderColorChoice);
+        Panel borderColorPanel = new Panel(new BorderLayout());
+        Button borderColorButton = new Button("Choose Border Color");
+        final Color[] selectedBorderColor = { Color.BLACK }; // Default border color
+
+        borderColorButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Create a color dialog
+                Dialog colorDialog = new Dialog(editDialog, "Choose Border Color", true);
+                colorDialog.setLayout(new GridLayout(0, 5, 5, 5));
+                colorDialog.setSize(500, 400);
+
+                // Add a wide range of colors
+                addColorButton(colorDialog, Color.BLACK, selectedBorderColor);
+                addColorButton(colorDialog, Color.DARK_GRAY, selectedBorderColor);
+                addColorButton(colorDialog, Color.GRAY, selectedBorderColor);
+                addColorButton(colorDialog, Color.LIGHT_GRAY, selectedBorderColor);
+                addColorButton(colorDialog, Color.WHITE, selectedBorderColor);
+                addColorButton(colorDialog, new Color(128, 0, 0), selectedBorderColor); // Maroon
+                addColorButton(colorDialog, Color.RED, selectedBorderColor);
+                addColorButton(colorDialog, new Color(255, 127, 127), selectedBorderColor); // Light Red
+                addColorButton(colorDialog, new Color(255, 0, 127), selectedBorderColor); // Pink
+                addColorButton(colorDialog, new Color(255, 192, 203), selectedBorderColor); // Pink
+                addColorButton(colorDialog, new Color(0, 128, 0), selectedBorderColor); // Dark Green
+                addColorButton(colorDialog, Color.GREEN, selectedBorderColor);
+                addColorButton(colorDialog, new Color(127, 255, 127), selectedBorderColor); // Light Green
+                addColorButton(colorDialog, new Color(0, 0, 128), selectedBorderColor); // Navy
+                addColorButton(colorDialog, Color.BLUE, selectedBorderColor);
+                addColorButton(colorDialog, new Color(127, 127, 255), selectedBorderColor); // Light Blue
+                addColorButton(colorDialog, new Color(0, 128, 128), selectedBorderColor); // Teal
+                addColorButton(colorDialog, Color.CYAN, selectedBorderColor);
+                addColorButton(colorDialog, new Color(128, 0, 128), selectedBorderColor); // Purple
+                addColorButton(colorDialog, Color.MAGENTA, selectedBorderColor);
+                addColorButton(colorDialog, new Color(128, 128, 0), selectedBorderColor); // Olive
+                addColorButton(colorDialog, Color.YELLOW, selectedBorderColor);
+                addColorButton(colorDialog, new Color(255, 215, 0), selectedBorderColor); // Gold
+                addColorButton(colorDialog, new Color(255, 165, 0), selectedBorderColor); // Orange
+                addColorButton(colorDialog, new Color(210, 105, 30), selectedBorderColor); // Chocolate
+
+                // Show the color dialog
+                colorDialog.setLocationRelativeTo(editDialog);
+                colorDialog.setVisible(true);
+
+                // Update the border color button background
+                borderColorButton.setBackground(selectedBorderColor[0]);
+                borderColorButton.setForeground(getContrastColor(selectedBorderColor[0]));
+            }
+        });
+
+        borderColorPanel.add(borderColorButton, BorderLayout.CENTER);
+        editDialog.add(borderColorPanel);
 
         // Ajouter des contrôles pour éditer la couleur de remplissage
         editDialog.add(new Label("Fill Color:"));
-        Choice fillColorChoice = new Choice();
-        fillColorChoice.add("White");
-        fillColorChoice.add("Red");
-        fillColorChoice.add("Green");
-        fillColorChoice.add("Blue");
-        fillColorChoice.add("Yellow");
-        editDialog.add(fillColorChoice);
+        Panel fillColorPanel = new Panel(new BorderLayout());
+        Button fillColorButton = new Button("Choose Fill Color");
+        final Color[] selectedFillColor = { Color.WHITE }; // Default fill color
+
+        fillColorButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Create a color dialog
+                Dialog colorDialog = new Dialog(editDialog, "Choose Fill Color", true);
+                colorDialog.setLayout(new GridLayout(0, 5, 5, 5));
+                colorDialog.setSize(500, 400);
+
+                // Add a wide range of colors
+                addColorButton(colorDialog, Color.BLACK, selectedFillColor);
+                addColorButton(colorDialog, Color.DARK_GRAY, selectedFillColor);
+                addColorButton(colorDialog, Color.GRAY, selectedFillColor);
+                addColorButton(colorDialog, Color.LIGHT_GRAY, selectedFillColor);
+                addColorButton(colorDialog, Color.WHITE, selectedFillColor);
+                addColorButton(colorDialog, new Color(128, 0, 0), selectedFillColor); // Maroon
+                addColorButton(colorDialog, Color.RED, selectedFillColor);
+                addColorButton(colorDialog, new Color(255, 127, 127), selectedFillColor); // Light Red
+                addColorButton(colorDialog, new Color(255, 0, 127), selectedFillColor); // Pink
+                addColorButton(colorDialog, new Color(255, 192, 203), selectedFillColor); // Pink
+                addColorButton(colorDialog, new Color(0, 128, 0), selectedFillColor); // Dark Green
+                addColorButton(colorDialog, Color.GREEN, selectedFillColor);
+                addColorButton(colorDialog, new Color(127, 255, 127), selectedFillColor); // Light Green
+                addColorButton(colorDialog, new Color(0, 0, 128), selectedFillColor); // Navy
+                addColorButton(colorDialog, Color.BLUE, selectedFillColor);
+                addColorButton(colorDialog, new Color(127, 127, 255), selectedFillColor); // Light Blue
+                addColorButton(colorDialog, new Color(0, 128, 128), selectedFillColor); // Teal
+                addColorButton(colorDialog, Color.CYAN, selectedFillColor);
+                addColorButton(colorDialog, new Color(128, 0, 128), selectedFillColor); // Purple
+                addColorButton(colorDialog, Color.MAGENTA, selectedFillColor);
+                addColorButton(colorDialog, new Color(128, 128, 0), selectedFillColor); // Olive
+                addColorButton(colorDialog, Color.YELLOW, selectedFillColor);
+                addColorButton(colorDialog, new Color(255, 215, 0), selectedFillColor); // Gold
+                addColorButton(colorDialog, new Color(255, 165, 0), selectedFillColor); // Orange
+                addColorButton(colorDialog, new Color(210, 105, 30), selectedFillColor); // Chocolate
+
+                // Show the color dialog
+                colorDialog.setLocationRelativeTo(editDialog);
+                colorDialog.setVisible(true);
+
+                // Update the fill color button background
+                fillColorButton.setBackground(selectedFillColor[0]);
+                fillColorButton.setForeground(getContrastColor(selectedFillColor[0]));
+            }
+        });
+
+        fillColorPanel.add(fillColorButton, BorderLayout.CENTER);
+        editDialog.add(fillColorPanel);
+
+        // Ajouter des contrôles pour éditer la rotation
+        editDialog.add(new Label("Rotation (degrees):"));
+        Panel rotationPanel = new Panel(new BorderLayout());
+        TextField rotationField = new TextField("0", 5);
+        rotationPanel.add(rotationField, BorderLayout.CENTER);
+        editDialog.add(rotationPanel);
 
         // Ajouter des boutons OK et Annuler
         Button okButton = new Button("OK");
@@ -246,24 +345,35 @@ public class WhiteBoard extends Canvas implements Draggable {
         okButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Appliquer les modifications
-                Color borderColor = getColorFromName(borderColorChoice.getSelectedItem());
-                Color fillColor = getColorFromName(fillColorChoice.getSelectedItem());
+                try {
+                    // Get the rotation value
+                    double rotation = Double.parseDouble(rotationField.getText());
 
-                // Appliquer la couleur de bordure à toutes les formes
-                for (Shape shape : selectedShapes) {
-                    shape.setBorderColor(borderColor);
+                    // Create a command to make the edit undoable
+                    EditShapeCommand command = new EditShapeCommand(
+                            selectedShapes,
+                            selectedBorderColor[0],
+                            selectedFillColor[0],
+                            rotation);
 
-                    // Appliquer la couleur de remplissage selon le type de forme
-                    if (shape instanceof Rectangle) {
-                        ((Rectangle) shape).setFillColor(fillColor);
-                    } else if (shape instanceof RegularPolygon) {
-                        ((RegularPolygon) shape).setFillColor(fillColor);
-                    }
+                    // Execute the command and add it to the command history
+                    command.execute();
+                    commandHistory.addCommand(command);
+
+                    repaint();
+                    editDialog.dispose();
+                } catch (NumberFormatException ex) {
+                    // Show error message for invalid rotation value
+                    Dialog errorDialog = new Dialog(editDialog, "Error", true);
+                    errorDialog.setLayout(new BorderLayout());
+                    errorDialog.add(new Label("Invalid rotation value. Please enter a number."), BorderLayout.CENTER);
+                    Button okBtn = new Button("OK");
+                    okBtn.addActionListener(event -> errorDialog.dispose());
+                    errorDialog.add(okBtn, BorderLayout.SOUTH);
+                    errorDialog.pack();
+                    errorDialog.setLocationRelativeTo(editDialog);
+                    errorDialog.setVisible(true);
                 }
-
-                repaint();
-                editDialog.dispose();
             }
         });
 
@@ -282,6 +392,34 @@ public class WhiteBoard extends Canvas implements Draggable {
         // Centrer la boîte de dialogue et l'afficher
         editDialog.setLocationRelativeTo(this);
         editDialog.setVisible(true);
+    }
+
+    /**
+     * Adds a color button to a dialog
+     */
+    private void addColorButton(Dialog dialog, Color color, final Color[] selectedColor) {
+        Button colorBtn = new Button();
+        colorBtn.setBackground(color);
+        colorBtn.setSize(30, 30);
+        colorBtn.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                selectedColor[0] = color;
+                dialog.dispose();
+            }
+        });
+        dialog.add(colorBtn);
+    }
+
+    /**
+     * Returns a contrasting color (black or white) based on the brightness of the
+     * input color
+     */
+    private Color getContrastColor(Color color) {
+        // Calculate the perceived brightness using the formula
+        // (0.299*R + 0.587*G + 0.114*B)
+        double brightness = (0.299 * color.getRed() + 0.587 * color.getGreen() + 0.114 * color.getBlue()) / 255;
+        return brightness > 0.5 ? Color.BLACK : Color.WHITE;
     }
 
     /**

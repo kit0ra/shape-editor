@@ -10,6 +10,7 @@ public class Rectangle implements Shape {
     private boolean selected;
     private Color fillColor = Color.BLUE; // Default fill color for rectangles
     private Color borderColor = Color.BLACK; // Default border color
+    private double rotation = 0.0; // Rotation in degrees
 
     public Rectangle(int x, int y, int width, int height) {
         this.x = x;
@@ -63,6 +64,7 @@ public class Rectangle implements Shape {
         clone.setSelected(selected);
         clone.setFillColor(fillColor);
         clone.setBorderColor(borderColor);
+        clone.setRotation(rotation);
         return clone;
     }
 
@@ -100,6 +102,26 @@ public class Rectangle implements Shape {
      */
     public Color getBorderColor() {
         return borderColor;
+    }
+
+    /**
+     * Sets the rotation angle for this rectangle
+     *
+     * @param degrees The rotation angle in degrees
+     */
+    @Override
+    public void setRotation(double degrees) {
+        this.rotation = degrees;
+    }
+
+    /**
+     * Gets the rotation angle for this rectangle
+     *
+     * @return The current rotation angle in degrees
+     */
+    @Override
+    public double getRotation() {
+        return rotation;
     }
 
     public int getX() {
