@@ -48,6 +48,7 @@ import com.editor.shapes.ShapePrototypeRegistry;
 import com.editor.gui.button.Draggable;
 import com.editor.gui.panel.ToolbarPanel; // Added import
 import com.editor.mediator.DragMediator;
+import com.editor.state.StateChangeListener;
 
 public class WhiteBoard extends Canvas implements Draggable {
     private double relX, relY, relW, relH;
@@ -58,6 +59,9 @@ public class WhiteBoard extends Canvas implements Draggable {
     private ShapePrototypeRegistry prototypeRegistry = null;
     private String currentShapeType = null;
     private Shape activeShape; // La forme actuellement active pour le déplacement
+
+    // State change listener for auto-save functionality
+    private StateChangeListener stateChangeListener;
     private Point dragStartPoint; // Where the mouse was initially pressed
     private Point originalShapePosition; // Top-left corner of the shape when drag started
     private Point dragOffset; // Difference between dragStartPoint and originalShapePosition
@@ -934,6 +938,9 @@ public class WhiteBoard extends Canvas implements Draggable {
             activeShape = newShape;
             newShape.setSelected(true);
             repaint();
+
+            // Notify state change listener
+            notifyStateChanged("Shape created on whiteboard");
         }
     }
 
@@ -1001,6 +1008,11 @@ public class WhiteBoard extends Canvas implements Draggable {
 
         // Repaint to show the updated state
         repaint();
+
+        // Notify state change listener
+        if (removed) {
+            notifyStateChanged("Shapes deleted from whiteboard");
+        }
 
         return removed;
     }
@@ -1182,11 +1194,33 @@ public class WhiteBoard extends Canvas implements Draggable {
         offscreenBuffer = null;
     }
 
+    /**
+     * Sets the state change listener for this whiteboard.
+     * The listener will be notified when significant state changes occur.
+     *
+     * @param listener The state change listener
+     */
+    public void setStateChangeListener(StateChangeListener listener) {
+        this.stateChangeListener = listener;
+    }
+
+    /**
+     * Notifies the state change listener that a significant state change has
+     * occurred.
+     *
+     * @param description A description of the change
+     */
+    private void notifyStateChanged(String description) {
+        if (stateChangeListener != null) {
+            stateChangeListener.onStateChanged(this, description);
+        }
+    }
+
     // --- Memento Pattern Implementation ---
 
     /**
      * Creates a memento containing the current state of the whiteboard (shapes).
-     * 
+     *
      * @return A ShapeMemento object.
      */
     public ShapeMemento createMemento() {
@@ -1197,7 +1231,7 @@ public class WhiteBoard extends Canvas implements Draggable {
 
     /**
      * Restores the whiteboard state from a memento.
-     * 
+     *
      * @param memento The memento object containing the state to restore.
      */
     public void restoreFromMemento(ShapeMemento memento) {

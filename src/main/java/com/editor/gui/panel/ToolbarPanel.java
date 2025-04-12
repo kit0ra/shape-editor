@@ -27,6 +27,7 @@ import com.editor.shapes.CompositeShapePrototypeRegistry;
 import com.editor.shapes.Shape;
 import com.editor.shapes.ShapeGroup;
 import com.editor.shapes.ShapePrototypeRegistry;
+import com.editor.state.StateChangeListener;
 import com.editor.utils.ImageLoader;
 
 /**
@@ -44,6 +45,9 @@ public class ToolbarPanel extends CustomPanel {
     // private DragMediator dragMediator;
     private ShapePrototypeRegistry prototypeRegistry;
     private CompositeShapePrototypeRegistry compositeRegistry;
+
+    // State change listener for auto-save functionality
+    private StateChangeListener stateChangeListener;
 
     // Button layout constants
     private static final int BUTTON_Y_START = 30;
@@ -93,6 +97,28 @@ public class ToolbarPanel extends CustomPanel {
     public void setCompositePrototypeRegistry(CompositeShapePrototypeRegistry registry) {
         this.compositeRegistry = registry;
         System.out.println("[ToolbarPanel] CompositeShapePrototypeRegistry set: " + (registry != null));
+    }
+
+    /**
+     * Sets the state change listener for this toolbar panel.
+     * The listener will be notified when significant state changes occur.
+     *
+     * @param listener The state change listener
+     */
+    public void setStateChangeListener(StateChangeListener listener) {
+        this.stateChangeListener = listener;
+    }
+
+    /**
+     * Notifies the state change listener that a significant state change has
+     * occurred.
+     *
+     * @param description A description of the change
+     */
+    private void notifyStateChanged(String description) {
+        if (stateChangeListener != null) {
+            stateChangeListener.onStateChanged(this, description);
+        }
     }
 
     @Override
@@ -201,6 +227,9 @@ public class ToolbarPanel extends CustomPanel {
         super.addButton(button); // Adds to CustomPanel's list and repaints
         buttonToPrototypeKeyMap.put(button, prototypeKey);
         System.out.println("[ToolbarPanel] Stored mapping for button with key: " + prototypeKey);
+
+        // Notify state change listener
+        notifyStateChanged("Button added to toolbar with key: " + prototypeKey);
     }
 
     @Override
@@ -210,6 +239,9 @@ public class ToolbarPanel extends CustomPanel {
             String removedKey = buttonToPrototypeKeyMap.remove(button);
             System.out.println("[ToolbarPanel] Removed mapping for button with key: " + removedKey);
             recalculateButtonLayout(); // Adjust layout after removal
+
+            // Notify state change listener
+            notifyStateChanged("Button removed from toolbar with key: " + removedKey);
         }
         return removed;
     }
