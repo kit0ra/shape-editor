@@ -1,6 +1,7 @@
 package com.editor.utils;
 
 import java.awt.Image;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -18,26 +19,98 @@ public class ImageLoader {
      * @return The loaded Image, or null if failed to load
      */
     public static Image loadImage(String path) {
+        System.out.println("[ImageLoader] Attempting to load image: " + path);
+
         // Check cache first
         if (imageCache.containsKey(path)) {
+            System.out.println("[ImageLoader] Image found in cache: " + path);
             return imageCache.get(path);
         }
 
-        // Try to load the image
+        // First try to load from classpath resources
+        System.out.println("[ImageLoader] Trying to load from classpath: /" + path);
         try (InputStream is = ImageLoader.class.getResourceAsStream("/" + path)) {
-            if (is == null) {
-                System.err.println("Image not found: " + path);
-                return null;
+            if (is != null) {
+                System.out.println("[ImageLoader] Found in classpath: /" + path);
+                Image image = ImageIO.read(is);
+                if (image != null) {
+                    System.out.println("[ImageLoader] Successfully loaded from classpath: /" + path);
+                    imageCache.put(path, image); // Cache the image
+                    return image;
+                } else {
+                    System.err.println("[ImageLoader] Failed to read image from classpath stream: /" + path);
+                }
+            } else {
+                System.err.println("[ImageLoader] Resource stream is null for: /" + path);
+            }
+        } catch (IOException e) {
+            System.err.println("[ImageLoader] Error loading image from classpath: " + path);
+            System.err.println("[ImageLoader] Exception: " + e.getMessage());
+        }
+
+        // If not found in classpath, try to load from file system
+        try {
+            // Try src/main/resources path
+            File resourceFile = new File("src/main/resources/" + path);
+            System.out.println("[ImageLoader] Trying file system path: " + resourceFile.getAbsolutePath());
+            if (resourceFile.exists()) {
+                System.out.println("[ImageLoader] File exists at: " + resourceFile.getAbsolutePath());
+                Image image = ImageIO.read(resourceFile);
+                if (image != null) {
+                    System.out.println(
+                            "[ImageLoader] Successfully loaded from file system: " + resourceFile.getAbsolutePath());
+                    imageCache.put(path, image); // Cache the image
+                    return image;
+                } else {
+                    System.err
+                            .println("[ImageLoader] Failed to read image from file: " + resourceFile.getAbsolutePath());
+                }
+            } else {
+                System.err.println("[ImageLoader] File does not exist: " + resourceFile.getAbsolutePath());
             }
 
-            Image image = ImageIO.read(is);
-            if (image != null) {
-                imageCache.put(path, image); // Cache the image
+            // Try bin/icons path
+            File binFile = new File("bin/" + path);
+            System.out.println("[ImageLoader] Trying bin path: " + binFile.getAbsolutePath());
+            if (binFile.exists()) {
+                System.out.println("[ImageLoader] File exists at: " + binFile.getAbsolutePath());
+                Image image = ImageIO.read(binFile);
+                if (image != null) {
+                    System.out.println("[ImageLoader] Successfully loaded from bin path: " + binFile.getAbsolutePath());
+                    imageCache.put(path, image); // Cache the image
+                    return image;
+                } else {
+                    System.err
+                            .println("[ImageLoader] Failed to read image from bin file: " + binFile.getAbsolutePath());
+                }
+            } else {
+                System.err.println("[ImageLoader] Bin file does not exist: " + binFile.getAbsolutePath());
             }
-            return image;
+
+            // Try direct path
+            File directFile = new File(path);
+            System.out.println("[ImageLoader] Trying direct path: " + directFile.getAbsolutePath());
+            if (directFile.exists()) {
+                System.out.println("[ImageLoader] File exists at: " + directFile.getAbsolutePath());
+                Image image = ImageIO.read(directFile);
+                if (image != null) {
+                    System.out.println(
+                            "[ImageLoader] Successfully loaded from direct path: " + directFile.getAbsolutePath());
+                    imageCache.put(path, image); // Cache the image
+                    return image;
+                } else {
+                    System.err.println(
+                            "[ImageLoader] Failed to read image from direct file: " + directFile.getAbsolutePath());
+                }
+            } else {
+                System.err.println("[ImageLoader] Direct file does not exist: " + directFile.getAbsolutePath());
+            }
+
+            System.err.println("Image not found: " + path);
+            return null;
         } catch (IOException e) {
-            System.err.println("Error loading image: " + path);
-            e.printStackTrace();
+            System.err.println("Error loading image from file system: " + path);
+            System.err.println("Stack trace: " + e);
             return null;
         }
     }

@@ -173,17 +173,13 @@ public class ShapeEditorFrame extends Frame {
      * Sets up the auto-save manager and initializes auto-loading.
      */
     private void setupAutoSaveManager() {
-        // Create the auto-save manager, passing both registries
-        autoSaveManager = new AutoSaveManager(whiteBoard, toolbarPanel, compositeRegistry, prototypeRegistry); // Added
-                                                                                                               // prototypeRegistry
+        // Initialize the singleton auto-save manager with both registries
+        autoSaveManager = AutoSaveManager.initialize(whiteBoard, toolbarPanel, compositeRegistry, prototypeRegistry);
 
-        // Create a state change listener to trigger auto-save
-        StateChangeListener stateChangeListener = new StateChangeListener() {
-            @Override
-            public void onStateChanged(Object source, String description) {
-                System.out.println("[AutoSave] State changed: " + description);
-                autoSaveManager.triggerAutoSave();
-            }
+        // Create a state change listener to trigger auto-save using lambda
+        StateChangeListener stateChangeListener = (source, description) -> {
+            System.out.println("[AutoSave] State changed: " + description);
+            autoSaveManager.triggerAutoSave();
         };
 
         // Set the state change listener on the whiteboard and toolbar panel
@@ -198,10 +194,9 @@ public class ShapeEditorFrame extends Frame {
         // Auto-load the previous state if it exists
         if (autoSaveManager.autoSaveExists()) {
             System.out.println("[LOG] ShapeEditorFrame - Found previous state, auto-loading...");
-            // We can now use the AutoLoadCommand with the updated constructor
+            // Use the AutoLoadCommand with the updated constructor (uses singleton)
             AutoLoadCommand autoLoadCommand = new AutoLoadCommand(
-                    whiteBoard, toolbarPanel, compositeRegistry, prototypeRegistry,
-                    autoSaveManager);
+                    whiteBoard, toolbarPanel, compositeRegistry, prototypeRegistry);
             autoLoadCommand.execute();
         } else {
             System.out.println("[AutoSave] No previous state found, starting with empty state.");

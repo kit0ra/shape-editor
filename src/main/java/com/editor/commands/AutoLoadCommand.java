@@ -25,18 +25,15 @@ public class AutoLoadCommand implements Command {
      * @param toolbarPanel      The ToolbarPanel component
      * @param compositeRegistry The CompositeShapePrototypeRegistry
      * @param shapeRegistry     The ShapePrototypeRegistry
-     * @param autoSaveManager   The AutoSaveManager to get the autosave file path
-     *                          from
      */
     public AutoLoadCommand(WhiteBoard whiteBoard, ToolbarPanel toolbarPanel,
             CompositeShapePrototypeRegistry compositeRegistry,
-            ShapePrototypeRegistry shapeRegistry,
-            AutoSaveManager autoSaveManager) {
+            ShapePrototypeRegistry shapeRegistry) {
         this.whiteBoard = whiteBoard;
         this.toolbarPanel = toolbarPanel;
         this.compositeRegistry = compositeRegistry;
         this.shapeRegistry = shapeRegistry;
-        this.autoSaveManager = autoSaveManager;
+        this.autoSaveManager = AutoSaveManager.getInstance();
     }
 
     @Override
@@ -53,7 +50,7 @@ public class AutoLoadCommand implements Command {
                 System.out.println("[AutoLoadCommand] Successfully loaded autosaved state");
             } catch (Exception e) {
                 System.err.println("[AutoLoadCommand] Error loading autosaved state: " + e.getMessage());
-                e.printStackTrace();
+                System.err.println("[AutoLoadCommand] Stack trace: " + e);
 
                 // If loading fails, delete the corrupted autosave file
                 File autosaveFile = new File(filePath);

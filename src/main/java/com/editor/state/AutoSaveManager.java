@@ -9,59 +9,99 @@ import com.editor.commands.SaveStateCommand;
 import com.editor.gui.WhiteBoard;
 import com.editor.gui.panel.ToolbarPanel;
 import com.editor.shapes.CompositeShapePrototypeRegistry;
-import com.editor.shapes.ShapePrototypeRegistry; // Added import
+import com.editor.shapes.ShapePrototypeRegistry;
 
 /**
  * Manages automatic saving of the application state.
  * Implements a debounce mechanism to avoid saving too frequently.
+ * Implemented as a Singleton to ensure only one instance exists.
  */
 public class AutoSaveManager {
     private static final String DEFAULT_AUTOSAVE_FILENAME = "autosave.ser";
     private static final long DEBOUNCE_DELAY_MS = 1000; // 1 second debounce
 
-    private final WhiteBoard whiteBoard;
-    private final ToolbarPanel toolbarPanel;
-    private final CompositeShapePrototypeRegistry compositeRegistry;
-    private final ShapePrototypeRegistry prototypeRegistry; // Added standard registry
-    private final String autoSaveFilePath;
+    // Singleton instance
+    private static AutoSaveManager instance;
+
+    private WhiteBoard whiteBoard;
+    private ToolbarPanel toolbarPanel;
+    private CompositeShapePrototypeRegistry compositeRegistry;
+    private ShapePrototypeRegistry prototypeRegistry;
+    private String autoSaveFilePath;
     private final ScheduledExecutorService scheduler;
 
     private boolean saveScheduled = false;
+    private boolean initialized = false;
 
     /**
-     * Creates a new AutoSaveManager with the default autosave file path.
+     * Private constructor to prevent direct instantiation.
+     * Use getInstance() methods instead.
+     */
+    private AutoSaveManager() {
+        // Private constructor for singleton pattern
+        scheduler = Executors.newSingleThreadScheduledExecutor();
+    }
+
+    /**
+     * Gets the singleton instance of AutoSaveManager.
+     * Must call initialize() before using this method.
+     *
+     * @return The singleton instance
+     * @throws IllegalStateException if the manager hasn't been initialized
+     */
+    public static synchronized AutoSaveManager getInstance() {
+        if (instance == null) {
+            instance = new AutoSaveManager();
+        }
+
+        if (!instance.initialized) {
+            throw new IllegalStateException("AutoSaveManager not initialized. Call initialize() first.");
+        }
+
+        return instance;
+    }
+
+    /**
+     * Initializes the AutoSaveManager with the default autosave file path.
      *
      * @param whiteBoard        The WhiteBoard component
      * @param toolbarPanel      The ToolbarPanel component
      * @param compositeRegistry The CompositeShapePrototypeRegistry
-     * @param prototypeRegistry The ShapePrototypeRegistry // Added
+     * @param prototypeRegistry The ShapePrototypeRegistry
+     * @return The initialized singleton instance
      */
-    public AutoSaveManager(WhiteBoard whiteBoard, ToolbarPanel toolbarPanel,
-            CompositeShapePrototypeRegistry compositeRegistry, ShapePrototypeRegistry prototypeRegistry) { // Added
-        this(whiteBoard, toolbarPanel, compositeRegistry, prototypeRegistry, // Added
+    public static synchronized AutoSaveManager initialize(WhiteBoard whiteBoard, ToolbarPanel toolbarPanel,
+            CompositeShapePrototypeRegistry compositeRegistry, ShapePrototypeRegistry prototypeRegistry) {
+        return initialize(whiteBoard, toolbarPanel, compositeRegistry, prototypeRegistry,
                 System.getProperty("user.dir") + File.separator + DEFAULT_AUTOSAVE_FILENAME);
     }
 
     /**
-     * Creates a new AutoSaveManager with a custom autosave file path.
+     * Initializes the AutoSaveManager with a custom autosave file path.
      *
      * @param whiteBoard        The WhiteBoard component
      * @param toolbarPanel      The ToolbarPanel component
      * @param compositeRegistry The CompositeShapePrototypeRegistry
-     * @param prototypeRegistry The ShapePrototypeRegistry // Added
+     * @param prototypeRegistry The ShapePrototypeRegistry
      * @param autoSaveFilePath  The path to save the autosave file
+     * @return The initialized singleton instance
      */
-    public AutoSaveManager(WhiteBoard whiteBoard, ToolbarPanel toolbarPanel,
-            CompositeShapePrototypeRegistry compositeRegistry, ShapePrototypeRegistry prototypeRegistry, // Added
+    public static synchronized AutoSaveManager initialize(WhiteBoard whiteBoard, ToolbarPanel toolbarPanel,
+            CompositeShapePrototypeRegistry compositeRegistry, ShapePrototypeRegistry prototypeRegistry,
             String autoSaveFilePath) {
-        this.whiteBoard = whiteBoard;
-        this.toolbarPanel = toolbarPanel;
-        this.compositeRegistry = compositeRegistry;
-        this.prototypeRegistry = prototypeRegistry; // Added initialization
-        this.autoSaveFilePath = autoSaveFilePath;
-        this.scheduler = Executors.newSingleThreadScheduledExecutor();
+        if (instance == null) {
+            instance = new AutoSaveManager();
+        }
+
+        instance.whiteBoard = whiteBoard;
+        instance.toolbarPanel = toolbarPanel;
+        instance.compositeRegistry = compositeRegistry;
+        instance.prototypeRegistry = prototypeRegistry;
+        instance.autoSaveFilePath = autoSaveFilePath;
+        instance.initialized = true;
 
         System.out.println("[AutoSaveManager] Initialized with autosave path: " + autoSaveFilePath);
+        return instance;
     }
 
     /**
@@ -76,9 +116,8 @@ public class AutoSaveManager {
 
             scheduler.schedule(() -> {
                 performSave();
-                synchronized (AutoSaveManager.this) {
-                    saveScheduled = false;
-                }
+                // Use atomic operation instead of nested synchronization
+                saveScheduled = false;
             }, DEBOUNCE_DELAY_MS, TimeUnit.MILLISECONDS);
         }
     }
@@ -97,7 +136,7 @@ public class AutoSaveManager {
             System.out.println("[AutoSaveManager] Auto-save completed successfully");
         } catch (Exception e) {
             System.err.println("[AutoSaveManager] Error during auto-save: " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("[AutoSaveManager] Stack trace: " + e);
         }
     }
 
