@@ -19,6 +19,9 @@ public interface Shape extends Cloneable, Serializable {
 
     Rectangle getBounds(); // Get the bounding rectangle of the shape
 
+    // Color methods
+    void setBorderColor(java.awt.Color color); // Set the border color
+
     /**
      * Creates a deep clone of this shape.
      *

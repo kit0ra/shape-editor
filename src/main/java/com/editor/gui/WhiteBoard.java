@@ -2,15 +2,23 @@ package com.editor.gui;
 
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
+import java.awt.Button;
 import java.awt.Canvas;
+import java.awt.Choice;
 import java.awt.Color;
 import java.awt.Composite;
+import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GridLayout;
 import java.awt.Image;
+import java.awt.Label;
+import java.awt.MenuItem;
+import java.awt.Panel;
 import java.awt.Point;
+import java.awt.PopupMenu;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.awt.event.ActionEvent;
@@ -28,8 +36,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
 
 import com.editor.commands.CommandHistory;
@@ -42,6 +48,7 @@ import com.editor.drawing.AWTDrawing;
 import com.editor.drawing.Drawer;
 import com.editor.memento.ShapeMemento; // Added Memento import
 import com.editor.shapes.Rectangle;
+import com.editor.shapes.RegularPolygon;
 import com.editor.shapes.Shape;
 import com.editor.shapes.ShapeGroup;
 import com.editor.shapes.ShapePrototypeRegistry;
@@ -151,10 +158,20 @@ public class WhiteBoard extends Canvas implements Draggable {
      * Affiche le menu contextuel aux coordonnées spécifiées
      */
     private void showContextMenu(int x, int y) {
-        JPopupMenu contextMenu = new JPopupMenu();
+        PopupMenu contextMenu = new PopupMenu();
+
+        // Option Edit
+        MenuItem editItem = new MenuItem("Edit");
+        editItem.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                editSelectedShape();
+            }
+        });
+        contextMenu.add(editItem);
 
         // Option Group
-        JMenuItem groupItem = new JMenuItem("Group");
+        MenuItem groupItem = new MenuItem("Group");
         groupItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -164,7 +181,7 @@ public class WhiteBoard extends Canvas implements Draggable {
         contextMenu.add(groupItem);
 
         // Option Ungroup (activée uniquement si une forme sélectionnée est un groupe)
-        JMenuItem ungroupItem = new JMenuItem("Ungroup");
+        MenuItem ungroupItem = new MenuItem("Ungroup");
         ungroupItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -184,7 +201,108 @@ public class WhiteBoard extends Canvas implements Draggable {
         contextMenu.add(ungroupItem);
 
         // Afficher le menu contextuel
+        this.add(contextMenu);
         contextMenu.show(this, x, y);
+    }
+
+    /**
+     * Edite la forme sélectionnée
+     */
+    private void editSelectedShape() {
+        if (selectedShapes.isEmpty()) {
+            return; // Aucune forme sélectionnée
+        }
+
+        // Créer une boîte de dialogue pour éditer les propriétés des formes
+        // sélectionnées
+        Frame parentFrame = (Frame) SwingUtilities.getWindowAncestor(this);
+        Dialog editDialog = new Dialog(parentFrame, "Edit Shape", true);
+        editDialog.setLayout(new GridLayout(3, 2, 10, 10));
+        editDialog.setSize(300, 150);
+
+        // Ajouter des contrôles pour éditer la couleur de bordure
+        editDialog.add(new Label("Border Color:"));
+        Choice borderColorChoice = new Choice();
+        borderColorChoice.add("Black");
+        borderColorChoice.add("Red");
+        borderColorChoice.add("Green");
+        borderColorChoice.add("Blue");
+        editDialog.add(borderColorChoice);
+
+        // Ajouter des contrôles pour éditer la couleur de remplissage
+        editDialog.add(new Label("Fill Color:"));
+        Choice fillColorChoice = new Choice();
+        fillColorChoice.add("White");
+        fillColorChoice.add("Red");
+        fillColorChoice.add("Green");
+        fillColorChoice.add("Blue");
+        fillColorChoice.add("Yellow");
+        editDialog.add(fillColorChoice);
+
+        // Ajouter des boutons OK et Annuler
+        Button okButton = new Button("OK");
+        Button cancelButton = new Button("Cancel");
+
+        okButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Appliquer les modifications
+                Color borderColor = getColorFromName(borderColorChoice.getSelectedItem());
+                Color fillColor = getColorFromName(fillColorChoice.getSelectedItem());
+
+                // Appliquer la couleur de bordure à toutes les formes
+                for (Shape shape : selectedShapes) {
+                    shape.setBorderColor(borderColor);
+
+                    // Appliquer la couleur de remplissage selon le type de forme
+                    if (shape instanceof Rectangle) {
+                        ((Rectangle) shape).setFillColor(fillColor);
+                    } else if (shape instanceof RegularPolygon) {
+                        ((RegularPolygon) shape).setFillColor(fillColor);
+                    }
+                }
+
+                repaint();
+                editDialog.dispose();
+            }
+        });
+
+        cancelButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                editDialog.dispose();
+            }
+        });
+
+        Panel buttonPanel = new Panel();
+        buttonPanel.add(okButton);
+        buttonPanel.add(cancelButton);
+        editDialog.add(buttonPanel);
+
+        // Centrer la boîte de dialogue et l'afficher
+        editDialog.setLocationRelativeTo(this);
+        editDialog.setVisible(true);
+    }
+
+    /**
+     * Convertit un nom de couleur en objet Color
+     */
+    private Color getColorFromName(String colorName) {
+        switch (colorName) {
+            case "Red":
+                return Color.RED;
+            case "Green":
+                return Color.GREEN;
+            case "Blue":
+                return Color.BLUE;
+            case "Yellow":
+                return Color.YELLOW;
+            case "White":
+                return Color.WHITE;
+            case "Black":
+            default:
+                return Color.BLACK;
+        }
     }
 
     /**
