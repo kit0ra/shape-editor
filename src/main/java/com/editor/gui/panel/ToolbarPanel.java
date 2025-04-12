@@ -17,6 +17,7 @@ import com.editor.gui.button.IButton;
 import com.editor.gui.button.decorators.CompositeShapeCreationButtonDecorator;
 import com.editor.gui.button.decorators.ImageDecorator;
 import com.editor.gui.button.decorators.ShapeCreationButtonDecorator;
+import com.editor.gui.button.decorators.ShapeDrawingButtonDecorator;
 import com.editor.gui.button.decorators.TooltipDecorator; // Added
 import com.editor.mediator.DragMediator;
 import com.editor.shapes.CompositeShapePrototypeRegistry;
@@ -256,14 +257,35 @@ public class ToolbarPanel extends CustomPanel {
      * shapes).
      */
     private IButton createDraggableShapeButton(int x, int y, String iconPath, String tooltipText, String shapeTypeKey) {
-        Image icon = ImageLoader.loadImage(iconPath);
         IButton button = new CustomButton(x, y, 40, 40, "");
 
-        if (icon != null) {
-            button = new ImageDecorator(button, icon, 24, 24, 8, ImageDecorator.ImageMode.ICON_ONLY);
-        } else {
-            System.out.println("[ToolbarPanel] Warning: Icon not found at path: " + iconPath);
+        // Try to get the shape prototype to draw it on the button
+        Shape shapePrototype = null;
+        if (prototypeRegistry != null && prototypeRegistry.hasPrototype(shapeTypeKey)) {
+            try {
+                // Create a temporary instance to get the prototype
+                // We'll position it at 0,0 since we'll scale it anyway
+                shapePrototype = prototypeRegistry.createShape(shapeTypeKey, 0, 0);
+            } catch (Exception e) {
+                System.out.println("[ToolbarPanel] Error getting shape prototype: " + e.getMessage());
+            }
         }
+
+        // If we have a valid shape prototype, use it to draw on the button
+        if (shapePrototype != null) {
+            // Add shape drawing decorator to draw the shape on the button
+            button = new ShapeDrawingButtonDecorator(button, shapePrototype, 0.5, 4);
+            System.out.println("[ToolbarPanel] Using shape drawing for button: " + shapeTypeKey);
+        } else {
+            // Fallback to using an icon if we couldn't get the shape
+            Image icon = ImageLoader.loadImage(iconPath);
+            if (icon != null) {
+                button = new ImageDecorator(button, icon, 24, 24, 8, ImageDecorator.ImageMode.ICON_ONLY);
+            } else {
+                System.out.println("[ToolbarPanel] Warning: Icon not found at path: " + iconPath);
+            }
+        }
+
         button = new TooltipDecorator(button, tooltipText);
 
         if (targetWhiteBoard != null && prototypeRegistry != null) {
@@ -279,18 +301,39 @@ public class ToolbarPanel extends CustomPanel {
      * Helper method to create a button that creates a composite shape (group).
      */
     private IButton createCompositeButton(int x, int y, String iconPath, String tooltipText, String groupKey) {
-        Image icon = ImageLoader.loadImage(iconPath);
         IButton button = new CustomButton(x, y, 40, 40, ""); // Standard size
 
-        if (icon != null) {
-            button = new ImageDecorator(button, icon, 24, 24, 8, ImageDecorator.ImageMode.ICON_ONLY);
-        } else {
-            System.out.println("[ToolbarPanel] Warning: Group icon not found at path: " + iconPath);
-            // Optionally set default text if icon fails
+        // Get the shape group from the registry to draw it on the button
+        ShapeGroup groupPrototype = null;
+        if (compositeRegistry != null && compositeRegistry.hasPrototype(groupKey)) {
+            try {
+                // Create a temporary instance to get the prototype
+                // We'll position it at 0,0 since we'll scale it anyway
+                groupPrototype = compositeRegistry.createGroup(groupKey, 0, 0);
+            } catch (Exception e) {
+                System.out.println("[ToolbarPanel] Error getting group prototype: " + e.getMessage());
+            }
         }
+
+        // If we have a valid group prototype, use it to draw on the button
+        if (groupPrototype != null) {
+            // Add shape drawing decorator to draw the group on the button
+            button = new ShapeDrawingButtonDecorator(button, groupPrototype, 0.5, 4);
+            System.out.println("[ToolbarPanel] Using shape drawing for group button");
+        } else {
+            // Fallback to using an icon if we couldn't get the group
+            Image icon = ImageLoader.loadImage(iconPath);
+            if (icon != null) {
+                button = new ImageDecorator(button, icon, 24, 24, 8, ImageDecorator.ImageMode.ICON_ONLY);
+            } else {
+                System.out.println("[ToolbarPanel] Warning: Group icon not found at path: " + iconPath);
+            }
+        }
+
+        // Add tooltip
         button = new TooltipDecorator(button, tooltipText);
 
-        // Use the new CompositeShapeCreationButtonDecorator
+        // Use the CompositeShapeCreationButtonDecorator
         if (targetWhiteBoard != null && compositeRegistry != null) {
             button = new CompositeShapeCreationButtonDecorator(button, targetWhiteBoard, compositeRegistry, groupKey);
         } else {

@@ -1,12 +1,10 @@
 package com.editor.gui.button.decorators;
 
 import java.awt.Graphics;
-import java.awt.Point;
-import java.awt.event.MouseEvent;
 
-import com.editor.commands.CommandHistory; // Assuming WhiteBoard provides access or we pass it
+import com.editor.commands.CommandHistory;
 import com.editor.commands.CreateGroupCommand;
-import com.editor.gui.WhiteBoard;
+import com.editor.gui.WhiteBoard; // Assuming WhiteBoard provides access or we pass it
 import com.editor.gui.button.IButton;
 import com.editor.shapes.CompositeShapePrototypeRegistry;
 import com.editor.shapes.ShapeGroup;
@@ -83,6 +81,8 @@ public class CompositeShapeCreationButtonDecorator extends ButtonDecorator {
     @Override
     public void draw(Graphics g) {
         super.draw(g);
+        // Note: The actual shape drawing is handled by the ShapeDrawingButtonDecorator
+        // if it was applied before this decorator
     }
 
     @Override
