@@ -8,9 +8,11 @@ import com.editor.gui.WhiteBoard;
 import com.editor.gui.panel.ToolbarPanel;
 import com.editor.memento.AppStateMemento;
 import com.editor.memento.CompositeRegistryMemento;
+import com.editor.memento.PrototypeRegistryMemento; // Added import
 import com.editor.memento.ShapeMemento;
 import com.editor.memento.ToolbarMemento;
 import com.editor.shapes.CompositeShapePrototypeRegistry;
+import com.editor.shapes.ShapePrototypeRegistry; // Added import
 
 /**
  * Command to save the application state (WhiteBoard and ToolbarPanel) to a
@@ -22,6 +24,7 @@ public class SaveStateCommand implements Command {
     private final WhiteBoard whiteBoard;
     private final ToolbarPanel toolbarPanel;
     private final CompositeShapePrototypeRegistry compositeRegistry;
+    private final ShapePrototypeRegistry prototypeRegistry; // Added standard registry
     private final String filePath;
 
     // Keep track of the saved state in case we need undo (though unlikely for save)
@@ -33,13 +36,16 @@ public class SaveStateCommand implements Command {
      * @param whiteBoard        The whiteboard component
      * @param toolbarPanel      The toolbar panel component
      * @param compositeRegistry The composite shape prototype registry
+     * @param prototypeRegistry The standard shape prototype registry
      * @param filePath          The path to save the state to
      */
     public SaveStateCommand(WhiteBoard whiteBoard, ToolbarPanel toolbarPanel,
-            CompositeShapePrototypeRegistry compositeRegistry, String filePath) {
+            CompositeShapePrototypeRegistry compositeRegistry, ShapePrototypeRegistry prototypeRegistry,
+            String filePath) { // Added prototypeRegistry
         this.whiteBoard = whiteBoard;
         this.toolbarPanel = toolbarPanel;
         this.compositeRegistry = compositeRegistry;
+        this.prototypeRegistry = prototypeRegistry; // Added
         this.filePath = filePath;
     }
 
@@ -51,14 +57,12 @@ public class SaveStateCommand implements Command {
      * @param toolbarPanel The toolbar panel component
      * @param filePath     The path to save the state to
      */
-    public SaveStateCommand(WhiteBoard whiteBoard, ToolbarPanel toolbarPanel, String filePath) {
-        this.whiteBoard = whiteBoard;
-        this.toolbarPanel = toolbarPanel;
-        this.compositeRegistry = new CompositeShapePrototypeRegistry(); // Create empty registry
-        this.filePath = filePath;
-        System.out.println("[WARNING] Using deprecated SaveStateCommand constructor without composite registry.");
-        System.out.println("[WARNING] Composite shapes will not be saved properly.");
-    }
+    // Note: The deprecated constructor below likely needs updating or removal
+    // if standard shapes added to the toolbar are expected to be saved via this
+    // path.
+    // For now, focusing on the main constructor used by AutoSaveManager.
+    // public SaveStateCommand(WhiteBoard whiteBoard, ToolbarPanel toolbarPanel,
+    // String filePath) { ... }
 
     @Override
     public void execute() {
@@ -77,8 +81,13 @@ public class SaveStateCommand implements Command {
             CompositeRegistryMemento compositeRegistryMemento = new CompositeRegistryMemento(
                     compositeRegistry.getPrototypesMap());
 
+            System.out.println("[STATE DEBUG] Creating PrototypeRegistry memento...");
+            PrototypeRegistryMemento prototypeRegistryMemento = new PrototypeRegistryMemento(
+                    prototypeRegistry.getPrototypesMap()); // Create memento for standard registry
+
             System.out.println("[STATE DEBUG] Creating AppStateMemento with all component mementos...");
-            AppStateMemento appState = new AppStateMemento(whiteboardMemento, toolbarMemento, compositeRegistryMemento);
+            AppStateMemento appState = new AppStateMemento(whiteboardMemento, toolbarMemento, compositeRegistryMemento,
+                    prototypeRegistryMemento); // Pass new memento
             this.savedState = appState; // Store for potential undo
 
             // 2. Serialize the AppStateMemento to the file

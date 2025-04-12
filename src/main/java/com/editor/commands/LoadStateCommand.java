@@ -9,10 +9,13 @@ import com.editor.gui.WhiteBoard;
 import com.editor.gui.panel.ToolbarPanel;
 import com.editor.memento.AppStateMemento;
 import com.editor.memento.CompositeRegistryMemento; // Add import for Map
+import com.editor.memento.PrototypeRegistryMemento; // Added import
 import com.editor.memento.ShapeMemento;
 import com.editor.memento.ToolbarMemento;
 import com.editor.shapes.CompositeShapePrototypeRegistry;
+import com.editor.shapes.Shape; // Added import
 import com.editor.shapes.ShapeGroup; // Add import for ShapeGroup
+import com.editor.shapes.ShapePrototypeRegistry; // Added import
 
 /**
  * Command to load the application state (WhiteBoard and ToolbarPanel) from a
@@ -23,6 +26,7 @@ public class LoadStateCommand implements Command {
     private final WhiteBoard whiteBoard;
     private final ToolbarPanel toolbarPanel;
     private final CompositeShapePrototypeRegistry compositeRegistry;
+    private final ShapePrototypeRegistry prototypeRegistry; // Added standard registry
     private final String filePath;
 
     // Store the state *before* loading, in case we need to undo the load
@@ -34,13 +38,16 @@ public class LoadStateCommand implements Command {
      * @param whiteBoard        The whiteboard component
      * @param toolbarPanel      The toolbar panel component
      * @param compositeRegistry The composite shape prototype registry
+     * @param prototypeRegistry The standard shape prototype registry
      * @param filePath          The path to load the state from
      */
     public LoadStateCommand(WhiteBoard whiteBoard, ToolbarPanel toolbarPanel,
-            CompositeShapePrototypeRegistry compositeRegistry, String filePath) {
+            CompositeShapePrototypeRegistry compositeRegistry, ShapePrototypeRegistry prototypeRegistry,
+            String filePath) { // Added prototypeRegistry
         this.whiteBoard = whiteBoard;
         this.toolbarPanel = toolbarPanel;
         this.compositeRegistry = compositeRegistry;
+        this.prototypeRegistry = prototypeRegistry; // Added
         this.filePath = filePath;
     }
 
@@ -52,14 +59,12 @@ public class LoadStateCommand implements Command {
      * @param toolbarPanel The toolbar panel component
      * @param filePath     The path to load the state from
      */
-    public LoadStateCommand(WhiteBoard whiteBoard, ToolbarPanel toolbarPanel, String filePath) {
-        this.whiteBoard = whiteBoard;
-        this.toolbarPanel = toolbarPanel;
-        this.compositeRegistry = new CompositeShapePrototypeRegistry(); // Create empty registry
-        this.filePath = filePath;
-        System.out.println("[WARNING] Using deprecated LoadStateCommand constructor without composite registry.");
-        System.out.println("[WARNING] Composite shapes will not be loaded properly.");
-    }
+    // Note: The deprecated constructor below likely needs updating or removal
+    // if standard shapes added to the toolbar are expected to be saved/loaded via
+    // this path.
+    // For now, focusing on the main constructor used by AutoLoadCommand.
+    // public LoadStateCommand(WhiteBoard whiteBoard, ToolbarPanel toolbarPanel,
+    // String filePath) { ... }
 
     @Override
     public void execute() {
@@ -78,9 +83,13 @@ public class LoadStateCommand implements Command {
             // *** CORRECTED LINE: Use getPrototypesMap() ***
             CompositeRegistryMemento compositeRegistryBackup = new CompositeRegistryMemento(
                     compositeRegistry.getPrototypesMap());
+            // Backup standard registry too
+            PrototypeRegistryMemento prototypeRegistryBackup = new PrototypeRegistryMemento(
+                    prototypeRegistry.getPrototypesMap());
 
             System.out.println("[STATE DEBUG] Creating AppStateMemento with backup mementos...");
-            this.previousState = new AppStateMemento(whiteboardBackup, toolbarBackup, compositeRegistryBackup);
+            this.previousState = new AppStateMemento(whiteboardBackup, toolbarBackup, compositeRegistryBackup,
+                    prototypeRegistryBackup); // Add prototype backup
 
             // 2. Deserialize the AppStateMemento from the file
             System.out.println("[STATE DEBUG] Deserializing AppStateMemento from file...");
@@ -104,6 +113,12 @@ public class LoadStateCommand implements Command {
                 System.out.println("[STATE DEBUG] Getting CompositeRegistry state from loaded AppStateMemento...");
                 CompositeRegistryMemento loadedCompositeRegistryState = loadedState.getCompositeRegistryState();
 
+                System.out.println("[STATE DEBUG] Getting PrototypeRegistry state from loaded AppStateMemento...");
+                PrototypeRegistryMemento loadedPrototypeRegistryState = loadedState.getPrototypeRegistryState(); // Get
+                                                                                                                 // standard
+                                                                                                                 // registry
+                                                                                                                 // memento
+
                 // Restore WhiteBoard first
                 System.out.println("[STATE DEBUG] Restoring WhiteBoard from memento...");
                 whiteBoard.restoreFromMemento(loadedWhiteboardState);
@@ -121,6 +136,19 @@ public class LoadStateCommand implements Command {
                             + compositeRegistry.getPrototypesMap().keySet());
                 } else {
                     System.err.println("[LOG] LoadStateCommand - ERROR: Loaded CompositeRegistryMemento is null!");
+                }
+
+                // Restore Standard Registry *BEFORE* Toolbar
+                System.out.println("[STATE DEBUG] Restoring PrototypeRegistry from memento...");
+                if (loadedPrototypeRegistryState != null) {
+                    Map<String, Shape> standardKeysToRestore = loadedPrototypeRegistryState.getPrototypesState();
+                    System.out.println("[LOG] LoadStateCommand - Memento contains standard keys: "
+                            + standardKeysToRestore.keySet());
+                    prototypeRegistry.restoreFromMemento(loadedPrototypeRegistryState);
+                    System.out.println("[LOG] LoadStateCommand - prototypeRegistry instance keys AFTER restore: "
+                            + prototypeRegistry.getPrototypesMap().keySet());
+                } else {
+                    System.err.println("[LOG] LoadStateCommand - ERROR: Loaded PrototypeRegistryMemento is null!");
                 }
 
                 // Restore ToolbarPanel last

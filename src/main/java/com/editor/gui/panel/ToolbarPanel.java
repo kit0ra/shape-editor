@@ -439,15 +439,28 @@ public class ToolbarPanel extends CustomPanel {
                 }
             } else {
                 boolean hasKey = (prototypeRegistry != null && prototypeRegistry.hasPrototype(key));
-                System.out.println("[LOG] ToolbarPanel.restoreFromMemento() - Is standard key. Registry has key '" + key
-                        + "': " + hasKey);
+                System.out.println("[LOG] ToolbarPanel.restoreFromMemento() - Processing key: '" + key
+                        + "', Registry has key: " + hasKey);
+
                 if (hasKey) {
-                    String iconPath = "icons/" + key.toLowerCase() + ".png";
-                    newButton = createDraggableShapeButton(BUTTON_X_MARGIN, nextButtonY, iconPath, "Restored " + key,
-                            key);
+                    // Extract the base shape type from the key (e.g., "Rectangle_UUID" ->
+                    // "Rectangle")
+                    String baseShapeType = key;
+                    if (key.contains("_")) {
+                        baseShapeType = key.substring(0, key.indexOf("_"));
+                    }
+
+                    // Get the icon path based on the base shape type
+                    String iconPath = "icons/" + baseShapeType.toLowerCase() + ".png";
+                    System.out.println("[LOG] ToolbarPanel.restoreFromMemento() - Using icon path: " + iconPath
+                            + " for key: " + key);
+
+                    // Create the button with the original key to preserve custom properties
+                    newButton = createDraggableShapeButton(BUTTON_X_MARGIN, nextButtonY, iconPath,
+                            "Restored " + baseShapeType, key);
                 } else {
                     System.err.println(
-                            "[LOG] ToolbarPanel.restoreFromMemento() - Warning: Standard prototype not found for key: "
+                            "[LOG] ToolbarPanel.restoreFromMemento() - Warning: Prototype not found for key: "
                                     + key);
                 }
             }

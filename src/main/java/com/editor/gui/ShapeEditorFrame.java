@@ -173,8 +173,9 @@ public class ShapeEditorFrame extends Frame {
      * Sets up the auto-save manager and initializes auto-loading.
      */
     private void setupAutoSaveManager() {
-        // Create the auto-save manager
-        autoSaveManager = new AutoSaveManager(whiteBoard, toolbarPanel, compositeRegistry);
+        // Create the auto-save manager, passing both registries
+        autoSaveManager = new AutoSaveManager(whiteBoard, toolbarPanel, compositeRegistry, prototypeRegistry); // Added
+                                                                                                               // prototypeRegistry
 
         // Create a state change listener to trigger auto-save
         StateChangeListener stateChangeListener = new StateChangeListener() {
@@ -197,8 +198,10 @@ public class ShapeEditorFrame extends Frame {
         // Auto-load the previous state if it exists
         if (autoSaveManager.autoSaveExists()) {
             System.out.println("[LOG] ShapeEditorFrame - Found previous state, auto-loading...");
+            // We can now use the AutoLoadCommand with the updated constructor
             AutoLoadCommand autoLoadCommand = new AutoLoadCommand(
-                    whiteBoard, toolbarPanel, compositeRegistry, autoSaveManager);
+                    whiteBoard, toolbarPanel, compositeRegistry, prototypeRegistry,
+                    autoSaveManager);
             autoLoadCommand.execute();
         } else {
             System.out.println("[AutoSave] No previous state found, starting with empty state.");
@@ -403,10 +406,13 @@ public class ShapeEditorFrame extends Frame {
             System.out.println("[ShapeEditorFrame] Saving state to: " + filePath);
 
             // Create and execute the SaveStateCommand
-            // Note: We assume whiteBoard and toolbarPanel are correctly initialized
-            if (whiteBoard != null && toolbarPanel != null && compositeRegistry != null) {
+            // Note: We assume whiteBoard, toolbarPanel, and both registries are correctly
+            // initialized
+            if (whiteBoard != null && toolbarPanel != null && compositeRegistry != null && prototypeRegistry != null) { // Check
+                                                                                                                        // prototypeRegistry
+                // Create the SaveStateCommand with both registries
                 SaveStateCommand saveCommand = new SaveStateCommand(whiteBoard, toolbarPanel,
-                        compositeRegistry, filePath);
+                        compositeRegistry, prototypeRegistry, filePath); // Pass prototypeRegistry
                 // Execute directly, or use CommandHistory if undoing save makes sense
                 saveCommand.execute();
                 // whiteBoard.getCommandHistory().executeCommand(saveCommand); // If using
@@ -433,10 +439,11 @@ public class ShapeEditorFrame extends Frame {
             String filePath = fileToLoad.getAbsolutePath();
             System.out.println("[ShapeEditorFrame] Loading state from: " + filePath);
 
-            // Create and execute the LoadStateCommand
-            if (whiteBoard != null && toolbarPanel != null && compositeRegistry != null) {
+            // Create and execute the LoadStateCommand, passing both registries
+            if (whiteBoard != null && toolbarPanel != null && compositeRegistry != null && prototypeRegistry != null) { // Check
+                                                                                                                        // prototypeRegistry
                 LoadStateCommand loadCommand = new LoadStateCommand(whiteBoard, toolbarPanel,
-                        compositeRegistry, filePath);
+                        compositeRegistry, prototypeRegistry, filePath); // Pass prototypeRegistry
                 // Use CommandHistory to allow undoing the load operation
                 whiteBoard.getCommandHistory().executeCommand(loadCommand);
             } else {

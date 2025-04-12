@@ -5,7 +5,7 @@ import java.io.Serializable;
 /**
  * Represents the overall application state to be saved or loaded.
  * It holds mementos for different parts of the application, like the
- * WhiteBoard and the ToolbarPanel.
+ * WhiteBoard, ToolbarPanel, and both prototype registries.
  */
 public class AppStateMemento implements Serializable {
 
@@ -13,7 +13,8 @@ public class AppStateMemento implements Serializable {
 
     private final ShapeMemento whiteBoardState;
     private final ToolbarMemento toolbarState;
-    private final CompositeRegistryMemento compositeRegistryState; // Added for composite shapes
+    private final CompositeRegistryMemento compositeRegistryState;
+    private final PrototypeRegistryMemento prototypeRegistryState; // Added for standard shapes
 
     /**
      * Constructs an AppStateMemento.
@@ -22,14 +23,19 @@ public class AppStateMemento implements Serializable {
      * @param toolbarState           The memento for the ToolbarPanel's state.
      * @param compositeRegistryState The memento for the
      *                               CompositeShapePrototypeRegistry's state.
+     * @param prototypeRegistryState The memento for the ShapePrototypeRegistry's
+     *                               state.
      */
     public AppStateMemento(ShapeMemento whiteBoardState, ToolbarMemento toolbarState,
-            CompositeRegistryMemento compositeRegistryState) {
+            CompositeRegistryMemento compositeRegistryState, PrototypeRegistryMemento prototypeRegistryState) { // Added
+                                                                                                                // prototype
+                                                                                                                // state
         this.whiteBoardState = whiteBoardState;
         this.toolbarState = toolbarState;
         this.compositeRegistryState = compositeRegistryState;
+        this.prototypeRegistryState = prototypeRegistryState; // Added
         System.out.println(
-                "[STATE DEBUG] AppStateMemento created with WhiteBoard, Toolbar, and CompositeRegistry states.");
+                "[STATE DEBUG] AppStateMemento created with WhiteBoard, Toolbar, CompositeRegistry, and PrototypeRegistry states.");
     }
 
     /**
@@ -57,5 +63,14 @@ public class AppStateMemento implements Serializable {
      */
     public CompositeRegistryMemento getCompositeRegistryState() {
         return compositeRegistryState;
+    }
+
+    /**
+     * Gets the saved ShapePrototypeRegistry state.
+     *
+     * @return The PrototypeRegistryMemento for the ShapePrototypeRegistry.
+     */
+    public PrototypeRegistryMemento getPrototypeRegistryState() { // Added getter
+        return prototypeRegistryState;
     }
 }
