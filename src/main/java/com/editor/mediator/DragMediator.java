@@ -30,11 +30,8 @@ public interface DragMediator {
     void registerWhiteBoard(WhiteBoard whiteBoard);
 
     /**
-     * Start a drag operation from a panel
+     * Start a drag operation
      *
-     * @param panel           The panel where the drag started
-     * @param draggable       The draggable object being dragged
-     * @param x               The x-coordinate where the drag started
      * @param sourceComponent The component where the drag started (e.g.,
      *                        CustomPanel or WhiteBoard)
      * @param draggable       The draggable object being dragged

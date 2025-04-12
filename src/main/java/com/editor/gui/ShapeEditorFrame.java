@@ -5,9 +5,16 @@ import java.awt.Frame;
 import java.awt.Image;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
 
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
+import com.editor.commands.LoadStateCommand;
+import com.editor.commands.SaveStateCommand;
 import com.editor.gui.button.CustomButton;
 import com.editor.gui.button.IButton;
+import com.editor.gui.button.decorators.ButtonDecorator; // Ensure this import is present
 import com.editor.gui.button.decorators.ImageDecorator;
 import com.editor.gui.button.decorators.RedoButtonDecorator;
 import com.editor.gui.button.decorators.ShapeCreationButtonDecorator;
@@ -22,7 +29,7 @@ import com.editor.mediator.ShapeDragMediator;
 import com.editor.shapes.CompositeShapePrototypeRegistry;
 import com.editor.shapes.Rectangle;
 import com.editor.shapes.RegularPolygon;
-import com.editor.shapes.ShapePrototypeRegistry; // Added
+import com.editor.shapes.ShapePrototypeRegistry;
 import com.editor.utils.ImageLoader;
 
 public class ShapeEditorFrame extends Frame {
@@ -198,26 +205,48 @@ public class ShapeEditorFrame extends Frame {
     private void setupHorizontalButtons() {
         int x = HORIZONTAL_INITIAL_OFFSET;
 
-        // Create save button (icon only)
-        IButton saveButton = createIconButton(x, 5, "icons/save.png", "Save the current drawing");
-        horizontalPanel.addButton(saveButton);
+        // Create save button (icon only) - Base button, no action yet
+        IButton saveButtonBase = createIconButton(x, 5, "icons/save.png", "Save the current drawing");
+        // Decorate save button to add save action
+        IButton saveButton = new ButtonDecorator(saveButtonBase) {
+            @Override
+            public void onClick() {
+                super.onClick(); // Call decorated button's onClick (if any)
+                handleSaveState(); // Add save action
+            }
+            // Assuming ButtonDecorator delegates other methods
+        };
+        horizontalPanel.addButton(saveButton); // Add the final decorated button
 
-        // Create load button
-        x += saveButton.getWidth() + HORIZONTAL_BUTTON_SPACING;
-        IButton loadButton = createIconButton(x, 5, "icons/load.png", "Load a saved drawing");
-        horizontalPanel.addButton(loadButton);
+        // Create load button - Base button, no action yet
+        x += saveButton.getWidth() + HORIZONTAL_BUTTON_SPACING; // Use final button width for spacing
+        IButton loadButtonBase = createIconButton(x, 5, "icons/load.png", "Load a saved drawing");
+        // Decorate load button to add load action
+        IButton loadButton = new ButtonDecorator(loadButtonBase) {
+            @Override
+            public void onClick() {
+                super.onClick(); // Call decorated button's onClick (if any)
+                handleLoadState(); // Add load action
+            }
+            // Assuming ButtonDecorator delegates other methods
+        };
+        horizontalPanel.addButton(loadButton); // Add the final decorated button
 
         // Create undo button
         x += loadButton.getWidth() + HORIZONTAL_BUTTON_SPACING;
         IButton undoButton = createIconButton(x, 5, "icons/undo.png", "Undo the last action");
-        undoButton = new UndoButtonDecorator(undoButton, whiteBoard);
+        undoButton = new UndoButtonDecorator(undoButton, whiteBoard); // Decorate with Undo functionality
         horizontalPanel.addButton(undoButton);
 
         // Create redo button
         x += undoButton.getWidth() + HORIZONTAL_BUTTON_SPACING;
         IButton redoButton = createIconButton(x, 5, "icons/redo.png", "Redo the last undone action");
-        redoButton = new RedoButtonDecorator(redoButton, whiteBoard);
+        redoButton = new RedoButtonDecorator(redoButton, whiteBoard); // Decorate with Redo functionality
         horizontalPanel.addButton(redoButton);
+
+        // Note: The previous Save/Load buttons were replaced above with functional
+        // ones.
+        // If you intended to keep separate Save/Load State buttons, adjust accordingly.
     }
 
     /**
@@ -294,6 +323,72 @@ public class ShapeEditorFrame extends Frame {
     public static void main(String[] args) {
         ShapeEditorFrame frame = new ShapeEditorFrame();
         frame.launch();
+    }
+
+    // --- Save/Load Handling Methods ---
+
+    private void handleSaveState() {
+        System.out.println("[ShapeEditorFrame] Save button clicked.");
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Save Application State");
+        fileChooser.setFileFilter(new FileNameExtensionFilter("Shape Editor State (*.ser)", "ser"));
+        fileChooser.setSelectedFile(new File("editor_state.ser")); // Default filename
+
+        int userSelection = fileChooser.showSaveDialog(this);
+
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            File fileToSave = fileChooser.getSelectedFile();
+            // Ensure the file has the .ser extension
+            String filePath = fileToSave.getAbsolutePath();
+            if (!filePath.toLowerCase().endsWith(".ser")) {
+                filePath += ".ser";
+            }
+            System.out.println("[ShapeEditorFrame] Saving state to: " + filePath);
+
+            // Create and execute the SaveStateCommand
+            // Note: We assume whiteBoard and toolbarPanel are correctly initialized
+            if (whiteBoard != null && toolbarPanel != null && compositeRegistry != null) {
+                SaveStateCommand saveCommand = new SaveStateCommand(whiteBoard, toolbarPanel,
+                        compositeRegistry, filePath);
+                // Execute directly, or use CommandHistory if undoing save makes sense
+                saveCommand.execute();
+                // whiteBoard.getCommandHistory().executeCommand(saveCommand); // If using
+                // history
+            } else {
+                System.err.println(
+                        "[ShapeEditorFrame] Cannot save: WhiteBoard, ToolbarPanel, or CompositeRegistry is null.");
+            }
+        } else {
+            System.out.println("[ShapeEditorFrame] Save command cancelled by user.");
+        }
+    }
+
+    private void handleLoadState() {
+        System.out.println("[ShapeEditorFrame] Load button clicked.");
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Load Application State");
+        fileChooser.setFileFilter(new FileNameExtensionFilter("Shape Editor State (*.ser)", "ser"));
+
+        int userSelection = fileChooser.showOpenDialog(this);
+
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            File fileToLoad = fileChooser.getSelectedFile();
+            String filePath = fileToLoad.getAbsolutePath();
+            System.out.println("[ShapeEditorFrame] Loading state from: " + filePath);
+
+            // Create and execute the LoadStateCommand
+            if (whiteBoard != null && toolbarPanel != null && compositeRegistry != null) {
+                LoadStateCommand loadCommand = new LoadStateCommand(whiteBoard, toolbarPanel,
+                        compositeRegistry, filePath);
+                // Use CommandHistory to allow undoing the load operation
+                whiteBoard.getCommandHistory().executeCommand(loadCommand);
+            } else {
+                System.err.println(
+                        "[ShapeEditorFrame] Cannot load: WhiteBoard, ToolbarPanel, or CompositeRegistry is null.");
+            }
+        } else {
+            System.out.println("[ShapeEditorFrame] Load command cancelled by user.");
+        }
     }
 
 }

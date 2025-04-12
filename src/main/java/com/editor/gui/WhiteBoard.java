@@ -40,6 +40,7 @@ import com.editor.commands.MoveShapesCommand;
 import com.editor.commands.UngroupShapesCommand;
 import com.editor.drawing.AWTDrawing;
 import com.editor.drawing.Drawer;
+import com.editor.memento.ShapeMemento; // Added Memento import
 import com.editor.shapes.Rectangle;
 import com.editor.shapes.Shape;
 import com.editor.shapes.ShapeGroup;
@@ -1179,5 +1180,39 @@ public class WhiteBoard extends Canvas implements Draggable {
             offscreenGraphics = null;
         }
         offscreenBuffer = null;
+    }
+
+    // --- Memento Pattern Implementation ---
+
+    /**
+     * Creates a memento containing the current state of the whiteboard (shapes).
+     * 
+     * @return A ShapeMemento object.
+     */
+    public ShapeMemento createMemento() {
+        System.out.println("[WhiteBoard] Creating Memento...");
+        // Pass the current list of shapes to the memento constructor
+        return new ShapeMemento(new ArrayList<>(this.shapes)); // Pass a copy
+    }
+
+    /**
+     * Restores the whiteboard state from a memento.
+     * 
+     * @param memento The memento object containing the state to restore.
+     */
+    public void restoreFromMemento(ShapeMemento memento) {
+        if (memento == null) {
+            System.err.println("[WhiteBoard] Cannot restore from null memento.");
+            return;
+        }
+        System.out.println("[WhiteBoard] Restoring state from Memento...");
+        // Get the shapes from the memento (these are already clones)
+        this.shapes = memento.getShapesState();
+        // Clear selection and command history as the state is completely replaced
+        this.selectedShapes.clear();
+        this.activeShape = null;
+        this.commandHistory.clear(); // Clear history after loading state
+        System.out.println("[WhiteBoard] Memento restore complete. Shape count: " + this.shapes.size());
+        repaint(); // Repaint to show the restored shapes
     }
 }

@@ -1,9 +1,11 @@
 package com.editor.drawing;
 
+import java.io.Serializable;
+
 import com.editor.shapes.Rectangle;
 import com.editor.shapes.RegularPolygon;
 
-public interface Drawer {
+public interface Drawer extends Serializable {
     /**
      * Draws a rectangle with the specified parameters
      */

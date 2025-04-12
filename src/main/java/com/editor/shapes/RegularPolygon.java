@@ -9,19 +9,20 @@ import com.editor.drawing.Drawer;
  * Represents a regular polygon with a specified number of sides and radius.
  */
 public class RegularPolygon implements Shape {
+    private static final long serialVersionUID = 1L;
     private int x, y;
     private int radius;
     private int numberOfSides;
     private boolean selected;
-    private Color fillColor = Color.GREEN;  // Default fill color for polygons
-    private Color borderColor = Color.BLACK;  // Default border color
+    private Color fillColor = Color.GREEN; // Default fill color for polygons
+    private Color borderColor = Color.BLACK; // Default border color
 
     /**
      * Creates a new regular polygon.
      *
-     * @param x The x-coordinate of the center
-     * @param y The y-coordinate of the center
-     * @param radius The radius of the polygon
+     * @param x             The x-coordinate of the center
+     * @param y             The y-coordinate of the center
+     * @param radius        The radius of the polygon
      * @param numberOfSides The number of sides
      */
     public RegularPolygon(int x, int y, int radius, int numberOfSides) {

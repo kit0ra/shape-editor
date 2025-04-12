@@ -122,8 +122,8 @@ public class ShapeDragMediator implements DragMediator {
         if (toolbarPanel != null && screenPoint != null) {
             try {
                 // Check if the point is over the toolbar panel
-                boolean isOverToolbar = toolbarPanel.isPointOverToolbar(screenPoint);
-                toolbarPanel.setShapeOverToolbar(isOverToolbar);
+                boolean isOverToolbar = toolbarPanel.isPointOverToolbar(screenPoint); // Reverted to direct call
+                toolbarPanel.setShapeOverToolbar(isOverToolbar); // Let ToolbarPanel manage its visual state
                 // Update whiteboard state if dragging from whiteboard
                 if (sourceComponentForDrag == whiteBoard) {
                     whiteBoard.setDraggingToToolbar(isOverToolbar);
@@ -220,7 +220,8 @@ public class ShapeDragMediator implements DragMediator {
         // Check if the drag ended over the toolbar panel
         if (toolbarPanel != null && screenPoint != null && !deletedShape) {
             try {
-                if (toolbarPanel.isPointOverToolbar(screenPoint)) {
+                // Check if the point is over the toolbar panel
+                if (toolbarPanel.isPointOverToolbar(screenPoint)) { // Reverted to direct call
                     debugLog("Ending drag over toolbar panel - adding shape(s) to toolbar");
                     // If dragging from whiteboard, let whiteboard handle adding via its endDrag
                     if (sourceComponentForDrag == whiteBoard) {
@@ -445,7 +446,7 @@ public class ShapeDragMediator implements DragMediator {
             debugLog("ERROR: Cannot check if point is over toolbar - ToolbarPanel not registered");
             return false;
         }
-
+        // Reverted bypass and explicit cast
         boolean isOverToolbar = toolbarPanel.isPointOverToolbar(screenPoint);
         // Visual state update is handled within the toolbar panel itself now
         // if (isOverToolbar) {

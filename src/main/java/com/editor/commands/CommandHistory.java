@@ -27,4 +27,14 @@ public class CommandHistory {
             history.push(command);
         }
     }
+
+    /**
+     * Clears both the undo and redo history stacks.
+     * Useful when loading a new state.
+     */
+    public void clear() {
+        history.clear();
+        redoStack.clear();
+        System.out.println("[CommandHistory] History cleared.");
+    }
 }

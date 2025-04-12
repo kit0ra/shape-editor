@@ -1,5 +1,6 @@
 package com.editor.shapes;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -7,7 +8,8 @@ import java.util.Map;
  * Registry for ShapeGroup prototypes.
  * Stores prototype instances (groups) and creates new groups by cloning them.
  */
-public class CompositeShapePrototypeRegistry {
+public class CompositeShapePrototypeRegistry implements Serializable {
+    private static final long serialVersionUID = 1L;
     private final Map<String, ShapeGroup> groupPrototypes = new HashMap<>();
 
     /**

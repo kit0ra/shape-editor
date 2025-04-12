@@ -1,9 +1,11 @@
 package com.editor.shapes;
 
 import java.awt.Color;
+
 import com.editor.drawing.Drawer;
 
 public class Rectangle implements Shape {
+    private static final long serialVersionUID = 1L;
     private int x, y, width, height;
     private boolean selected;
     private Color fillColor = Color.BLUE; // Default fill color for rectangles

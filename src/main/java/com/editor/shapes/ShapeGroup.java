@@ -10,6 +10,7 @@ import com.editor.drawing.Drawer;
  * Represents a group of shapes that can be manipulated as a single entity.
  */
 public class ShapeGroup implements Shape {
+    private static final long serialVersionUID = 1L;
     private List<Shape> shapes = new ArrayList<>();
     private boolean selected;
     private Color borderColor = Color.BLACK;
@@ -137,16 +138,23 @@ public class ShapeGroup implements Shape {
 
     @Override
     public Shape clone() {
-        ShapeGroup clone = new ShapeGroup();
-        clone.selected = this.selected;
-        clone.borderColor = this.borderColor;
+        try {
+            // Call Object.clone() to create the initial shallow copy
+            ShapeGroup clone = (ShapeGroup) super.clone();
 
-        // Clone all shapes in the group
-        for (Shape shape : shapes) {
-            clone.addShape(shape.clone());
+            // Initialize a new list for the cloned shapes
+            clone.shapes = new ArrayList<>();
+
+            // Deep clone the shapes in the group
+            for (Shape shape : shapes) {
+                clone.addShape(shape.clone());
+            }
+
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            // This should never happen since we implement Cloneable
+            throw new InternalError("Could not clone ShapeGroup", e);
         }
-
-        return clone;
     }
 
     /**

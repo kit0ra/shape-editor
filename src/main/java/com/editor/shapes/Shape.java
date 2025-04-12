@@ -1,8 +1,10 @@
 package com.editor.shapes;
 
+import java.io.Serializable;
+
 import com.editor.drawing.Drawer;
 
-public interface Shape extends Cloneable {
+public interface Shape extends Cloneable, Serializable {
     void draw(Drawer drawer);
 
     void move(int dx, int dy); // Moves the shape by a delta
