@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Polygon;
 
+import com.editor.shapes.Circle;
 import com.editor.shapes.Rectangle;
 import com.editor.shapes.RegularPolygon;
 
@@ -37,13 +38,31 @@ public class AWTDrawing implements Drawer {
                 graphics.rotate(Math.toRadians(rectangle.getRotation()), centerX, centerY);
             }
 
-            // Fill the rectangle
-            graphics.setColor(rectangle.getFillColor());
-            graphics.fillRect(rectangle.getX(), rectangle.getY(), rectangle.getWidth(), rectangle.getHeight());
+            int borderRadius = rectangle.getBorderRadius();
+            int x = rectangle.getX();
+            int y = rectangle.getY();
+            int width = rectangle.getWidth();
+            int height = rectangle.getHeight();
 
-            // Draw the outline
-            graphics.setColor(rectangle.getBorderColor());
-            graphics.drawRect(rectangle.getX(), rectangle.getY(), rectangle.getWidth(), rectangle.getHeight());
+            // If border radius is 0, draw a regular rectangle
+            if (borderRadius == 0) {
+                // Fill the rectangle
+                graphics.setColor(rectangle.getFillColor());
+                graphics.fillRect(x, y, width, height);
+
+                // Draw the outline
+                graphics.setColor(rectangle.getBorderColor());
+                graphics.drawRect(x, y, width, height);
+            } else {
+                // Draw a rounded rectangle with the specified border radius
+                // Fill the rounded rectangle
+                graphics.setColor(rectangle.getFillColor());
+                graphics.fillRoundRect(x, y, width, height, borderRadius, borderRadius);
+
+                // Draw the outline
+                graphics.setColor(rectangle.getBorderColor());
+                graphics.drawRoundRect(x, y, width, height, borderRadius, borderRadius);
+            }
         } finally {
             // Restore the original transform and color
             graphics.setTransform(oldTransform);
@@ -96,6 +115,48 @@ public class AWTDrawing implements Drawer {
             // Draw the outline
             graphics.setColor(regularPolygon.getBorderColor());
             graphics.drawPolygon(awtPolygon);
+        } finally {
+            // Restore the original transform and color
+            graphics.setTransform(oldTransform);
+            graphics.setColor(originalColor);
+        }
+    }
+
+    @Override
+    public void drawCircle(Circle circle) {
+        // Save the current color
+        Color originalColor = graphics.getColor();
+        java.awt.geom.AffineTransform oldTransform = graphics.getTransform();
+
+        try {
+            // Calculate the top-left corner of the bounding box
+            int x = circle.getX() - circle.getRadius();
+            int y = circle.getY() - circle.getRadius();
+            int diameter = circle.getRadius() * 2;
+
+            // Fill the circle
+            graphics.setColor(circle.getFillColor());
+            graphics.fillOval(x, y, diameter, diameter);
+
+            // Draw the outline
+            graphics.setColor(circle.getBorderColor());
+            graphics.drawOval(x, y, diameter, diameter);
+
+            // Draw selection indicator if selected
+            if (circle.isSelected()) {
+                graphics.setColor(Color.RED);
+                int selectionMarkerSize = 6;
+
+                // Draw selection markers at the cardinal points
+                graphics.fillRect(circle.getX() - selectionMarkerSize / 2, y - selectionMarkerSize / 2,
+                        selectionMarkerSize, selectionMarkerSize); // Top
+                graphics.fillRect(circle.getX() - selectionMarkerSize / 2, y + diameter - selectionMarkerSize / 2,
+                        selectionMarkerSize, selectionMarkerSize); // Bottom
+                graphics.fillRect(x - selectionMarkerSize / 2, circle.getY() - selectionMarkerSize / 2,
+                        selectionMarkerSize, selectionMarkerSize); // Left
+                graphics.fillRect(x + diameter - selectionMarkerSize / 2, circle.getY() - selectionMarkerSize / 2,
+                        selectionMarkerSize, selectionMarkerSize); // Right
+            }
         } finally {
             // Restore the original transform and color
             graphics.setTransform(oldTransform);

@@ -11,6 +11,7 @@ public class Rectangle implements Shape {
     private Color fillColor = Color.BLUE; // Default fill color for rectangles
     private Color borderColor = Color.BLACK; // Default border color
     private double rotation = 0.0; // Rotation in degrees
+    private int borderRadius = 0; // Border radius for rounded corners
 
     public Rectangle(int x, int y, int width, int height) {
         this.x = x;
@@ -65,6 +66,7 @@ public class Rectangle implements Shape {
         clone.setFillColor(fillColor);
         clone.setBorderColor(borderColor);
         clone.setRotation(rotation);
+        clone.setBorderRadius(borderRadius);
         return clone;
     }
 
@@ -138,5 +140,23 @@ public class Rectangle implements Shape {
 
     public int getHeight() {
         return height;
+    }
+
+    /**
+     * Gets the border radius for this rectangle
+     *
+     * @return The current border radius
+     */
+    public int getBorderRadius() {
+        return borderRadius;
+    }
+
+    /**
+     * Sets the border radius for this rectangle
+     *
+     * @param radius The new border radius
+     */
+    public void setBorderRadius(int radius) {
+        this.borderRadius = radius;
     }
 }

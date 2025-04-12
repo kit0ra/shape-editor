@@ -106,12 +106,13 @@ public class ShapePrototypeRegistry {
         System.out.println("[ShapePrototypeRegistry] Restoring state from Memento...");
         // Get the map directly from the memento (it already contains clones)
         Map<String, Shape> restoredPrototypes = memento.getPrototypesState();
-        // Clear current prototypes
-        this.prototypes.clear();
-        // Add prototypes from the restored map
+        // Instead of clearing, merge the restored prototypes.
+        // This ensures default prototypes registered at startup are kept if not present
+        // in the memento.
+        // Prototypes from the memento will overwrite defaults if keys match.
         this.prototypes.putAll(restoredPrototypes);
         System.out.println(
-                "[LOG] ShapePrototypeRegistry.restoreFromMemento() - Restore complete. Prototype count: "
+                "[LOG] ShapePrototypeRegistry.restoreFromMemento() - Merged restore complete. Prototype count: "
                         + this.prototypes.size());
         // Log the keys restored for debugging
         System.out.println("[LOG] ShapePrototypeRegistry.restoreFromMemento() - Final keys in registry: "

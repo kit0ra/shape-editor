@@ -2,6 +2,7 @@ package com.editor.drawing;
 
 import java.io.Serializable;
 
+import com.editor.shapes.Circle;
 import com.editor.shapes.Rectangle;
 import com.editor.shapes.RegularPolygon;
 
@@ -29,4 +30,11 @@ public interface Drawer extends Serializable {
      * @param regularPolygon The regular polygon to draw
      */
     void drawRegularPolygon(RegularPolygon regularPolygon);
+
+    /**
+     * Draws a circle object with fill and border colors
+     *
+     * @param circle The circle to draw
+     */
+    void drawCircle(Circle circle);
 }

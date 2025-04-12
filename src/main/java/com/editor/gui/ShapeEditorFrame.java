@@ -27,6 +27,7 @@ import com.editor.gui.panel.TrashPanel;
 import com.editor.gui.panel.VerticalPanel;
 import com.editor.mediator.DragMediator;
 import com.editor.mediator.ShapeDragMediator; // Ensure this import is present
+import com.editor.shapes.Circle;
 import com.editor.shapes.CompositeShapePrototypeRegistry;
 import com.editor.shapes.Rectangle;
 import com.editor.shapes.RegularPolygon;
@@ -100,7 +101,8 @@ public class ShapeEditorFrame extends Frame {
                 "icons/undo.png",
                 "icons/redo.png",
                 "icons/rectangle.png",
-                "icons/polygon.png");
+                "icons/polygon.png",
+                "icons/circle.png");
 
         // Initialize the shape prototype registries
         initializePrototypeRegistry();
@@ -240,6 +242,12 @@ public class ShapeEditorFrame extends Frame {
         polygonPrototype.setBorderColor(Color.BLACK);
         prototypeRegistry.registerPrototype("Polygon", polygonPrototype);
 
+        // Register a circle prototype
+        Circle circlePrototype = new Circle(0, 0, 40);
+        circlePrototype.setFillColor(Color.RED);
+        circlePrototype.setBorderColor(Color.BLACK);
+        prototypeRegistry.registerPrototype("Circle", circlePrototype);
+
         // Set the prototype registry in the whiteboard
         whiteBoard.setPrototypeRegistry(prototypeRegistry);
     }
@@ -330,6 +338,16 @@ public class ShapeEditorFrame extends Frame {
                 "Draw a polygon",
                 "Polygon");
         verticalPanel.addButton(polygonButton);
+
+        // Create circle button (icon only with drag capability) - positioned
+        // horizontally
+        x += polygonButton.getWidth() + HORIZONTAL_BUTTON_SPACING;
+        IButton circleButton = createDraggableShapeButton(
+                x, y,
+                "icons/circle.png",
+                "Draw a circle",
+                "Circle");
+        verticalPanel.addButton(circleButton);
     }
 
     /**

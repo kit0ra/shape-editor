@@ -38,7 +38,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JColorChooser;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JSlider;
+import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 
 import com.editor.commands.CommandHistory;
 import com.editor.commands.CreateShapeCommand;
@@ -216,141 +231,153 @@ public class WhiteBoard extends Canvas implements Draggable {
             return; // Aucune forme sélectionnée
         }
 
-        // Créer une boîte de dialogue pour éditer les propriétés des formes
-        // sélectionnées
-        Frame parentFrame = (Frame) SwingUtilities.getWindowAncestor(this);
-        Dialog editDialog = new Dialog(parentFrame, "Edit Shape", true);
-        editDialog.setLayout(new GridLayout(4, 2, 10, 10));
-        editDialog.setSize(400, 300);
-
         // Get the current properties from the first selected shape
         Shape firstShape = selectedShapes.get(0);
         Color currentBorderColor = getBorderColor(firstShape);
         Color currentFillColor = getFillColor(firstShape);
         double currentRotation = getRotation(firstShape);
 
-        // Ajouter des contrôles pour éditer la couleur de bordure
-        editDialog.add(new Label("Border Color:"));
-        Panel borderColorPanel = new Panel(new BorderLayout());
-        Button borderColorButton = new Button("Choose Border Color");
-        final Color[] selectedBorderColor = { currentBorderColor }; // Initialize with current border color
+        // Get border radius if it's a rectangle
+        int currentBorderRadius = 0;
+        boolean isRectangle = firstShape instanceof Rectangle;
+        if (isRectangle) {
+            currentBorderRadius = ((Rectangle) firstShape).getBorderRadius();
+        }
+
+        // Create a Swing dialog for editing properties
+        Frame parentFrame = (Frame) SwingUtilities.getWindowAncestor(this);
+        final JDialog editDialog = new JDialog(parentFrame, "Edit Shape", true);
+        editDialog.setLayout(new BorderLayout());
+
+        // Create a panel for the form fields
+        JPanel formPanel = new JPanel(new GridBagLayout());
+        formPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.insets = new Insets(5, 5, 5, 5);
+
+        // Border Color
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        formPanel.add(new JLabel("Border Color:"), gbc);
+
+        final JButton borderColorButton = new JButton();
         borderColorButton.setBackground(currentBorderColor);
-        borderColorButton.setForeground(getContrastColor(currentBorderColor));
+        borderColorButton.setPreferredSize(new Dimension(100, 25));
+        final Color[] selectedBorderColor = { currentBorderColor };
 
         borderColorButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Create a color dialog
-                Dialog colorDialog = new Dialog(editDialog, "Choose Border Color", true);
-                colorDialog.setLayout(new GridLayout(0, 5, 5, 5));
-                colorDialog.setSize(500, 400);
-
-                // Add a wide range of colors
-                addColorButton(colorDialog, Color.BLACK, selectedBorderColor);
-                addColorButton(colorDialog, Color.DARK_GRAY, selectedBorderColor);
-                addColorButton(colorDialog, Color.GRAY, selectedBorderColor);
-                addColorButton(colorDialog, Color.LIGHT_GRAY, selectedBorderColor);
-                addColorButton(colorDialog, Color.WHITE, selectedBorderColor);
-                addColorButton(colorDialog, new Color(128, 0, 0), selectedBorderColor); // Maroon
-                addColorButton(colorDialog, Color.RED, selectedBorderColor);
-                addColorButton(colorDialog, new Color(255, 127, 127), selectedBorderColor); // Light Red
-                addColorButton(colorDialog, new Color(255, 0, 127), selectedBorderColor); // Pink
-                addColorButton(colorDialog, new Color(255, 192, 203), selectedBorderColor); // Pink
-                addColorButton(colorDialog, new Color(0, 128, 0), selectedBorderColor); // Dark Green
-                addColorButton(colorDialog, Color.GREEN, selectedBorderColor);
-                addColorButton(colorDialog, new Color(127, 255, 127), selectedBorderColor); // Light Green
-                addColorButton(colorDialog, new Color(0, 0, 128), selectedBorderColor); // Navy
-                addColorButton(colorDialog, Color.BLUE, selectedBorderColor);
-                addColorButton(colorDialog, new Color(127, 127, 255), selectedBorderColor); // Light Blue
-                addColorButton(colorDialog, new Color(0, 128, 128), selectedBorderColor); // Teal
-                addColorButton(colorDialog, Color.CYAN, selectedBorderColor);
-                addColorButton(colorDialog, new Color(128, 0, 128), selectedBorderColor); // Purple
-                addColorButton(colorDialog, Color.MAGENTA, selectedBorderColor);
-                addColorButton(colorDialog, new Color(128, 128, 0), selectedBorderColor); // Olive
-                addColorButton(colorDialog, Color.YELLOW, selectedBorderColor);
-                addColorButton(colorDialog, new Color(255, 215, 0), selectedBorderColor); // Gold
-                addColorButton(colorDialog, new Color(255, 165, 0), selectedBorderColor); // Orange
-                addColorButton(colorDialog, new Color(210, 105, 30), selectedBorderColor); // Chocolate
-
-                // Show the color dialog
-                colorDialog.setLocationRelativeTo(editDialog);
-                colorDialog.setVisible(true);
-
-                // Update the border color button background
-                borderColorButton.setBackground(selectedBorderColor[0]);
-                borderColorButton.setForeground(getContrastColor(selectedBorderColor[0]));
+                Color newColor = JColorChooser.showDialog(editDialog, "Choose Border Color", selectedBorderColor[0]);
+                if (newColor != null) {
+                    selectedBorderColor[0] = newColor;
+                    borderColorButton.setBackground(newColor);
+                }
             }
         });
 
-        borderColorPanel.add(borderColorButton, BorderLayout.CENTER);
-        editDialog.add(borderColorPanel);
+        gbc.gridx = 1;
+        formPanel.add(borderColorButton, gbc);
 
-        // Ajouter des contrôles pour éditer la couleur de remplissage
-        editDialog.add(new Label("Fill Color:"));
-        Panel fillColorPanel = new Panel(new BorderLayout());
-        Button fillColorButton = new Button("Choose Fill Color");
-        final Color[] selectedFillColor = { currentFillColor }; // Initialize with current fill color
+        // Fill Color
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        formPanel.add(new JLabel("Fill Color:"), gbc);
+
+        final JButton fillColorButton = new JButton();
         fillColorButton.setBackground(currentFillColor);
-        fillColorButton.setForeground(getContrastColor(currentFillColor));
+        fillColorButton.setPreferredSize(new Dimension(100, 25));
+        final Color[] selectedFillColor = { currentFillColor };
 
         fillColorButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Create a color dialog
-                Dialog colorDialog = new Dialog(editDialog, "Choose Fill Color", true);
-                colorDialog.setLayout(new GridLayout(0, 5, 5, 5));
-                colorDialog.setSize(500, 400);
-
-                // Add a wide range of colors
-                addColorButton(colorDialog, Color.BLACK, selectedFillColor);
-                addColorButton(colorDialog, Color.DARK_GRAY, selectedFillColor);
-                addColorButton(colorDialog, Color.GRAY, selectedFillColor);
-                addColorButton(colorDialog, Color.LIGHT_GRAY, selectedFillColor);
-                addColorButton(colorDialog, Color.WHITE, selectedFillColor);
-                addColorButton(colorDialog, new Color(128, 0, 0), selectedFillColor); // Maroon
-                addColorButton(colorDialog, Color.RED, selectedFillColor);
-                addColorButton(colorDialog, new Color(255, 127, 127), selectedFillColor); // Light Red
-                addColorButton(colorDialog, new Color(255, 0, 127), selectedFillColor); // Pink
-                addColorButton(colorDialog, new Color(255, 192, 203), selectedFillColor); // Pink
-                addColorButton(colorDialog, new Color(0, 128, 0), selectedFillColor); // Dark Green
-                addColorButton(colorDialog, Color.GREEN, selectedFillColor);
-                addColorButton(colorDialog, new Color(127, 255, 127), selectedFillColor); // Light Green
-                addColorButton(colorDialog, new Color(0, 0, 128), selectedFillColor); // Navy
-                addColorButton(colorDialog, Color.BLUE, selectedFillColor);
-                addColorButton(colorDialog, new Color(127, 127, 255), selectedFillColor); // Light Blue
-                addColorButton(colorDialog, new Color(0, 128, 128), selectedFillColor); // Teal
-                addColorButton(colorDialog, Color.CYAN, selectedFillColor);
-                addColorButton(colorDialog, new Color(128, 0, 128), selectedFillColor); // Purple
-                addColorButton(colorDialog, Color.MAGENTA, selectedFillColor);
-                addColorButton(colorDialog, new Color(128, 128, 0), selectedFillColor); // Olive
-                addColorButton(colorDialog, Color.YELLOW, selectedFillColor);
-                addColorButton(colorDialog, new Color(255, 215, 0), selectedFillColor); // Gold
-                addColorButton(colorDialog, new Color(255, 165, 0), selectedFillColor); // Orange
-                addColorButton(colorDialog, new Color(210, 105, 30), selectedFillColor); // Chocolate
-
-                // Show the color dialog
-                colorDialog.setLocationRelativeTo(editDialog);
-                colorDialog.setVisible(true);
-
-                // Update the fill color button background
-                fillColorButton.setBackground(selectedFillColor[0]);
-                fillColorButton.setForeground(getContrastColor(selectedFillColor[0]));
+                Color newColor = JColorChooser.showDialog(editDialog, "Choose Fill Color", selectedFillColor[0]);
+                if (newColor != null) {
+                    selectedFillColor[0] = newColor;
+                    fillColorButton.setBackground(newColor);
+                }
             }
         });
 
-        fillColorPanel.add(fillColorButton, BorderLayout.CENTER);
-        editDialog.add(fillColorPanel);
+        gbc.gridx = 1;
+        formPanel.add(fillColorButton, gbc);
 
-        // Ajouter des contrôles pour éditer la rotation
-        editDialog.add(new Label("Rotation (degrees):"));
-        Panel rotationPanel = new Panel(new BorderLayout());
-        TextField rotationField = new TextField(String.valueOf(currentRotation), 5);
-        rotationPanel.add(rotationField, BorderLayout.CENTER);
-        editDialog.add(rotationPanel);
+        // Rotation
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        formPanel.add(new JLabel("Rotation (degrees):"), gbc);
 
-        // Ajouter des boutons OK et Annuler
-        Button okButton = new Button("OK");
-        Button cancelButton = new Button("Cancel");
+        final JTextField rotationField = new JTextField(String.valueOf(currentRotation));
+        gbc.gridx = 1;
+        formPanel.add(rotationField, gbc);
+
+        // Border Radius (only for rectangles)
+        final JSlider borderRadiusSlider;
+        final JLabel borderRadiusValueLabel;
+
+        if (isRectangle) {
+            // Add a label for the radius control
+            gbc.gridx = 0;
+            gbc.gridy = 3;
+            formPanel.add(new JLabel("Border Radius:"), gbc);
+
+            // Create a simpler slider with better visibility
+            borderRadiusSlider = new JSlider(JSlider.HORIZONTAL, 0, 50, currentBorderRadius);
+
+            // Set slider properties for better visibility
+            borderRadiusSlider.setMajorTickSpacing(10);
+            borderRadiusSlider.setMinorTickSpacing(5);
+            borderRadiusSlider.setPaintTicks(true);
+            borderRadiusSlider.setPaintLabels(true);
+            borderRadiusSlider.setSnapToTicks(false); // Allow smooth sliding
+
+            // Make the slider more visible with a border and background
+            borderRadiusSlider.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(Color.LIGHT_GRAY),
+                    BorderFactory.createEmptyBorder(5, 5, 5, 5)));
+            borderRadiusSlider.setBackground(new Color(240, 240, 240)); // Light gray background
+
+            // Create a value display
+            borderRadiusValueLabel = new JLabel(String.valueOf(currentBorderRadius));
+            borderRadiusValueLabel.setHorizontalAlignment(JLabel.RIGHT);
+            borderRadiusValueLabel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
+
+            // Add a change listener with live preview
+            borderRadiusSlider.addChangeListener(e -> {
+                int value = borderRadiusSlider.getValue();
+                borderRadiusValueLabel.setText(String.valueOf(value));
+
+                // Create a preview of the shape with the new border radius
+                if (!selectedShapes.isEmpty() && selectedShapes.get(0) instanceof Rectangle) {
+                    Rectangle previewRect = (Rectangle) selectedShapes.get(0);
+                    previewRect.setBorderRadius(value);
+                    repaint(); // Update the display to show the new border radius
+                }
+            });
+
+            // Create a panel for the slider with the value label
+            JPanel sliderPanel = new JPanel(new BorderLayout());
+            sliderPanel.add(borderRadiusSlider, BorderLayout.CENTER);
+            sliderPanel.add(borderRadiusValueLabel, BorderLayout.EAST);
+
+            // Add the slider panel to the form
+            gbc.gridx = 1;
+            formPanel.add(sliderPanel, gbc);
+        } else {
+            // Create dummy objects to avoid null pointer exceptions
+            borderRadiusSlider = new JSlider();
+            borderRadiusValueLabel = new JLabel();
+        }
+
+        // Add the form panel to the dialog
+        editDialog.add(formPanel, BorderLayout.CENTER);
+
+        // Create buttons panel
+        JPanel buttonPanel = new JPanel();
+        JButton okButton = new JButton("OK");
+        JButton cancelButton = new JButton("Cancel");
 
         okButton.addActionListener(new ActionListener() {
             @Override
@@ -359,30 +386,36 @@ public class WhiteBoard extends Canvas implements Draggable {
                     // Get the rotation value
                     double rotation = Double.parseDouble(rotationField.getText());
 
+                    // Get the border radius value if it's a rectangle
+                    int borderRadius = 0;
+                    if (isRectangle) {
+                        borderRadius = borderRadiusSlider.getValue();
+                    }
+
                     // Create a command to make the edit undoable
                     EditShapeCommand command = new EditShapeCommand(
                             selectedShapes,
                             selectedBorderColor[0],
                             selectedFillColor[0],
-                            rotation);
+                            rotation,
+                            borderRadius);
 
                     // Execute the command and add it to the command history
                     command.execute();
                     commandHistory.addCommand(command);
 
                     repaint();
+
+                    // Notify state change listener
+                    notifyStateChanged("Shape properties edited");
+
                     editDialog.dispose();
                 } catch (NumberFormatException ex) {
-                    // Show error message for invalid rotation value
-                    Dialog errorDialog = new Dialog(editDialog, "Error", true);
-                    errorDialog.setLayout(new BorderLayout());
-                    errorDialog.add(new Label("Invalid rotation value. Please enter a number."), BorderLayout.CENTER);
-                    Button okBtn = new Button("OK");
-                    okBtn.addActionListener(event -> errorDialog.dispose());
-                    errorDialog.add(okBtn, BorderLayout.SOUTH);
-                    errorDialog.pack();
-                    errorDialog.setLocationRelativeTo(editDialog);
-                    errorDialog.setVisible(true);
+                    // Show an error message for invalid rotation value
+                    JOptionPane.showMessageDialog(editDialog,
+                            "Invalid rotation value. Please enter a number.",
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
@@ -394,12 +427,12 @@ public class WhiteBoard extends Canvas implements Draggable {
             }
         });
 
-        Panel buttonPanel = new Panel();
         buttonPanel.add(okButton);
         buttonPanel.add(cancelButton);
-        editDialog.add(buttonPanel);
+        editDialog.add(buttonPanel, BorderLayout.SOUTH);
 
-        // Centrer la boîte de dialogue et l'afficher
+        // Set dialog size and show it
+        editDialog.setSize(450, isRectangle ? 350 : 250);
         editDialog.setLocationRelativeTo(this);
         editDialog.setVisible(true);
     }
