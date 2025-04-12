@@ -8,6 +8,7 @@ import java.util.List;
 
 import com.editor.gui.WhiteBoard;
 import com.editor.gui.button.Draggable;
+import com.editor.gui.button.IButton; // Added import
 import com.editor.gui.panel.CustomPanel;
 import com.editor.gui.panel.ToolbarPanel;
 import com.editor.gui.panel.TrashPanel;
@@ -187,12 +188,27 @@ public class ShapeDragMediator implements DragMediator {
                     // If dragging from whiteboard, let whiteboard handle deletion via its endDrag
                     if (sourceComponentForDrag == whiteBoard) {
                         // Whiteboard's endDrag will call deleteSelectedShapes
-                        deletedShape = true; // Mark as handled
+                        deletedShape = true; // Mark as handled by whiteboard
+                        debugLog("Drag from WhiteBoard ended over trash. WhiteBoard will handle deletion.");
+                    } else if (sourceComponentForDrag instanceof CustomPanel && currentDraggable instanceof IButton) {
+                        // If dragging a button from a CustomPanel (like ToolbarPanel) to trash
+                        debugLog("Drag from CustomPanel ended over trash. Attempting to remove button.");
+                        CustomPanel sourcePanel = (CustomPanel) sourceComponentForDrag;
+                        IButton draggedButton = (IButton) currentDraggable;
+                        boolean removed = sourcePanel.removeButton(draggedButton);
+                        if (removed) {
+                            debugLog("Button removed successfully from source panel.");
+                            deletedShape = true; // Mark as handled (button removed)
+                        } else {
+                            debugLog("Failed to remove button from source panel.");
+                            currentDraggable.endDrag(-1, -1); // Cancel drop if removal failed
+                            deletedShape = true; // Still mark as handled to prevent further processing
+                        }
                     } else {
-                        // If dragging from elsewhere (e.g., toolbar button), just cancel
+                        // If dragging from other source or draggable is not IButton, just cancel
                         deletedShape = true; // Mark as handled, effectively cancelling drop
                         currentDraggable.endDrag(-1, -1); // Explicitly cancel button drop
-                        debugLog("Drag from external source ended over trash. Cancelling drop.");
+                        debugLog("Drag from unknown source/type ended over trash. Cancelling drop.");
                     }
                     trashPanel.setShapeOverTrash(false); // Reset visual state
                 }
@@ -362,7 +378,7 @@ public class ShapeDragMediator implements DragMediator {
     /**
      * Helper method to check if a point in screen coordinates is over the
      * whiteboard.
-     * 
+     *
      * @param screenPoint Point in screen coordinates.
      * @return true if the point is over the whiteboard, false otherwise.
      */

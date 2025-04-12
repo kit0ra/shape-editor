@@ -159,12 +159,29 @@ public class CustomPanel extends Canvas {
 
     /**
      * Adds a button to this panel.
-     * 
+     *
      * @param button The button to add.
      */
     public void addButton(IButton button) {
         buttons.add(button);
         repaint(); // Repaint after adding a button
+    }
+
+    /**
+     * Removes a specific button from this panel.
+     * 
+     * @param button The button to remove.
+     * @return true if the button was found and removed, false otherwise.
+     */
+    public boolean removeButton(IButton button) {
+        boolean removed = buttons.remove(button);
+        if (removed) {
+            System.out.println("[CustomPanel] Removed button: " + button.getClass().getSimpleName());
+            // TODO: Add logic here or in subclasses (like ToolbarPanel)
+            // to potentially readjust layout if necessary.
+            repaint(); // Repaint after removing the button
+        }
+        return removed;
     }
 
     @Override
