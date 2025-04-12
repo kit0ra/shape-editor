@@ -14,14 +14,14 @@ import java.util.UUID; // Added
 import com.editor.gui.WhiteBoard;
 import com.editor.gui.button.CustomButton;
 import com.editor.gui.button.IButton;
-import com.editor.gui.button.decorators.CompositeShapeCreationButtonDecorator;
+import com.editor.gui.button.decorators.DraggableCompositeShapeCreationButtonDecorator;
 import com.editor.gui.button.decorators.ImageDecorator;
 import com.editor.gui.button.decorators.ShapeCreationButtonDecorator;
 import com.editor.gui.button.decorators.ShapeDrawingButtonDecorator;
-import com.editor.gui.button.decorators.TooltipDecorator; // Added
+import com.editor.gui.button.decorators.TooltipDecorator;
 import com.editor.mediator.DragMediator;
 import com.editor.shapes.CompositeShapePrototypeRegistry;
-import com.editor.shapes.Shape; // Added
+import com.editor.shapes.Shape;
 import com.editor.shapes.ShapeGroup;
 import com.editor.shapes.ShapePrototypeRegistry; // Added
 import com.editor.utils.ImageLoader;
@@ -112,12 +112,20 @@ public class ToolbarPanel extends CustomPanel {
      *
      * @param mediator The mediator to use
      */
+    @Override // Add Override annotation
     public void setDragMediator(DragMediator mediator) {
-        this.dragMediator = mediator;
+        super.setDragMediator(mediator); // Call the superclass method to register as a generic panel
 
-        // Register with the mediator as a special panel
+        // Keep the local reference if needed for specific ToolbarPanel logic
+        // this.dragMediator = mediator; // This line might be redundant if superclass
+        // field is protected
+
+        // Register with the mediator specifically as the ToolbarPanel
         if (mediator != null) {
             mediator.registerToolbarPanel(this);
+            System.out.println("[ToolbarPanel] Registered with mediator (as ToolbarPanel and CustomPanel).");
+        } else {
+            System.out.println("[ToolbarPanel] DragMediator set to null.");
         }
     }
 
@@ -333,12 +341,23 @@ public class ToolbarPanel extends CustomPanel {
         // Add tooltip
         button = new TooltipDecorator(button, tooltipText);
 
-        // Use the CompositeShapeCreationButtonDecorator
+        // Use the DraggableCompositeShapeCreationButtonDecorator instead of
+        // CompositeShapeCreationButtonDecorator
         if (targetWhiteBoard != null && compositeRegistry != null) {
-            button = new CompositeShapeCreationButtonDecorator(button, targetWhiteBoard, compositeRegistry, groupKey);
+            // Create a draggable composite button
+            DraggableCompositeShapeCreationButtonDecorator compositeButton = new DraggableCompositeShapeCreationButtonDecorator(
+                    button, targetWhiteBoard, compositeRegistry, groupKey);
+
+            // Set the drag mediator on the button if available
+            if (dragMediator != null) {
+                compositeButton.setDragMediator(dragMediator);
+                System.out.println("[ToolbarPanel] Set drag mediator on composite button: " + groupKey);
+            }
+
+            button = compositeButton;
         } else {
             System.out.println(
-                    "[ToolbarPanel] Error: Whiteboard or CompositeRegistry not set for CompositeShapeCreationButtonDecorator.");
+                    "[ToolbarPanel] Error: Whiteboard or CompositeRegistry not set for DraggableCompositeShapeCreationButtonDecorator.");
         }
         return button;
     }

@@ -15,8 +15,8 @@ import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentAdapter; // Already exists, ensure it's used
+import java.awt.event.ComponentEvent; // Already exists, ensure it's used
 import java.awt.event.InputEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -111,6 +111,14 @@ public class WhiteBoard extends Canvas implements Draggable {
             @Override
             public void mouseDragged(MouseEvent e) {
                 handleMouseDrag(e);
+            }
+        });
+
+        // Add a component listener to update the offscreen buffer on resize
+        addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                createOffscreenBuffer();
             }
         });
     }
@@ -337,8 +345,19 @@ public class WhiteBoard extends Canvas implements Draggable {
                         originalPositions.put(s, new Point(b.getX(), b.getY()));
                     }
 
-                    // Set dragging state
+                    // Set dragging state (internal whiteboard drag)
                     isDragging = true;
+
+                    // Notify the mediator that a drag started *from* the whiteboard
+                    if (dragMediator != null && dragStartPoint != null) {
+                        // Pass 'this' (the WhiteBoard) as the source component
+                        // Use the initial click point (dragStartPoint) relative to the whiteboard
+                        dragMediator.startDrag(this, this, dragStartPoint.x, dragStartPoint.y);
+                        System.out.println("[WhiteBoard] Notified mediator of internal drag start.");
+                    } else {
+                        System.err.println(
+                                "[WhiteBoard] Could not notify mediator of drag start (mediator or dragStartPoint is null).");
+                    }
                 }
             }
 
@@ -451,8 +470,25 @@ public class WhiteBoard extends Canvas implements Draggable {
     }
 
     private void handleMouseRelease(MouseEvent e) {
-        // Si on a dessiné un rectangle de sélection
+        // --- Check for external drag ending on WhiteBoard ---
+        if (dragMediator != null && dragMediator.isDragging() && dragMediator.getSourceComponentForDrag() != this) {
+            System.out.println("[WhiteBoard] Mouse released, delegating endDrag to mediator for external drag.");
+            // Pass coordinates relative to the WhiteBoard
+            dragMediator.endDrag(e.getX(), e.getY());
+            // Reset internal state just in case, although mediator should handle most of it
+            isDragging = false; // Reset internal flag
+            activeShape = null;
+            isSelectionRectActive = false;
+            selectionStart = null;
+            selectionEnd = null;
+            // Don't repaint here, mediator's endDrag should handle repaint
+            return; // Skip internal whiteboard release logic
+        }
+        // --- End check for external drag ---
+
+        // Si on a dessiné un rectangle de sélection (internal whiteboard interaction)
         if (isSelectionRectActive && selectionStart != null && selectionEnd != null) {
+            System.out.println("[WhiteBoard] Handling mouse release for selection rectangle.");
             // Calculer les coordonnées du rectangle de sélection
             int x1 = Math.min(selectionStart.x, selectionEnd.x);
             int y1 = Math.min(selectionStart.y, selectionEnd.y);
@@ -501,8 +537,12 @@ public class WhiteBoard extends Canvas implements Draggable {
             return;
         }
 
-        // Check if a drag operation was in progress and completed
-        if (isDragging && activeShape != null && !originalPositions.isEmpty()) {
+        // Check if an internal drag operation (started on whiteboard) was in progress
+        // and completed
+        // Use mediator state to confirm it was an internal drag
+        if (isDragging && activeShape != null && !originalPositions.isEmpty() && dragMediator != null
+                && dragMediator.getSourceComponentForDrag() == this) {
+            System.out.println("[WhiteBoard] Handling mouse release for internal shape drag.");
             // Convert whiteboard coordinates to screen coordinates for checking panels
             Point screenPoint = new Point(e.getX(), e.getY());
             try {

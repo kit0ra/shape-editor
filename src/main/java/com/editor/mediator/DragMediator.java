@@ -32,12 +32,18 @@ public interface DragMediator {
     /**
      * Start a drag operation from a panel
      *
-     * @param panel     The panel where the drag started
-     * @param draggable The draggable object being dragged
-     * @param x         The x-coordinate where the drag started
-     * @param y         The y-coordinate where the drag started
+     * @param panel           The panel where the drag started
+     * @param draggable       The draggable object being dragged
+     * @param x               The x-coordinate where the drag started
+     * @param sourceComponent The component where the drag started (e.g.,
+     *                        CustomPanel or WhiteBoard)
+     * @param draggable       The draggable object being dragged
+     * @param x               The x-coordinate where the drag started (relative to
+     *                        sourceComponent)
+     * @param y               The y-coordinate where the drag started (relative to
+     *                        sourceComponent)
      */
-    void startDrag(CustomPanel panel, Draggable draggable, int x, int y);
+    void startDrag(Object sourceComponent, Draggable draggable, int x, int y);
 
     /**
      * Update a drag operation
@@ -56,14 +62,14 @@ public interface DragMediator {
     void endDrag(int x, int y);
 
     /**
-     * Convert coordinates from a panel to whiteboard coordinates
+     * Convert coordinates from a source component to whiteboard coordinates
      *
-     * @param panel      The source panel
-     * @param panelPoint The point in panel coordinates
+     * @param sourceComponent The source component (e.g., CustomPanel, WhiteBoard)
+     * @param sourcePoint     The point in the source component's coordinates
      * @return The point in whiteboard coordinates, or null if outside the
-     *         whiteboard
+     *         whiteboard or conversion fails
      */
-    Point convertToWhiteboardCoordinates(CustomPanel panel, Point panelPoint);
+    Point convertToWhiteboardCoordinates(Object sourceComponent, Point sourcePoint);
 
     /**
      * Register a trash panel with the mediator
@@ -106,4 +112,19 @@ public interface DragMediator {
      * @param enabled Whether debug messages should be enabled
      */
     void setDebugEnabled(boolean enabled);
+
+    /**
+     * Checks if a drag operation is currently in progress.
+     *
+     * @return true if dragging, false otherwise.
+     */
+    boolean isDragging();
+
+    /**
+     * Gets the component from which the current drag operation originated.
+     *
+     * @return The source component (e.g., CustomPanel, WhiteBoard), or null if not
+     *         dragging.
+     */
+    Object getSourceComponentForDrag();
 }

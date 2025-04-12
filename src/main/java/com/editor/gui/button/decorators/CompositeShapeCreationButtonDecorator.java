@@ -15,9 +15,9 @@ import com.editor.shapes.ShapeGroup;
  */
 public class CompositeShapeCreationButtonDecorator extends ButtonDecorator {
 
-    private final WhiteBoard whiteBoard;
-    private final CompositeShapePrototypeRegistry compositeRegistry;
-    private final String groupKey; // Key to identify the group in the registry
+    protected final WhiteBoard whiteBoard;
+    protected final CompositeShapePrototypeRegistry compositeRegistry;
+    protected final String groupKey; // Key to identify the group in the registry
 
     public CompositeShapeCreationButtonDecorator(IButton decoratedButton, WhiteBoard whiteBoard,
             CompositeShapePrototypeRegistry compositeRegistry, String groupKey) {
