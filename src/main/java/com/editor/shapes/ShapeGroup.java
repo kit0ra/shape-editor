@@ -1,16 +1,18 @@
 package com.editor.shapes;
 
 import java.awt.Color;
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.List; // Import Serializable
 
 import com.editor.drawing.Drawer;
 
 /**
  * Represents a group of shapes that can be manipulated as a single entity.
+ * Implements Serializable to allow saving/loading state.
  */
-public class ShapeGroup implements Shape {
-    private static final long serialVersionUID = 1L;
+public class ShapeGroup implements Shape, Serializable { // Implement Serializable
+    private static final long serialVersionUID = 1L; // Keep serialVersionUID
     private List<Shape> shapes = new ArrayList<>();
     private boolean selected;
     private Color borderColor = Color.BLACK;

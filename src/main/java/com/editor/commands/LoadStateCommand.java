@@ -3,14 +3,16 @@ package com.editor.commands;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.util.Map;
 
 import com.editor.gui.WhiteBoard;
 import com.editor.gui.panel.ToolbarPanel;
 import com.editor.memento.AppStateMemento;
-import com.editor.memento.CompositeRegistryMemento;
+import com.editor.memento.CompositeRegistryMemento; // Add import for Map
 import com.editor.memento.ShapeMemento;
 import com.editor.memento.ToolbarMemento;
 import com.editor.shapes.CompositeShapePrototypeRegistry;
+import com.editor.shapes.ShapeGroup; // Add import for ShapeGroup
 
 /**
  * Command to load the application state (WhiteBoard and ToolbarPanel) from a
@@ -109,9 +111,16 @@ public class LoadStateCommand implements Command {
                 // Restore Registry *BEFORE* Toolbar
                 System.out.println("[STATE DEBUG] Restoring CompositeRegistry from memento...");
                 if (loadedCompositeRegistryState != null) {
+                    // Log the keys *before* restoring
+                    Map<String, ShapeGroup> keysToRestore = loadedCompositeRegistryState.getPrototypesState();
+                    System.out.println(
+                            "[LOG] LoadStateCommand - Memento contains composite keys: " + keysToRestore.keySet());
                     compositeRegistry.restoreFromMemento(loadedCompositeRegistryState);
+                    // Add log AFTER restoring the registry, before restoring toolbar
+                    System.out.println("[LOG] LoadStateCommand - compositeRegistry instance keys AFTER restore: "
+                            + compositeRegistry.getPrototypesMap().keySet());
                 } else {
-                    System.err.println("[STATE DEBUG] ERROR: Loaded CompositeRegistryMemento is null!");
+                    System.err.println("[LOG] LoadStateCommand - ERROR: Loaded CompositeRegistryMemento is null!");
                 }
 
                 // Restore ToolbarPanel last

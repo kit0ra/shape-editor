@@ -13,8 +13,6 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import com.editor.commands.AutoLoadCommand;
 import com.editor.commands.LoadStateCommand;
 import com.editor.commands.SaveStateCommand;
-import com.editor.state.AutoSaveManager;
-import com.editor.state.StateChangeListener;
 import com.editor.gui.button.CustomButton;
 import com.editor.gui.button.IButton;
 import com.editor.gui.button.decorators.ButtonDecorator;
@@ -26,13 +24,15 @@ import com.editor.gui.button.decorators.UndoButtonDecorator;
 import com.editor.gui.panel.HorizontalPanel;
 import com.editor.gui.panel.ToolbarPanel;
 import com.editor.gui.panel.TrashPanel;
-import com.editor.gui.panel.VerticalPanel; // Ensure this import is present
+import com.editor.gui.panel.VerticalPanel;
 import com.editor.mediator.DragMediator;
-import com.editor.mediator.ShapeDragMediator;
+import com.editor.mediator.ShapeDragMediator; // Ensure this import is present
 import com.editor.shapes.CompositeShapePrototypeRegistry;
 import com.editor.shapes.Rectangle;
 import com.editor.shapes.RegularPolygon;
 import com.editor.shapes.ShapePrototypeRegistry;
+import com.editor.state.AutoSaveManager;
+import com.editor.state.StateChangeListener;
 import com.editor.utils.ImageLoader;
 
 public class ShapeEditorFrame extends Frame {
@@ -116,18 +116,25 @@ public class ShapeEditorFrame extends Frame {
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                // Clean up resources
+                // Perform a final auto-save FIRST, before disposing components
+                if (autoSaveManager != null) {
+                    System.out.println("[LOG] ShapeEditorFrame.windowClosing - Performing final auto-save...");
+                    autoSaveManager.shutdown(); // This calls performSave()
+                    System.out.println("[LOG] ShapeEditorFrame.windowClosing - Final auto-save complete.");
+                } else {
+                    System.out.println(
+                            "[LOG] ShapeEditorFrame.windowClosing - AutoSaveManager is null, skipping final save.");
+                }
+
+                // Now clean up resources
+                System.out.println("[LOG] ShapeEditorFrame.windowClosing - Disposing whiteboard...");
                 if (whiteBoard != null) {
                     whiteBoard.dispose();
                 }
 
-                // Perform a final auto-save before closing
-                if (autoSaveManager != null) {
-                    System.out.println("[AutoSave] Window closing, performing final auto-save...");
-                    autoSaveManager.shutdown();
-                }
-
-                dispose();
+                System.out.println("[LOG] ShapeEditorFrame.windowClosing - Disposing frame...");
+                dispose(); // Dispose the frame itself
+                System.out.println("[LOG] ShapeEditorFrame.windowClosing - Exiting application...");
                 System.exit(0);
             }
         });
@@ -182,9 +189,14 @@ public class ShapeEditorFrame extends Frame {
         whiteBoard.setStateChangeListener(stateChangeListener);
         toolbarPanel.setStateChangeListener(stateChangeListener);
 
+        // Set registries on ToolbarPanel BEFORE auto-load
+        System.out.println("[LOG] ShapeEditorFrame - Setting registries on ToolbarPanel...");
+        toolbarPanel.setPrototypeRegistry(prototypeRegistry);
+        toolbarPanel.setCompositePrototypeRegistry(compositeRegistry); // Added
+
         // Auto-load the previous state if it exists
         if (autoSaveManager.autoSaveExists()) {
-            System.out.println("[AutoSave] Found previous state, auto-loading...");
+            System.out.println("[LOG] ShapeEditorFrame - Found previous state, auto-loading...");
             AutoLoadCommand autoLoadCommand = new AutoLoadCommand(
                     whiteBoard, toolbarPanel, compositeRegistry, autoSaveManager);
             autoLoadCommand.execute();
@@ -192,14 +204,7 @@ public class ShapeEditorFrame extends Frame {
             System.out.println("[AutoSave] No previous state found, starting with empty state.");
         }
 
-        // Add a shutdown hook to ensure auto-save on application exit
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            @Override
-            public void run() {
-                System.out.println("[AutoSave] Application shutting down, performing final auto-save...");
-                autoSaveManager.shutdown();
-            }
-        });
+        // REMOVED Shutdown hook - rely on windowClosing for final save
 
         // Register the trash panel with the mediator
         dragMediator.registerTrashPanel(trashPanel);
@@ -207,14 +212,10 @@ public class ShapeEditorFrame extends Frame {
         // Register the toolbar panel with the mediator
         dragMediator.registerToolbarPanel(toolbarPanel);
 
-        // Set the prototype registry in the toolbar panel
-        toolbarPanel.setPrototypeRegistry(prototypeRegistry);
-
-        // Set the toolbar panel reference in the whiteboard
+        // Set the toolbar panel reference in the whiteboard (can stay here)
         whiteBoard.setToolbarPanel(toolbarPanel);
 
-        // Set the composite registry in the toolbar panel
-        toolbarPanel.setCompositePrototypeRegistry(compositeRegistry); // Added
+        // Registries were set above, before auto-load
 
         System.out.println("Drag mediator initialized and connected to components");
     }

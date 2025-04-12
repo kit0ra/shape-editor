@@ -92,9 +92,11 @@ public class CompositeShapePrototypeRegistry implements Serializable {
      * @return A CompositeRegistryMemento object.
      */
     public CompositeRegistryMemento createMemento() {
-        System.out.println("[CompositeRegistry] Creating Memento...");
+        Map<String, ShapeGroup> currentPrototypes = new HashMap<>(this.groupPrototypes);
+        System.out.println(
+                "[LOG] CompositeRegistry.createMemento() - Creating memento with keys: " + currentPrototypes.keySet());
         // Pass a copy of the current prototypes map
-        return new CompositeRegistryMemento(new HashMap<>(this.groupPrototypes));
+        return new CompositeRegistryMemento(currentPrototypes);
     }
 
     /**
@@ -110,15 +112,17 @@ public class CompositeShapePrototypeRegistry implements Serializable {
             return;
         }
         System.out.println("[CompositeRegistry] Restoring state from Memento...");
-        // Get the map directly from the memento
+        // Get the map directly from the memento (it already contains clones)
         Map<String, ShapeGroup> restoredPrototypes = memento.getPrototypesState();
         // Clear current prototypes
         this.groupPrototypes.clear();
         // Add prototypes from the restored map
         this.groupPrototypes.putAll(restoredPrototypes);
         System.out.println(
-                "[CompositeRegistry] Memento restore complete. Prototype count: " + this.groupPrototypes.size());
+                "[LOG] CompositeRegistry.restoreFromMemento() - Restore complete. Prototype count: "
+                        + this.groupPrototypes.size());
         // Log the keys restored for debugging
-        System.out.println("[CompositeRegistry] Restored keys: " + this.groupPrototypes.keySet());
+        System.out.println("[LOG] CompositeRegistry.restoreFromMemento() - Final keys in registry: "
+                + this.groupPrototypes.keySet());
     }
 }

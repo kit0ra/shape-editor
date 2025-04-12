@@ -73,7 +73,9 @@ public class SaveStateCommand implements Command {
             ToolbarMemento toolbarMemento = toolbarPanel.createMemento();
 
             System.out.println("[STATE DEBUG] Creating CompositeRegistry memento...");
-            CompositeRegistryMemento compositeRegistryMemento = new CompositeRegistryMemento(compositeRegistry);
+            // Use the constructor that takes the map directly, avoiding reflection
+            CompositeRegistryMemento compositeRegistryMemento = new CompositeRegistryMemento(
+                    compositeRegistry.getPrototypesMap());
 
             System.out.println("[STATE DEBUG] Creating AppStateMemento with all component mementos...");
             AppStateMemento appState = new AppStateMemento(whiteboardMemento, toolbarMemento, compositeRegistryMemento);

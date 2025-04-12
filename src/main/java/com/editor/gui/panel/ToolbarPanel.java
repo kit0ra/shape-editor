@@ -217,6 +217,11 @@ public class ToolbarPanel extends CustomPanel {
             targetWhiteBoard.clearSelection();
             targetWhiteBoard.repaint();
             repaint();
+
+            // Explicitly notify state change listener for shapes dragged from whiteboard
+            // This is in addition to the notification in addButton
+            notifyStateChanged("Shapes dragged from whiteboard to toolbar");
+
             return true;
         }
         return false;
@@ -345,8 +350,9 @@ public class ToolbarPanel extends CustomPanel {
     // --- Memento Pattern Implementation ---
 
     public ToolbarMemento createMemento() {
+        // Get the values (String prototype keys) from the map.
         List<String> keys = new ArrayList<>(buttonToPrototypeKeyMap.values());
-        System.out.println("[STATE DEBUG] ToolbarPanel.createMemento() - Keys being saved: " + keys);
+        System.out.println("[LOG] ToolbarPanel.createMemento() - Keys being saved: " + keys);
         return new ToolbarMemento(keys);
     }
 
@@ -355,9 +361,10 @@ public class ToolbarPanel extends CustomPanel {
             System.err.println("[ToolbarPanel] Cannot restore from null memento.");
             return;
         }
-        System.out.println("[STATE DEBUG] ToolbarPanel.restoreFromMemento() - START");
+        System.out.println("[LOG] ToolbarPanel.restoreFromMemento() - START");
         List<String> keysToRestore = memento.getButtonPrototypeKeys();
-        System.out.println("[STATE DEBUG] Keys to restore from memento: " + keysToRestore);
+        System.out.println(
+                "[LOG] ToolbarPanel.restoreFromMemento() - Keys received from ToolbarMemento: " + keysToRestore);
 
         // Clear existing dynamic buttons (using super.removeButton to avoid map issues
         // during clear)
@@ -369,46 +376,72 @@ public class ToolbarPanel extends CustomPanel {
         buttonToPrototypeKeyMap.clear(); // Clear the map
         nextButtonY = BUTTON_Y_START; // Reset layout position
 
+        // Log the state of the registries the ToolbarPanel instance knows about just
+        // before checking
+        System.out.println(
+                "[LOG] ToolbarPanel.restoreFromMemento() - Checking internal registry references before loop:");
+        System.out.println("[LOG]   this.prototypeRegistry is null: " + (this.prototypeRegistry == null));
+        if (this.prototypeRegistry != null) {
+            // Assuming ShapePrototypeRegistry has a method to get keys or check existence
+            // For now, just re-check the specific keys we expect.
+            System.out.println("[LOG]   this.prototypeRegistry.hasPrototype('Rectangle'): "
+                    + this.prototypeRegistry.hasPrototype("Rectangle"));
+            System.out.println("[LOG]   this.prototypeRegistry.hasPrototype('Polygon'): "
+                    + this.prototypeRegistry.hasPrototype("Polygon"));
+        }
+        System.out.println("[LOG]   this.compositeRegistry is null: " + (this.compositeRegistry == null));
+        if (this.compositeRegistry != null) {
+            // Use getPrototypesMap() which we know exists
+            System.out.println(
+                    "[LOG]   this.compositeRegistry keys: " + this.compositeRegistry.getPrototypesMap().keySet());
+        }
+
         // Recreate buttons from memento keys
-        System.out.println("[ToolbarPanel] Recreating buttons from restored keys...");
+        System.out.println("[LOG] ToolbarPanel.restoreFromMemento() - Recreating buttons from restored keys...");
         for (String key : keysToRestore) {
             IButton newButton = null;
-            System.out.println("[STATE DEBUG] Attempting to restore button for key: " + key);
+            System.out.println("[LOG] ToolbarPanel.restoreFromMemento() - Processing key: " + key);
             if (key.startsWith("composite_")) {
-                System.out.println("[STATE DEBUG] Checking composite registry for key '" + key + "'...");
                 boolean hasKey = (compositeRegistry != null && compositeRegistry.hasPrototype(key));
-                System.out.println("[STATE DEBUG] Registry has key '" + key + "': " + hasKey);
+                System.out.println("[LOG] ToolbarPanel.restoreFromMemento() - Is composite key. Registry has key '"
+                        + key + "': " + hasKey);
                 if (hasKey) {
                     newButton = createCompositeButton(BUTTON_X_MARGIN, nextButtonY, "icons/group.png",
                             "Restored Composite", key);
                 } else {
-                    System.err.println("[STATE DEBUG] Warning: Composite prototype not found during restore: " + key);
+                    System.err.println(
+                            "[LOG] ToolbarPanel.restoreFromMemento() - Warning: Composite prototype not found for key: "
+                                    + key);
                 }
             } else {
-                System.out.println("[STATE DEBUG] Checking prototype registry for key '" + key + "'...");
                 boolean hasKey = (prototypeRegistry != null && prototypeRegistry.hasPrototype(key));
-                System.out.println("[STATE DEBUG] Registry has key '" + key + "': " + hasKey);
+                System.out.println("[LOG] ToolbarPanel.restoreFromMemento() - Is standard key. Registry has key '" + key
+                        + "': " + hasKey);
                 if (hasKey) {
                     String iconPath = "icons/" + key.toLowerCase() + ".png";
                     newButton = createDraggableShapeButton(BUTTON_X_MARGIN, nextButtonY, iconPath, "Restored " + key,
                             key);
                 } else {
-                    System.err
-                            .println("[STATE DEBUG] Warning: Single shape prototype not found during restore: " + key);
+                    System.err.println(
+                            "[LOG] ToolbarPanel.restoreFromMemento() - Warning: Standard prototype not found for key: "
+                                    + key);
                 }
             }
 
             if (newButton != null) {
                 // Use the specific addButton overload that correctly populates the map
-                this.addButton(newButton, key);
+                this.addButton(newButton, key); // This method already logs the addition
                 nextButtonY += newButton.getHeight() + BUTTON_Y_SPACING;
-                System.out.println("[STATE DEBUG] Successfully recreated and added button for key: " + key);
+                System.out.println(
+                        "[LOG] ToolbarPanel.restoreFromMemento() - Successfully recreated and added button for key: "
+                                + key);
             } else {
-                System.err.println("[STATE DEBUG] Failed to recreate button for key: " + key);
+                System.err
+                        .println("[LOG] ToolbarPanel.restoreFromMemento() - Failed to recreate button for key: " + key);
             }
         }
         System.out.println(
-                "[STATE DEBUG] ToolbarPanel.restoreFromMemento() - END. Final button count: " + buttons.size());
+                "[LOG] ToolbarPanel.restoreFromMemento() - END. Final button count: " + buttons.size());
         repaint();
     }
 }
