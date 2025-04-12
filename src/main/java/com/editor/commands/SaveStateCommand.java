@@ -27,12 +27,37 @@ public class SaveStateCommand implements Command {
     // Keep track of the saved state in case we need undo (though unlikely for save)
     private AppStateMemento savedState = null;
 
+    /**
+     * Constructor that takes all components including the composite registry.
+     *
+     * @param whiteBoard        The whiteboard component
+     * @param toolbarPanel      The toolbar panel component
+     * @param compositeRegistry The composite shape prototype registry
+     * @param filePath          The path to save the state to
+     */
     public SaveStateCommand(WhiteBoard whiteBoard, ToolbarPanel toolbarPanel,
             CompositeShapePrototypeRegistry compositeRegistry, String filePath) {
         this.whiteBoard = whiteBoard;
         this.toolbarPanel = toolbarPanel;
         this.compositeRegistry = compositeRegistry;
         this.filePath = filePath;
+    }
+
+    /**
+     * Backward compatibility constructor that doesn't require a composite registry.
+     * Creates an empty composite registry internally.
+     *
+     * @param whiteBoard   The whiteboard component
+     * @param toolbarPanel The toolbar panel component
+     * @param filePath     The path to save the state to
+     */
+    public SaveStateCommand(WhiteBoard whiteBoard, ToolbarPanel toolbarPanel, String filePath) {
+        this.whiteBoard = whiteBoard;
+        this.toolbarPanel = toolbarPanel;
+        this.compositeRegistry = new CompositeShapePrototypeRegistry(); // Create empty registry
+        this.filePath = filePath;
+        System.out.println("[WARNING] Using deprecated SaveStateCommand constructor without composite registry.");
+        System.out.println("[WARNING] Composite shapes will not be saved properly.");
     }
 
     @Override

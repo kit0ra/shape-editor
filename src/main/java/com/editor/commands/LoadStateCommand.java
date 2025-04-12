@@ -3,7 +3,6 @@ package com.editor.commands;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.util.Map;
 
 import com.editor.gui.WhiteBoard;
 import com.editor.gui.panel.ToolbarPanel;
@@ -12,7 +11,6 @@ import com.editor.memento.CompositeRegistryMemento;
 import com.editor.memento.ShapeMemento;
 import com.editor.memento.ToolbarMemento;
 import com.editor.shapes.CompositeShapePrototypeRegistry;
-import com.editor.shapes.ShapeGroup;
 
 /**
  * Command to load the application state (WhiteBoard and ToolbarPanel) from a
@@ -28,12 +26,37 @@ public class LoadStateCommand implements Command {
     // Store the state *before* loading, in case we need to undo the load
     private AppStateMemento previousState = null;
 
+    /**
+     * Constructor that takes all components including the composite registry.
+     *
+     * @param whiteBoard        The whiteboard component
+     * @param toolbarPanel      The toolbar panel component
+     * @param compositeRegistry The composite shape prototype registry
+     * @param filePath          The path to load the state from
+     */
     public LoadStateCommand(WhiteBoard whiteBoard, ToolbarPanel toolbarPanel,
             CompositeShapePrototypeRegistry compositeRegistry, String filePath) {
         this.whiteBoard = whiteBoard;
         this.toolbarPanel = toolbarPanel;
         this.compositeRegistry = compositeRegistry;
         this.filePath = filePath;
+    }
+
+    /**
+     * Backward compatibility constructor that doesn't require a composite registry.
+     * Creates an empty composite registry internally.
+     *
+     * @param whiteBoard   The whiteboard component
+     * @param toolbarPanel The toolbar panel component
+     * @param filePath     The path to load the state from
+     */
+    public LoadStateCommand(WhiteBoard whiteBoard, ToolbarPanel toolbarPanel, String filePath) {
+        this.whiteBoard = whiteBoard;
+        this.toolbarPanel = toolbarPanel;
+        this.compositeRegistry = new CompositeShapePrototypeRegistry(); // Create empty registry
+        this.filePath = filePath;
+        System.out.println("[WARNING] Using deprecated LoadStateCommand constructor without composite registry.");
+        System.out.println("[WARNING] Composite shapes will not be loaded properly.");
     }
 
     @Override
@@ -50,7 +73,9 @@ public class LoadStateCommand implements Command {
             ToolbarMemento toolbarBackup = toolbarPanel.createMemento();
 
             System.out.println("[STATE DEBUG] Creating CompositeRegistry memento for backup...");
-            CompositeRegistryMemento compositeRegistryBackup = new CompositeRegistryMemento(compositeRegistry);
+            // *** CORRECTED LINE: Use getPrototypesMap() ***
+            CompositeRegistryMemento compositeRegistryBackup = new CompositeRegistryMemento(
+                    compositeRegistry.getPrototypesMap());
 
             System.out.println("[STATE DEBUG] Creating AppStateMemento with backup mementos...");
             this.previousState = new AppStateMemento(whiteboardBackup, toolbarBackup, compositeRegistryBackup);
@@ -77,17 +102,21 @@ public class LoadStateCommand implements Command {
                 System.out.println("[STATE DEBUG] Getting CompositeRegistry state from loaded AppStateMemento...");
                 CompositeRegistryMemento loadedCompositeRegistryState = loadedState.getCompositeRegistryState();
 
+                // Restore WhiteBoard first
                 System.out.println("[STATE DEBUG] Restoring WhiteBoard from memento...");
                 whiteBoard.restoreFromMemento(loadedWhiteboardState);
 
-                System.out.println("[STATE DEBUG] Restoring ToolbarPanel from memento...");
-                toolbarPanel.restoreFromMemento(loadedToolbarState);
+                // Restore Registry *BEFORE* Toolbar
+                System.out.println("[STATE DEBUG] Restoring CompositeRegistry from memento...");
+                if (loadedCompositeRegistryState != null) {
+                    compositeRegistry.restoreFromMemento(loadedCompositeRegistryState);
+                } else {
+                    System.err.println("[STATE DEBUG] ERROR: Loaded CompositeRegistryMemento is null!");
+                }
 
-                // Update the current composite registry with the loaded one
-                System.out.println("[STATE DEBUG] Updating CompositeRegistry with loaded state...");
-                // Since we can't replace the registry itself (it's final), we'll clear it and
-                // copy the contents
-                updateCompositeRegistry(compositeRegistry, loadedCompositeRegistryState.getRegistryState());
+                // Restore ToolbarPanel last
+                System.out.println("[STATE DEBUG] Restoring ToolbarPanel from memento...");
+                toolbarPanel.restoreFromMemento(loadedToolbarState); // Now registry should be populated
 
                 System.out.println("[STATE DEBUG] State successfully restored to all components.");
             } else {
@@ -108,61 +137,6 @@ public class LoadStateCommand implements Command {
         }
     }
 
-    /**
-     * Helper method to update a composite registry with the contents of another.
-     * This is used during loading to update the existing registry with the loaded
-     * state.
-     *
-     * @param targetRegistry The registry to update
-     * @param sourceRegistry The registry to copy from
-     */
-    private void updateCompositeRegistry(CompositeShapePrototypeRegistry targetRegistry,
-            CompositeShapePrototypeRegistry sourceRegistry) {
-        System.out.println("[COMPOSITE DEBUG] Starting updateCompositeRegistry");
-        System.out.println("[COMPOSITE DEBUG] Target registry: " + targetRegistry);
-        System.out.println("[COMPOSITE DEBUG] Source registry: " + sourceRegistry);
-
-        // We need to access the internal map of the registry
-        // Since we can't directly access it, we'll use reflection
-        try {
-            // Get the groupPrototypes field from the CompositeShapePrototypeRegistry class
-            java.lang.reflect.Field field = CompositeShapePrototypeRegistry.class.getDeclaredField("groupPrototypes");
-            field.setAccessible(true); // Make it accessible
-
-            // Get the maps from both registries
-            @SuppressWarnings("unchecked")
-            Map<String, ShapeGroup> targetMap = (Map<String, ShapeGroup>) field.get(targetRegistry);
-            @SuppressWarnings("unchecked")
-            Map<String, ShapeGroup> sourceMap = (Map<String, ShapeGroup>) field.get(sourceRegistry);
-
-            System.out.println("[COMPOSITE DEBUG] Target map before update: " + targetMap.keySet());
-            System.out.println("[COMPOSITE DEBUG] Source map keys: " + sourceMap.keySet());
-            System.out.println("[COMPOSITE DEBUG] Source map size: " + sourceMap.size());
-
-            // Clear the target map and copy all entries from the source map
-            targetMap.clear();
-            System.out.println("[COMPOSITE DEBUG] Target map cleared");
-
-            for (Map.Entry<String, ShapeGroup> entry : sourceMap.entrySet()) {
-                String key = entry.getKey();
-                ShapeGroup group = entry.getValue();
-                System.out.println("[COMPOSITE DEBUG] Copying key: " + key + ", group: " + group);
-
-                // Create a deep clone of the group to ensure proper serialization
-                ShapeGroup clonedGroup = (ShapeGroup) group.clone();
-                targetMap.put(key, clonedGroup);
-                System.out.println("[COMPOSITE DEBUG] Added to target map: " + key);
-            }
-
-            System.out.println("[COMPOSITE DEBUG] Target map after update: " + targetMap.keySet());
-            System.out.println("[COMPOSITE DEBUG] Successfully updated composite registry with " +
-                    sourceMap.size() + " prototypes.");
-        } catch (Exception e) {
-            System.err.println("[COMPOSITE DEBUG] ERROR: Failed to update composite registry: " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
     @Override
     public void undo() {
         System.out.println("[STATE DEBUG] LoadStateCommand.undo() - START");
@@ -179,14 +153,21 @@ public class LoadStateCommand implements Command {
                 System.out.println("[STATE DEBUG] Getting CompositeRegistry state from backup AppStateMemento...");
                 CompositeRegistryMemento backupCompositeRegistryState = previousState.getCompositeRegistryState();
 
+                // Restore WhiteBoard first
                 System.out.println("[STATE DEBUG] Restoring WhiteBoard from backup memento...");
                 whiteBoard.restoreFromMemento(backupWhiteboardState);
 
+                // Restore Registry *BEFORE* Toolbar
+                System.out.println("[STATE DEBUG] Restoring CompositeRegistry from backup memento...");
+                if (backupCompositeRegistryState != null) {
+                    compositeRegistry.restoreFromMemento(backupCompositeRegistryState);
+                } else {
+                    System.err.println("[STATE DEBUG] ERROR: Backup CompositeRegistryMemento is null during undo!");
+                }
+
+                // Restore ToolbarPanel last
                 System.out.println("[STATE DEBUG] Restoring ToolbarPanel from backup memento...");
                 toolbarPanel.restoreFromMemento(backupToolbarState);
-
-                System.out.println("[STATE DEBUG] Updating CompositeRegistry from backup memento...");
-                updateCompositeRegistry(compositeRegistry, backupCompositeRegistryState.getRegistryState());
 
                 System.out.println("[STATE DEBUG] Previous state successfully restored (Undo complete).");
             } catch (Exception e) {
