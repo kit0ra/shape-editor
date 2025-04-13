@@ -48,3 +48,5 @@ buildNumber.properties
 # OS specific files
 .DS_Store
 Thumbs.db
+
+autosave.ser
