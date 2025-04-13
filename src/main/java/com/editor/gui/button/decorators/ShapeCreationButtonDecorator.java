@@ -9,6 +9,7 @@ import java.awt.Graphics2D;
 import com.editor.gui.WhiteBoard;
 import com.editor.gui.button.Draggable;
 import com.editor.gui.button.IButton;
+import com.editor.mediator.DragMediator;
 import com.editor.shapes.ShapePrototypeRegistry;
 
 /**
@@ -22,6 +23,7 @@ public class ShapeCreationButtonDecorator extends ButtonDecorator implements Dra
     private final String shapeType;
     private boolean isDragging = false;
     private int dragX, dragY;
+    private DragMediator dragMediator;
 
     /**
      * Creates a new ShapeCreationButtonDecorator
@@ -112,6 +114,11 @@ public class ShapeCreationButtonDecorator extends ButtonDecorator implements Dra
         // Set the current shape type in the whiteboard
         targetWhiteBoard.setPrototypeRegistry(prototypeRegistry);
         targetWhiteBoard.setCurrentShapeType(shapeType);
+
+        // Notify the drag mediator if available
+        if (dragMediator != null) {
+            dragMediator.startDrag(this, this, x, y);
+        }
     }
 
     @Override
@@ -124,7 +131,8 @@ public class ShapeCreationButtonDecorator extends ButtonDecorator implements Dra
     public void endDrag(int x, int y) {
         isDragging = false;
 
-        // Vérifier si les coordonnées sont valides (pas -1, -1 qui indique une annulation)
+        // Vérifier si les coordonnées sont valides (pas -1, -1 qui indique une
+        // annulation)
         if (x >= 0 && y >= 0) {
             // Create the shape at the drop location
             targetWhiteBoard.createShapeAt(x, y);
@@ -137,6 +145,15 @@ public class ShapeCreationButtonDecorator extends ButtonDecorator implements Dra
     @Override
     public String getShapeType() {
         return shapeType;
+    }
+
+    /**
+     * Sets the drag mediator for this button.
+     *
+     * @param mediator The drag mediator
+     */
+    public void setDragMediator(DragMediator mediator) {
+        this.dragMediator = mediator;
     }
 
     @Override

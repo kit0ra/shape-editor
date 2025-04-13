@@ -74,6 +74,16 @@ public class CompositeShapePrototypeRegistry implements Serializable {
     }
 
     /**
+     * Gets the prototype with the given key.
+     *
+     * @param key The key of the prototype to get.
+     * @return The prototype, or null if not found.
+     */
+    public ShapeGroup getPrototype(String key) {
+        return groupPrototypes.get(key);
+    }
+
+    /**
      * Gets a defensive copy of the internal prototype map.
      * Used for creating the memento.
      *

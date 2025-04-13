@@ -18,15 +18,15 @@ import com.editor.gui.button.IButton;
 import com.editor.gui.button.decorators.ButtonDecorator;
 import com.editor.gui.button.decorators.ImageDecorator;
 import com.editor.gui.button.decorators.RedoButtonDecorator;
-import com.editor.gui.button.decorators.ShapeCreationButtonDecorator;
 import com.editor.gui.button.decorators.TooltipDecorator;
 import com.editor.gui.button.decorators.UndoButtonDecorator;
+import com.editor.gui.button.factory.ShapeButtonFactory;
 import com.editor.gui.panel.HorizontalPanel;
 import com.editor.gui.panel.ToolbarPanel;
 import com.editor.gui.panel.TrashPanel;
 import com.editor.gui.panel.VerticalPanel;
 import com.editor.mediator.DragMediator;
-import com.editor.mediator.ShapeDragMediator; // Ensure this import is present
+import com.editor.mediator.ShapeDragMediator;
 import com.editor.shapes.Circle;
 import com.editor.shapes.CompositeShapePrototypeRegistry;
 import com.editor.shapes.Rectangle;
@@ -326,8 +326,13 @@ public class ShapeEditorFrame extends Frame {
         int y = 5; // Small top margin
         int x = BUTTON_LEFT_MARGIN;
 
+        // Create a ShapeButtonFactory for creating shape buttons
+        ShapeButtonFactory buttonFactory = new ShapeButtonFactory(whiteBoard, prototypeRegistry,
+                whiteBoard.getCommandHistory());
+        buttonFactory.setDragMediator(dragMediator);
+
         // Create rectangle button (icon only with drag capability)
-        IButton rectangleButton = createDraggableShapeButton(
+        IButton rectangleButton = buttonFactory.createButton(
                 x, y,
                 "icons/rectangle.png",
                 "Draw a rectangle",
@@ -337,7 +342,7 @@ public class ShapeEditorFrame extends Frame {
         // Create polygon button (icon only with drag capability) - positioned
         // horizontally
         x += rectangleButton.getWidth() + HORIZONTAL_BUTTON_SPACING;
-        IButton polygonButton = createDraggableShapeButton(
+        IButton polygonButton = buttonFactory.createButton(
                 x, y,
                 "icons/polygon.png",
                 "Draw a polygon",
@@ -347,7 +352,7 @@ public class ShapeEditorFrame extends Frame {
         // Create circle button (icon only with drag capability) - positioned
         // horizontally
         x += polygonButton.getWidth() + HORIZONTAL_BUTTON_SPACING;
-        IButton circleButton = createDraggableShapeButton(
+        IButton circleButton = buttonFactory.createButton(
                 x, y,
                 "icons/circle.png",
                 "Draw a circle",
@@ -378,20 +383,6 @@ public class ShapeEditorFrame extends Frame {
 
         // Add tooltip decoration
         return new TooltipDecorator(button, tooltipText);
-    }
-
-    /**
-     * Helper method to create a draggable shape button with icon and tooltip
-     */
-    private IButton createDraggableShapeButton(int x, int y, String iconPath, String tooltipText,
-            String shapeType) {
-        // First create a regular icon button
-        IButton button = createIconButton(x, y, iconPath, tooltipText);
-
-        // Add shape creation decorator to make it draggable
-        button = new ShapeCreationButtonDecorator(button, whiteBoard, prototypeRegistry, shapeType);
-
-        return button;
     }
 
     public void launch() {
