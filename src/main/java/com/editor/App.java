@@ -1,14 +1,10 @@
 package com.editor;
 
-import com.editor.gui.ShapeEditorFrame;
-
 /**
- * Hello world!
- *
+ * Application launcher class.
+ * This class is kept for backward compatibility.
+ * The main entry point is now in ShapeEditorFrame.
  */
 public class App {
-    public static void main(String[] args) {
-        ShapeEditorFrame frame = new ShapeEditorFrame();
-        frame.launch();
-    }
+    // Main method removed - use ShapeEditorFrame.main() instead
 }
