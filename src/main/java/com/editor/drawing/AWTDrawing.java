@@ -12,9 +12,6 @@ public class AWTDrawing implements Drawer {
     private static final long serialVersionUID = 1L;
     private final transient Graphics2D graphics;
 
-    // Light pink color for all shapes
-    private static final Color LIGHT_PINK = new Color(255, 182, 193);
-
     public AWTDrawing(Graphics2D graphics) {
         this.graphics = graphics;
     }
@@ -43,15 +40,15 @@ public class AWTDrawing implements Drawer {
             int height = rectangle.getHeight();
 
             if (borderRadius == 0) {
-                // Always use light pink for fill color
-                graphics.setColor(LIGHT_PINK);
+                // Use the shape's actual fill color
+                graphics.setColor(rectangle.getFillColor());
                 graphics.fillRect(x, y, width, height);
 
                 graphics.setColor(rectangle.getBorderColor());
                 graphics.drawRect(x, y, width, height);
             } else {
-                // Always use light pink for fill color
-                graphics.setColor(LIGHT_PINK);
+                // Use the shape's actual fill color
+                graphics.setColor(rectangle.getFillColor());
                 graphics.fillRoundRect(x, y, width, height, borderRadius, borderRadius);
 
                 graphics.setColor(rectangle.getBorderColor());
@@ -94,8 +91,8 @@ public class AWTDrawing implements Drawer {
 
             Polygon awtPolygon = new Polygon(xPoints, yPoints, sides);
 
-            // Always use light pink for fill color
-            graphics.setColor(LIGHT_PINK);
+            // Use the shape's actual fill color
+            graphics.setColor(regularPolygon.getFillColor());
             graphics.fillPolygon(awtPolygon);
 
             graphics.setColor(regularPolygon.getBorderColor());
@@ -116,8 +113,8 @@ public class AWTDrawing implements Drawer {
             int y = circle.getY() - circle.getRadius();
             int diameter = circle.getRadius() * 2;
 
-            // Always use light pink for fill color
-            graphics.setColor(LIGHT_PINK);
+            // Use the shape's actual fill color
+            graphics.setColor(circle.getFillColor());
             graphics.fillOval(x, y, diameter, diameter);
 
             graphics.setColor(circle.getBorderColor());
