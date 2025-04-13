@@ -8,10 +8,10 @@ public class Rectangle implements Shape {
     private static final long serialVersionUID = 1L;
     private int x, y, width, height;
     private boolean selected;
-    private Color fillColor = Color.BLUE; // Default fill color for rectangles
-    private Color borderColor = Color.BLACK; // Default border color
-    private double rotation = 0.0; // Rotation in degrees
-    private int borderRadius = 0; // Border radius for rounded corners
+    private Color fillColor = Color.BLUE;
+    private Color borderColor = Color.BLACK;
+    private double rotation = 0.0;
+    private int borderRadius = 0;
 
     public Rectangle(int x, int y, int width, int height) {
         this.x = x;
@@ -60,7 +60,6 @@ public class Rectangle implements Shape {
 
     @Override
     public Shape clone() {
-        // Create a new Rectangle with the same properties
         Rectangle clone = new Rectangle(x, y, width, height);
         clone.setSelected(selected);
         clone.setFillColor(fillColor);

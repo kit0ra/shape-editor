@@ -14,10 +14,10 @@ public class Circle implements Shape {
     private int x;
     private int y;
     private int radius;
-    private Color fillColor = Color.GREEN; // Default fill color for circles
-    private Color borderColor = Color.BLACK; // Default border color
-    private double rotation = 0.0; // Rotation in degrees (not really used for circles but kept for consistency)
-    private boolean selected = false; // Selection state
+    private Color fillColor = Color.GREEN;
+    private Color borderColor = Color.BLACK;
+    private double rotation = 0.0;
+    private boolean selected = false;
 
     /**
      * Creates a new circle with the specified position and radius.
@@ -150,11 +150,7 @@ public class Circle implements Shape {
      * @return true if the point is inside the circle, false otherwise
      */
     public boolean contains(Point point) {
-        // Calculate the distance from the point to the center of the circle
         double distance = Math.sqrt(Math.pow(point.x - x, 2) + Math.pow(point.y - y, 2));
-
-        // The point is inside the circle if the distance is less than or equal to the
-        // radius
         return distance <= radius;
     }
 
@@ -172,8 +168,6 @@ public class Circle implements Shape {
 
     @Override
     public void setPosition(int x, int y) {
-        // Convert top-left coordinates to center coordinates
-        // x and y are the coordinates of the top-left corner of the bounding rectangle
         this.x = x + radius;
         this.y = y + radius;
     }
@@ -195,7 +189,6 @@ public class Circle implements Shape {
      */
     @Override
     public Shape clone() {
-        // Create a new Circle with the same properties
         Circle clone = new Circle(x, y, radius);
         clone.setSelected(selected);
         clone.setFillColor(fillColor);
@@ -233,11 +226,7 @@ public class Circle implements Shape {
      */
     @Override
     public boolean isSelected(int x, int y) {
-        // Calculate the distance from the point to the center of the circle
         double distance = Math.sqrt(Math.pow(x - this.x, 2) + Math.pow(y - this.y, 2));
-
-        // The point is inside the circle if the distance is less than or equal to the
-        // radius
         return distance <= radius;
     }
 }

@@ -14,9 +14,9 @@ public class RegularPolygon implements Shape {
     private int radius;
     private int numberOfSides;
     private boolean selected;
-    private Color fillColor = Color.GREEN; // Default fill color for polygons
-    private Color borderColor = Color.BLACK; // Default border color
-    private double rotation = 0.0; // Rotation in degrees
+    private Color fillColor = Color.GREEN;
+    private Color borderColor = Color.BLACK;
+    private double rotation = 0.0;
 
     /**
      * Creates a new regular polygon.
@@ -46,15 +46,12 @@ public class RegularPolygon implements Shape {
 
     @Override
     public void setPosition(int x, int y) {
-        // Convertir les coordonnées du coin supérieur gauche en coordonnées du centre
-        // x et y sont les coordonnées du coin supérieur gauche du rectangle englobant
         this.x = x + radius;
         this.y = y + radius;
     }
 
     @Override
     public boolean isSelected(int testX, int testY) {
-        // Calculate the points of the polygon
         int[] xPoints = new int[numberOfSides];
         int[] yPoints = new int[numberOfSides];
         double angleStep = 2 * Math.PI / numberOfSides;
@@ -64,7 +61,6 @@ public class RegularPolygon implements Shape {
             yPoints[i] = (int) (y + radius * Math.sin(i * angleStep));
         }
 
-        // Create a Java AWT Polygon for hit testing
         Polygon polygon = new Polygon(xPoints, yPoints, numberOfSides);
         return polygon.contains(testX, testY);
     }
@@ -81,7 +77,6 @@ public class RegularPolygon implements Shape {
 
     @Override
     public Rectangle getBounds() {
-        // Calculate the bounding box
         int minX = x - radius;
         int minY = y - radius;
         int width = radius * 2;
