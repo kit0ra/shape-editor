@@ -36,7 +36,7 @@ import com.editor.utils.ImageLoader;
  */
 public class ToolbarPanel extends CustomPanel {
 
-    private static final String PANEL_TITLE = "Toolbar";
+    private static final Color NORMALCOLOR = Color.decode("#F6E9D7");
     private static final Font TITLE_FONT = new Font("Arial", Font.BOLD, 14);
 
     private boolean isShapeOverToolbar = false;
@@ -60,30 +60,23 @@ public class ToolbarPanel extends CustomPanel {
     private Map<IButton, String> buttonToPrototypeKeyMap = new HashMap<>();
 
     // Colors for visual feedback
-    private final Color normalColor = new Color(240, 240, 240);
     private final Color hoverColor = new Color(220, 240, 220);
 
     public ToolbarPanel() {
         super();
-        setBackground(normalColor);
+        setBackground(NORMALCOLOR);
     }
 
     @Override
     public void paint(Graphics g) {
-        setBackground(isShapeOverToolbar ? hoverColor : normalColor);
-        super.paint(g); // Draws background and buttons from CustomPanel's list
+        setBackground(isShapeOverToolbar ? hoverColor : NORMALCOLOR);
+        super.paint(g);
 
         Graphics2D g2d = (Graphics2D) g;
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         g2d.setFont(TITLE_FONT);
-        g2d.setColor(Color.DARK_GRAY);
-        int titleWidth = g2d.getFontMetrics().stringWidth(PANEL_TITLE);
-        int x = (getWidth() - titleWidth) / 2;
-        g2d.drawString(PANEL_TITLE, x, 20);
-
-        g2d.setColor(Color.GRAY);
-        g2d.drawLine(10, 25, getWidth() - 10, 25);
+        g2d.setColor(Color.decode("#F6E9D7"));
     }
 
     public void setTargetWhiteBoard(WhiteBoard whiteBoard) {
