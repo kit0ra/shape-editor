@@ -343,7 +343,7 @@ public class WhiteBoard extends Canvas implements Draggable {
         } else {
             // Create dummy objects to avoid null pointer exceptions
             borderRadiusSlider = new JSlider();
-            borderRadiusValueLabel = new JLabel("");
+
         }
 
         // Add the form panel to the dialog

@@ -15,9 +15,9 @@ import com.editor.shapes.Shape;
  * Command to edit shape properties (colors, rotation)
  */
 public class EditShapeCommand implements Command {
-    private List<Shape> shapes;
-    private Map<Shape, ShapeState> oldStates = new HashMap<>();
-    private Map<Shape, ShapeState> newStates = new HashMap<>();
+    private final List<Shape> shapes;
+    private final Map<Shape, ShapeState> oldStates = new HashMap<>();
+    private final Map<Shape, ShapeState> newStates = new HashMap<>();
 
     /**
      * Class to store shape state

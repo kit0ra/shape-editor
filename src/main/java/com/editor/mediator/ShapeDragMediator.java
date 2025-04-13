@@ -18,7 +18,7 @@ import com.editor.gui.panel.TrashPanel;
  * This class mediates drag operations between panels and the whiteboard.
  */
 public class ShapeDragMediator implements DragMediator {
-    private List<CustomPanel> panels = new ArrayList<>(); // Keep track of panels specifically if needed
+    private final List<CustomPanel> panels = new ArrayList<>(); // Keep track of panels specifically if needed
     private WhiteBoard whiteBoard;
     private Draggable currentDraggable;
     private Object sourceComponentForDrag; // Changed type to Object
@@ -310,6 +310,7 @@ public class ShapeDragMediator implements DragMediator {
 
     @Override
     // Changed signature to accept Object sourceComponent
+    @SuppressWarnings("CallToPrintStackTrace")
     public Point convertToWhiteboardCoordinates(Object sourceComponent, Point sourcePoint) {
         if (whiteBoard == null || sourceComponent == null || !(sourceComponent instanceof Component)) {
             debugLog("ERROR: Cannot convert coordinates - WhiteBoard or sourceComponent invalid/not registered");
