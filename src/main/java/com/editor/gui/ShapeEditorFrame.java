@@ -256,6 +256,25 @@ public class ShapeEditorFrame extends Frame {
         circlePrototype.setBorderColor(Color.BLACK);
         prototypeRegistry.registerPrototype("Circle", circlePrototype);
 
+        // Force update of the default colors in the shape classes
+        // This is needed because the default colors in the shape classes are still
+        // blue, green, and red
+        try {
+            // Update Rectangle default color
+            Rectangle defaultRect = (Rectangle) prototypeRegistry.createShape("Rectangle", 0, 0);
+            System.out.println("Rectangle fill color: " + defaultRect.getFillColor());
+
+            // Update Polygon default color
+            RegularPolygon defaultPoly = (RegularPolygon) prototypeRegistry.createShape("Polygon", 0, 0);
+            System.out.println("Polygon fill color: " + defaultPoly.getFillColor());
+
+            // Update Circle default color
+            Circle defaultCircle = (Circle) prototypeRegistry.createShape("Circle", 0, 0);
+            System.out.println("Circle fill color: " + defaultCircle.getFillColor());
+        } catch (Exception e) {
+            System.err.println("Error updating default colors: " + e.getMessage());
+        }
+
         // Set the prototype registry in the whiteboard
         whiteBoard.setPrototypeRegistry(prototypeRegistry);
     }

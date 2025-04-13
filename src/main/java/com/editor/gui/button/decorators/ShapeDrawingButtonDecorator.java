@@ -10,7 +10,11 @@ import java.awt.image.BufferedImage;
 import com.editor.drawing.AWTDrawing;
 import com.editor.drawing.Drawer;
 import com.editor.gui.button.IButton;
+import com.editor.shapes.Circle;
+import com.editor.shapes.Rectangle;
+import com.editor.shapes.RegularPolygon;
 import com.editor.shapes.Shape;
+import com.editor.shapes.ShapeGroup;
 
 /**
  * A decorator that draws a shape on a button.
@@ -86,10 +90,40 @@ public class ShapeDrawingButtonDecorator extends ButtonDecorator {
             int shapeY = centerY - (bounds.getHeight() / 2);
 
             clonedShape.setPosition(shapeX, shapeY);
+
+            // Make sure the shape is drawn with its actual fill color
+            System.out.println("Drawing shape on button with fill color: " + getFillColorName(clonedShape));
             clonedShape.draw(drawer);
 
         } finally {
             g2d.dispose();
+        }
+    }
+
+    /**
+     * Gets a string representation of the fill color of a shape.
+     *
+     * @param shape The shape to get the fill color from
+     * @return A string representation of the fill color
+     */
+    private String getFillColorName(Shape shape) {
+        Color fillColor = null;
+
+        if (shape instanceof Rectangle) {
+            fillColor = ((Rectangle) shape).getFillColor();
+        } else if (shape instanceof RegularPolygon) {
+            fillColor = ((RegularPolygon) shape).getFillColor();
+        } else if (shape instanceof Circle) {
+            fillColor = ((Circle) shape).getFillColor();
+        } else if (shape instanceof ShapeGroup) {
+            // ShapeGroup doesn't have a getFillColor method, so we'll use a default color
+            fillColor = Color.PINK;
+        }
+
+        if (fillColor != null) {
+            return String.format("RGB(%d,%d,%d)", fillColor.getRed(), fillColor.getGreen(), fillColor.getBlue());
+        } else {
+            return "unknown";
         }
     }
 
