@@ -23,6 +23,7 @@ import com.editor.utils.ImageLoader;
 public class CompositeButtonFactory implements ButtonFactory {
     private final WhiteBoard whiteBoard;
     private final CompositeShapePrototypeRegistry compositeRegistry;
+    @SuppressWarnings("unused")
     private final CommandHistory commandHistory;
     private DragMediator dragMediator;
 

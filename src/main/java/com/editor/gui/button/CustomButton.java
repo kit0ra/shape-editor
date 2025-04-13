@@ -5,8 +5,8 @@ import java.awt.Graphics;
 
 public class CustomButton implements IButton {
 
-    private int x, y, width, height;
-    private String text;
+    private final int x, y, width, height;
+    private final String text;
     private boolean isMouseOver = false; // Tracks hover state
 
     public CustomButton(int x, int y, int width, int height, String text) {

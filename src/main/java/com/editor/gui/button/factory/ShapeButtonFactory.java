@@ -23,6 +23,7 @@ import com.editor.utils.ImageLoader;
 public class ShapeButtonFactory implements ButtonFactory {
     private final WhiteBoard whiteBoard;
     private final ShapePrototypeRegistry registry;
+    @SuppressWarnings("unused")
     private final CommandHistory commandHistory;
     private DragMediator dragMediator;
 

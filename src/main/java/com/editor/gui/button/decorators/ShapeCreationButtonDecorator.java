@@ -59,38 +59,43 @@ public class ShapeCreationButtonDecorator extends ButtonDecorator implements Dra
                 // Create a light pink color for all shapes
                 Color lightPink = new Color(255, 182, 193, 128); // Light pink semi-transparent
                 Color lightPinkBorder = new Color(255, 105, 180); // Darker pink for border
-
-                // Utiliser des couleurs différentes selon le type de forme
-                if ("Rectangle".equals(shapeType)) {
-                    g2d.setColor(lightPink);
-                    g2d.fillRect(dragX - 30, dragY - 20, 60, 40);
-                    g2d.setColor(lightPinkBorder);
-                    g2d.drawRect(dragX - 30, dragY - 20, 60, 40);
-                } else if ("Polygon".equals(shapeType)) {
-                    // Dessiner un hexagone pour le polygone
-                    int radius = 30;
-                    int sides = 6;
-                    int[] xPoints = new int[sides];
-                    int[] yPoints = new int[sides];
-
-                    for (int i = 0; i < sides; i++) {
-                        double angle = 2.0 * Math.PI * i / sides;
-                        xPoints[i] = (int) (dragX + radius * Math.cos(angle));
-                        yPoints[i] = (int) (dragY + radius * Math.sin(angle));
+                if (null != shapeType) // Utiliser des couleurs différentes selon le type de forme
+                    switch (shapeType) {
+                        case "Rectangle":
+                            g2d.setColor(lightPink);
+                            g2d.fillRect(dragX - 30, dragY - 20, 60, 40);
+                            g2d.setColor(lightPinkBorder);
+                            g2d.drawRect(dragX - 30, dragY - 20, 60, 40);
+                            break;
+                        case "Polygon": {
+                            // Dessiner un hexagone pour le polygone
+                            int radius = 30;
+                            int sides = 6;
+                            int[] xPoints = new int[sides];
+                            int[] yPoints = new int[sides];
+                            for (int i = 0; i < sides; i++) {
+                                double angle = 2.0 * Math.PI * i / sides;
+                                xPoints[i] = (int) (dragX + radius * Math.cos(angle));
+                                yPoints[i] = (int) (dragY + radius * Math.sin(angle));
+                            }
+                            g2d.setColor(lightPink);
+                            g2d.fillPolygon(xPoints, yPoints, sides);
+                            g2d.setColor(lightPinkBorder);
+                            g2d.drawPolygon(xPoints, yPoints, sides);
+                            break;
+                        }
+                        case "Circle": {
+                            // Draw a circle
+                            int radius = 30;
+                            g2d.setColor(lightPink);
+                            g2d.fillOval(dragX - radius, dragY - radius, radius * 2, radius * 2);
+                            g2d.setColor(lightPinkBorder);
+                            g2d.drawOval(dragX - radius, dragY - radius, radius * 2, radius * 2);
+                            break;
+                        }
+                        default:
+                            break;
                     }
-
-                    g2d.setColor(lightPink);
-                    g2d.fillPolygon(xPoints, yPoints, sides);
-                    g2d.setColor(lightPinkBorder);
-                    g2d.drawPolygon(xPoints, yPoints, sides);
-                } else if ("Circle".equals(shapeType)) {
-                    // Draw a circle
-                    int radius = 30;
-                    g2d.setColor(lightPink);
-                    g2d.fillOval(dragX - radius, dragY - radius, radius * 2, radius * 2);
-                    g2d.setColor(lightPinkBorder);
-                    g2d.drawOval(dragX - radius, dragY - radius, radius * 2, radius * 2);
-                }
 
                 // Dessiner une ligne pointillée pour indiquer le glisser-déposer
                 g2d.setColor(Color.DARK_GRAY);

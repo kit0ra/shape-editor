@@ -62,7 +62,7 @@ public class ShapePrototypeRegistry {
      * @return An array of all registered prototype keys
      */
     public String[] getPrototypeKeys() {
-        return prototypes.keySet().toArray(new String[0]);
+        return prototypes.keySet().stream().toArray(String[]::new);
     }
 
     /**
