@@ -42,12 +42,16 @@ public class CustomButton implements IButton {
         isMouseOver = false;
     }
 
+    // Button colors
+    private static final Color BUTTON_COLOR = Color.LIGHT_GRAY;
+    private static final Color BUTTON_HOVER_COLOR = new Color(200, 200, 200);
+
     @Override
     public void draw(Graphics g) {
         if (isMouseOver) {
-            g.setColor(Color.GRAY);
+            g.setColor(BUTTON_HOVER_COLOR);
         } else {
-            g.setColor(Color.LIGHT_GRAY);
+            g.setColor(BUTTON_COLOR);
         }
         g.fillRect(x, y, width, height);
         g.setColor(Color.BLACK);

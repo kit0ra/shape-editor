@@ -68,7 +68,7 @@ public class ShapeButtonFactory implements ButtonFactory {
             try {
                 shapePrototype = registry.createShape(typeKey, 0, 0);
                 if (shapePrototype != null) {
-                    button = new ShapeDrawingButtonDecorator(button, shapePrototype, 0.5, 4);
+                    button = new ShapeDrawingButtonDecorator(button, shapePrototype, 0.35, 6);
                 }
             } catch (Exception e) {
                 System.err.println("[ShapeButtonFactory] Error creating shape from registry: " + e.getMessage());

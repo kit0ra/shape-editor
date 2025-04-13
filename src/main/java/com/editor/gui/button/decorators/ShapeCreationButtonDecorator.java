@@ -56,11 +56,15 @@ public class ShapeCreationButtonDecorator extends ButtonDecorator implements Dra
                 // Draw a semi-transparent shape preview at the drag location
                 g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
 
+                // Create a light pink color for all shapes
+                Color lightPink = new Color(255, 182, 193, 128); // Light pink semi-transparent
+                Color lightPinkBorder = new Color(255, 105, 180); // Darker pink for border
+
                 // Utiliser des couleurs différentes selon le type de forme
                 if ("Rectangle".equals(shapeType)) {
-                    g2d.setColor(new Color(0, 0, 255, 128)); // Bleu semi-transparent
+                    g2d.setColor(lightPink);
                     g2d.fillRect(dragX - 30, dragY - 20, 60, 40);
-                    g2d.setColor(Color.BLUE);
+                    g2d.setColor(lightPinkBorder);
                     g2d.drawRect(dragX - 30, dragY - 20, 60, 40);
                 } else if ("Polygon".equals(shapeType)) {
                     // Dessiner un hexagone pour le polygone
@@ -75,10 +79,17 @@ public class ShapeCreationButtonDecorator extends ButtonDecorator implements Dra
                         yPoints[i] = (int) (dragY + radius * Math.sin(angle));
                     }
 
-                    g2d.setColor(new Color(0, 255, 0, 128)); // Vert semi-transparent
+                    g2d.setColor(lightPink);
                     g2d.fillPolygon(xPoints, yPoints, sides);
-                    g2d.setColor(Color.GREEN);
+                    g2d.setColor(lightPinkBorder);
                     g2d.drawPolygon(xPoints, yPoints, sides);
+                } else if ("Circle".equals(shapeType)) {
+                    // Draw a circle
+                    int radius = 30;
+                    g2d.setColor(lightPink);
+                    g2d.fillOval(dragX - radius, dragY - radius, radius * 2, radius * 2);
+                    g2d.setColor(lightPinkBorder);
+                    g2d.drawOval(dragX - radius, dragY - radius, radius * 2, radius * 2);
                 }
 
                 // Dessiner une ligne pointillée pour indiquer le glisser-déposer

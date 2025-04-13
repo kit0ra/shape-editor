@@ -57,10 +57,14 @@ public class DraggableCompositeShapeCreationButtonDecorator extends CompositeSha
                 // Draw a semi-transparent shape preview at the drag location
                 g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
 
+                // Create a light pink color for all shapes
+                Color lightPink = new Color(255, 182, 193, 128); // Light pink semi-transparent
+                Color lightPinkBorder = new Color(255, 105, 180); // Darker pink for border
+
                 // Draw a generic group representation (a rectangle with a "G" in it)
-                g2d.setColor(new Color(255, 165, 0, 128)); // Orange semi-transparent
+                g2d.setColor(lightPink);
                 g2d.fillRect(dragX - 30, dragY - 20, 60, 40);
-                g2d.setColor(Color.ORANGE);
+                g2d.setColor(lightPinkBorder);
                 g2d.drawRect(dragX - 30, dragY - 20, 60, 40);
 
                 // Draw a "G" in the center

@@ -14,7 +14,7 @@ public class RegularPolygon implements Shape {
     private final int radius;
     private final int numberOfSides;
     private boolean selected;
-    private Color fillColor = Color.GREEN;
+    private Color fillColor = new Color(255, 182, 193); // Light pink default fill color
     private Color borderColor = Color.BLACK;
     private double rotation = 0.0;
 

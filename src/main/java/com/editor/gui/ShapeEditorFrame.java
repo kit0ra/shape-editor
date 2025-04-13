@@ -231,9 +231,12 @@ public class ShapeEditorFrame extends Frame {
     private void initializePrototypeRegistry() {
         prototypeRegistry = new ShapePrototypeRegistry();
 
+        // Create a light pink color for all shapes
+        Color lightPink = new Color(255, 182, 193);
+
         // Register a rectangle prototype
         Rectangle rectanglePrototype = new Rectangle(0, 0, 80, 60);
-        rectanglePrototype.setFillColor(Color.BLUE);
+        rectanglePrototype.setFillColor(lightPink);
         rectanglePrototype.setBorderColor(Color.BLACK);
         prototypeRegistry.registerPrototype("Rectangle", rectanglePrototype);
 
@@ -243,13 +246,13 @@ public class ShapeEditorFrame extends Frame {
 
         // Create a regular hexagon centered at (0, 0) with radius 40
         RegularPolygon polygonPrototype = new RegularPolygon(0, 0, radius, numPoints);
-        polygonPrototype.setFillColor(Color.GREEN);
+        polygonPrototype.setFillColor(lightPink);
         polygonPrototype.setBorderColor(Color.BLACK);
         prototypeRegistry.registerPrototype("Polygon", polygonPrototype);
 
         // Register a circle prototype
         Circle circlePrototype = new Circle(0, 0, 40);
-        circlePrototype.setFillColor(Color.RED);
+        circlePrototype.setFillColor(lightPink);
         circlePrototype.setBorderColor(Color.BLACK);
         prototypeRegistry.registerPrototype("Circle", circlePrototype);
 

@@ -34,13 +34,13 @@ public class CompositeButtonFactory implements ButtonFactory {
     /**
      * Creates a new CompositeButtonFactory.
      *
-     * @param whiteBoard The whiteboard to create shapes on
+     * @param whiteBoard        The whiteboard to create shapes on
      * @param compositeRegistry The composite shape prototype registry
-     * @param commandHistory The command history for undo/redo
+     * @param commandHistory    The command history for undo/redo
      */
-    public CompositeButtonFactory(WhiteBoard whiteBoard, 
-                                 CompositeShapePrototypeRegistry compositeRegistry,
-                                 CommandHistory commandHistory) {
+    public CompositeButtonFactory(WhiteBoard whiteBoard,
+            CompositeShapePrototypeRegistry compositeRegistry,
+            CommandHistory commandHistory) {
         this.whiteBoard = whiteBoard;
         this.compositeRegistry = compositeRegistry;
         this.commandHistory = commandHistory;
@@ -69,7 +69,7 @@ public class CompositeButtonFactory implements ButtonFactory {
         if (compositeRegistry != null && compositeRegistry.hasPrototype(typeKey)) {
             groupPrototype = compositeRegistry.getPrototype(typeKey);
             if (groupPrototype != null) {
-                button = new ShapeDrawingButtonDecorator(button, groupPrototype, 0.5, 4);
+                button = new ShapeDrawingButtonDecorator(button, groupPrototype, 0.35, 6);
             }
         }
 
@@ -90,8 +90,7 @@ public class CompositeButtonFactory implements ButtonFactory {
         button = new TooltipDecorator(button, tooltipText);
 
         // Add composite shape creation functionality
-        DraggableCompositeShapeCreationButtonDecorator compositeButton = 
-            new DraggableCompositeShapeCreationButtonDecorator(
+        DraggableCompositeShapeCreationButtonDecorator compositeButton = new DraggableCompositeShapeCreationButtonDecorator(
                 button, whiteBoard, compositeRegistry, typeKey);
 
         // Set drag mediator if available

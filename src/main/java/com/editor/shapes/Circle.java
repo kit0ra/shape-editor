@@ -14,7 +14,7 @@ public class Circle implements Shape {
     private int x;
     private int y;
     private int radius;
-    private Color fillColor = Color.GREEN;
+    private Color fillColor = new Color(255, 182, 193); // Light pink default fill color
     private Color borderColor = Color.BLACK;
     private double rotation = 0.0;
     private boolean selected = false;

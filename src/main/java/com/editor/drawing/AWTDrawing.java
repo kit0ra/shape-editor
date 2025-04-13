@@ -12,6 +12,9 @@ public class AWTDrawing implements Drawer {
     private static final long serialVersionUID = 1L;
     private final transient Graphics2D graphics;
 
+    // Light pink color for all shapes
+    private static final Color LIGHT_PINK = new Color(255, 182, 193);
+
     public AWTDrawing(Graphics2D graphics) {
         this.graphics = graphics;
     }
@@ -40,13 +43,15 @@ public class AWTDrawing implements Drawer {
             int height = rectangle.getHeight();
 
             if (borderRadius == 0) {
-                graphics.setColor(rectangle.getFillColor());
+                // Always use light pink for fill color
+                graphics.setColor(LIGHT_PINK);
                 graphics.fillRect(x, y, width, height);
 
                 graphics.setColor(rectangle.getBorderColor());
                 graphics.drawRect(x, y, width, height);
             } else {
-                graphics.setColor(rectangle.getFillColor());
+                // Always use light pink for fill color
+                graphics.setColor(LIGHT_PINK);
                 graphics.fillRoundRect(x, y, width, height, borderRadius, borderRadius);
 
                 graphics.setColor(rectangle.getBorderColor());
@@ -89,7 +94,8 @@ public class AWTDrawing implements Drawer {
 
             Polygon awtPolygon = new Polygon(xPoints, yPoints, sides);
 
-            graphics.setColor(regularPolygon.getFillColor());
+            // Always use light pink for fill color
+            graphics.setColor(LIGHT_PINK);
             graphics.fillPolygon(awtPolygon);
 
             graphics.setColor(regularPolygon.getBorderColor());
@@ -110,7 +116,8 @@ public class AWTDrawing implements Drawer {
             int y = circle.getY() - circle.getRadius();
             int diameter = circle.getRadius() * 2;
 
-            graphics.setColor(circle.getFillColor());
+            // Always use light pink for fill color
+            graphics.setColor(LIGHT_PINK);
             graphics.fillOval(x, y, diameter, diameter);
 
             graphics.setColor(circle.getBorderColor());
