@@ -6,12 +6,12 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 
+import com.editor.commands.CommandHistory;
+import com.editor.commands.CreateGroupCommand;
 import com.editor.gui.WhiteBoard;
 import com.editor.gui.button.Draggable;
 import com.editor.gui.button.IButton;
 import com.editor.mediator.DragMediator;
-import com.editor.commands.CommandHistory;
-import com.editor.commands.CreateGroupCommand;
 import com.editor.shapes.CompositeShapePrototypeRegistry;
 import com.editor.shapes.ShapeGroup;
 
@@ -84,6 +84,9 @@ public class DraggableCompositeShapeCreationButtonDecorator extends CompositeSha
         isDragging = true;
         dragX = x;
         dragY = y;
+        if (dragMediator != null) {
+            dragMediator.startDrag(this, this, x, y);
+        }
     }
 
     @Override
@@ -94,6 +97,7 @@ public class DraggableCompositeShapeCreationButtonDecorator extends CompositeSha
     }
 
     @Override
+    @SuppressWarnings("CallToPrintStackTrace")
     public void endDrag(int x, int y) {
         System.out.println("[DraggableCompositeButton] Ended drag at (" + x + ", " + y + ")");
         isDragging = false;
@@ -162,4 +166,5 @@ public class DraggableCompositeShapeCreationButtonDecorator extends CompositeSha
         System.out.println("[DraggableCompositeButton] Setting drag mediator");
         this.dragMediator = mediator;
     }
+
 }

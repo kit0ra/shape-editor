@@ -27,9 +27,6 @@ public class SaveStateCommand implements Command {
     private final ShapePrototypeRegistry prototypeRegistry; // Added standard registry
     private final String filePath;
 
-    // Keep track of the saved state in case we need undo (though unlikely for save)
-    private AppStateMemento savedState = null;
-
     /**
      * Constructor that takes all components including the composite registry.
      *
@@ -65,6 +62,7 @@ public class SaveStateCommand implements Command {
     // String filePath) { ... }
 
     @Override
+    @SuppressWarnings("CallToPrintStackTrace")
     public void execute() {
         System.out.println("[STATE DEBUG] SaveStateCommand.execute() - START");
         System.out.println("[STATE DEBUG] Saving application state to: " + filePath);
@@ -88,7 +86,6 @@ public class SaveStateCommand implements Command {
             System.out.println("[STATE DEBUG] Creating AppStateMemento with all component mementos...");
             AppStateMemento appState = new AppStateMemento(whiteboardMemento, toolbarMemento, compositeRegistryMemento,
                     prototypeRegistryMemento); // Pass new memento
-            this.savedState = appState; // Store for potential undo
 
             // 2. Serialize the AppStateMemento to the file
             try (FileOutputStream fileOut = new FileOutputStream(filePath);

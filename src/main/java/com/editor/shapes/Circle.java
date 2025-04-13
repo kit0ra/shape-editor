@@ -188,13 +188,19 @@ public class Circle implements Shape {
      * @return A new Circle with the same properties
      */
     @Override
+    @SuppressWarnings("CloneDeclaresCloneNotSupported")
     public Shape clone() {
-        Circle clone = new Circle(x, y, radius);
-        clone.setSelected(selected);
-        clone.setFillColor(fillColor);
-        clone.setBorderColor(borderColor);
-        clone.setRotation(rotation);
-        return clone;
+        try {
+            Circle clone = (Circle) super.clone();
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            Circle clone = new Circle(x, y, radius);
+            clone.setSelected(selected);
+            clone.setFillColor(fillColor);
+            clone.setBorderColor(borderColor);
+            clone.setRotation(rotation);
+            return clone;
+        }
     }
 
     /**

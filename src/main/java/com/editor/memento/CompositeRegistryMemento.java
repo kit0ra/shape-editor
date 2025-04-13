@@ -43,6 +43,7 @@ public class CompositeRegistryMemento implements Serializable {
      *
      * @param registry The CompositeShapePrototypeRegistry to create a memento from.
      */
+    @SuppressWarnings({ "CallToPrintStackTrace", "UseSpecificCatch" })
     public CompositeRegistryMemento(CompositeShapePrototypeRegistry registry) {
         Map<String, ShapeGroup> extractedMap = new HashMap<>();
 

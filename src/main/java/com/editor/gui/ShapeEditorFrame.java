@@ -38,11 +38,11 @@ import com.editor.utils.ImageLoader;
 
 public class ShapeEditorFrame extends Frame {
 
-    private HorizontalPanel horizontalPanel;
-    private VerticalPanel verticalPanel;
-    private ToolbarPanel toolbarPanel;
-    private TrashPanel trashPanel;
-    private WhiteBoard whiteBoard;
+    private final HorizontalPanel horizontalPanel;
+    private final VerticalPanel verticalPanel;
+    private final ToolbarPanel toolbarPanel;
+    private final TrashPanel trashPanel;
+    private final WhiteBoard whiteBoard;
 
     // Mediator for drag operations
     private DragMediator dragMediator;
@@ -66,31 +66,26 @@ public class ShapeEditorFrame extends Frame {
 
         whiteBoard = new WhiteBoard(800, 600, Color.WHITE);
         whiteBoard.setRelativeBounds(20, 30, 80, 70); // x=20%, y=30% (below vertical panel), width=80%, height=70%
-        whiteBoard.makeResponsiveTo(this);
         add(whiteBoard);
 
         horizontalPanel = new HorizontalPanel();
         horizontalPanel.setRelativeBounds(0, 10, 100, 10); // x=10%, y=10%, width=80%, height=10%
-        horizontalPanel.makeResponsiveTo(this);
         add(horizontalPanel);
 
         verticalPanel = new VerticalPanel();
         verticalPanel.setRelativeBounds(0, 20, 20, 10); // x=0%, y=20% (below horizontal panel), width=20%, height=10%
-        verticalPanel.makeResponsiveTo(this);
         verticalPanel.setTargetWhiteBoard(whiteBoard); // Définir le whiteboard comme cible pour le glisser-déposer
         add(verticalPanel);
 
         // Initialize the toolbar panel in the middle of the left side
         toolbarPanel = new ToolbarPanel();
         toolbarPanel.setRelativeBounds(0, 30, 20, 60); // x=0%, y=30% (below vertical panel), width=20%, height=60%
-        toolbarPanel.makeResponsiveTo(this);
         toolbarPanel.setTargetWhiteBoard(whiteBoard);
         add(toolbarPanel);
 
         // Initialize the trash panel at the bottom left
         trashPanel = new TrashPanel();
         trashPanel.setRelativeBounds(0, 90, 20, 10); // x=0%, y=90% (bottom), width=20%, height=10%
-        trashPanel.makeResponsiveTo(this);
         trashPanel.setTargetWhiteBoard(whiteBoard);
         add(trashPanel);
 
@@ -141,7 +136,17 @@ public class ShapeEditorFrame extends Frame {
             }
         });
 
+        initializeResponsiveness();
         init();
+    }
+
+    private void initializeResponsiveness() {
+        // Make components responsive after construction is complete
+        whiteBoard.makeResponsiveTo(this);
+        horizontalPanel.makeResponsiveTo(this);
+        verticalPanel.makeResponsiveTo(this);
+        toolbarPanel.makeResponsiveTo(this);
+        trashPanel.makeResponsiveTo(this);
     }
 
     private void init() {

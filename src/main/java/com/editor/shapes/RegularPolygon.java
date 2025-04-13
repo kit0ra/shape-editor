@@ -11,8 +11,8 @@ import com.editor.drawing.Drawer;
 public class RegularPolygon implements Shape {
     private static final long serialVersionUID = 1L;
     private int x, y;
-    private int radius;
-    private int numberOfSides;
+    private final int radius;
+    private final int numberOfSides;
     private boolean selected;
     private Color fillColor = Color.GREEN;
     private Color borderColor = Color.BLACK;
@@ -86,13 +86,19 @@ public class RegularPolygon implements Shape {
     }
 
     @Override
+    @SuppressWarnings("CloneDeclaresCloneNotSupported")
     public Shape clone() {
-        RegularPolygon clone = new RegularPolygon(x, y, radius, numberOfSides);
-        clone.setSelected(selected);
-        clone.setFillColor(fillColor);
-        clone.setBorderColor(borderColor);
-        clone.setRotation(rotation);
-        return clone;
+        try {
+            RegularPolygon clone = (RegularPolygon) super.clone();
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            RegularPolygon clone = new RegularPolygon(x, y, radius, numberOfSides);
+            clone.setSelected(selected);
+            clone.setFillColor(fillColor);
+            clone.setBorderColor(borderColor);
+            clone.setRotation(rotation);
+            return clone;
+        }
     }
 
     /**
@@ -145,6 +151,7 @@ public class RegularPolygon implements Shape {
      *
      * @param color The new border color
      */
+    @Override
     public void setBorderColor(Color color) {
         this.borderColor = color;
     }

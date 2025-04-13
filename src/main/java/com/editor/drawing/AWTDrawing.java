@@ -10,7 +10,7 @@ import com.editor.shapes.RegularPolygon;
 
 public class AWTDrawing implements Drawer {
     private static final long serialVersionUID = 1L;
-    private transient Graphics2D graphics;
+    private final transient Graphics2D graphics;
 
     public AWTDrawing(Graphics2D graphics) {
         this.graphics = graphics;

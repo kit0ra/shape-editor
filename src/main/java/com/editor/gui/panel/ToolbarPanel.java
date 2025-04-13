@@ -57,7 +57,7 @@ public class ToolbarPanel extends CustomPanel {
 
     // Store mapping from button instance to its prototype key for memento
     // Use the 'buttons' list from CustomPanel and this map in parallel
-    private Map<IButton, String> buttonToPrototypeKeyMap = new HashMap<>();
+    private final Map<IButton, String> buttonToPrototypeKeyMap = new HashMap<>();
 
     // Colors for visual feedback
     private final Color hoverColor = new Color(220, 240, 220);
@@ -79,6 +79,7 @@ public class ToolbarPanel extends CustomPanel {
         g2d.setColor(Color.decode("#F6E9D7"));
     }
 
+    @Override
     public void setTargetWhiteBoard(WhiteBoard whiteBoard) {
         this.targetWhiteBoard = whiteBoard;
     }
@@ -322,6 +323,7 @@ public class ToolbarPanel extends CustomPanel {
         return button;
     }
 
+    @SuppressWarnings("CallToPrintStackTrace")
     private IButton createCompositeButton(int x, int y, String iconPath, String tooltipText, String groupKey) {
         System.out.println("[COMPOSITE DEBUG] createCompositeButton called for key: " + groupKey);
         IButton button = new CustomButton(x, y, 40, 40, "");

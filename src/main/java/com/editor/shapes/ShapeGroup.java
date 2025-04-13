@@ -1,17 +1,16 @@
 package com.editor.shapes;
 
 import java.awt.Color;
-import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.List; // Import Serializable
+import java.util.List;
 
-import com.editor.drawing.Drawer;
+import com.editor.drawing.Drawer; // Import Serializable
 
 /**
  * Represents a group of shapes that can be manipulated as a single entity.
  * Implements Serializable to allow saving/loading state.
  */
-public class ShapeGroup implements Shape, Serializable { // Implement Serializable
+public class ShapeGroup implements Shape { // Implement Serializable
     private static final long serialVersionUID = 1L; // Keep serialVersionUID
     private List<Shape> shapes = new ArrayList<>();
     private boolean selected;
@@ -140,6 +139,7 @@ public class ShapeGroup implements Shape, Serializable { // Implement Serializab
     }
 
     @Override
+    @SuppressWarnings("CloneDeclaresCloneNotSupported")
     public Shape clone() {
         try {
             // Call Object.clone() to create the initial shallow copy
@@ -168,6 +168,7 @@ public class ShapeGroup implements Shape, Serializable { // Implement Serializab
      *
      * @param color The new border color
      */
+    @Override
     public void setBorderColor(Color color) {
         this.borderColor = color;
     }

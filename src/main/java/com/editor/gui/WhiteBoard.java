@@ -3,30 +3,25 @@ package com.editor.gui;
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
-import java.awt.Button;
 import java.awt.Canvas;
-import java.awt.Choice;
 import java.awt.Color;
 import java.awt.Composite;
-import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.GridLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.Image;
-import java.awt.Label;
+import java.awt.Insets;
 import java.awt.MenuItem;
-import java.awt.Panel;
 import java.awt.Point;
 import java.awt.PopupMenu;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
-import java.awt.TextField;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter; // Already exists, ensure it's used
-import java.awt.event.ComponentEvent; // Already exists, ensure it's used
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -42,18 +37,12 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
 import javax.swing.JDialog;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
 
 import com.editor.commands.CommandHistory;
 import com.editor.commands.CreateShapeCommand;
@@ -64,24 +53,24 @@ import com.editor.commands.MoveShapesCommand;
 import com.editor.commands.UngroupShapesCommand;
 import com.editor.drawing.AWTDrawing;
 import com.editor.drawing.Drawer;
-import com.editor.memento.ShapeMemento; // Added Memento import
+import com.editor.gui.button.Draggable;
+import com.editor.gui.panel.ToolbarPanel; // Added Memento import
+import com.editor.mediator.DragMediator;
+import com.editor.memento.ShapeMemento;
 import com.editor.shapes.Circle;
 import com.editor.shapes.Rectangle;
 import com.editor.shapes.RegularPolygon;
 import com.editor.shapes.Shape;
 import com.editor.shapes.ShapeGroup;
-import com.editor.shapes.ShapePrototypeRegistry;
-import com.editor.gui.button.Draggable;
-import com.editor.gui.panel.ToolbarPanel; // Added import
-import com.editor.mediator.DragMediator;
+import com.editor.shapes.ShapePrototypeRegistry; // Added import
 import com.editor.state.StateChangeListener;
 
 public class WhiteBoard extends Canvas implements Draggable {
     private double relX, relY, relW, relH;
     private Color backgroundColor = Color.WHITE;
     private List<Shape> shapes = new ArrayList<>();
-    private List<Shape> selectedShapes = new ArrayList<>(); // Liste des formes sélectionnées
-    private CommandHistory commandHistory = new CommandHistory();
+    private final List<Shape> selectedShapes = new ArrayList<>();
+    private final CommandHistory commandHistory = new CommandHistory();
     private ShapePrototypeRegistry prototypeRegistry = null;
     private String currentShapeType = null;
     private Shape activeShape; // La forme actuellement active pour le déplacement
@@ -181,31 +170,22 @@ public class WhiteBoard extends Canvas implements Draggable {
 
         // Option Edit
         MenuItem editItem = new MenuItem("Edit");
-        editItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                editSelectedShape();
-            }
+        editItem.addActionListener((ActionEvent e) -> {
+            editSelectedShape();
         });
         contextMenu.add(editItem);
 
         // Option Group
         MenuItem groupItem = new MenuItem("Group");
-        groupItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                groupSelectedShapes();
-            }
+        groupItem.addActionListener((ActionEvent e) -> {
+            groupSelectedShapes();
         });
         contextMenu.add(groupItem);
 
         // Option Ungroup (activée uniquement si une forme sélectionnée est un groupe)
         MenuItem ungroupItem = new MenuItem("Ungroup");
-        ungroupItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                ungroupSelectedShapes();
-            }
+        ungroupItem.addActionListener((ActionEvent e) -> {
+            ungroupSelectedShapes();
         });
 
         // Vérifier si au moins une forme sélectionnée est un groupe
@@ -267,14 +247,11 @@ public class WhiteBoard extends Canvas implements Draggable {
         borderColorButton.setPreferredSize(new Dimension(100, 25));
         final Color[] selectedBorderColor = { currentBorderColor };
 
-        borderColorButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                Color newColor = JColorChooser.showDialog(editDialog, "Choose Border Color", selectedBorderColor[0]);
-                if (newColor != null) {
-                    selectedBorderColor[0] = newColor;
-                    borderColorButton.setBackground(newColor);
-                }
+        borderColorButton.addActionListener((ActionEvent e) -> {
+            Color newColor = JColorChooser.showDialog(editDialog, "Choose Border Color", selectedBorderColor[0]);
+            if (newColor != null) {
+                selectedBorderColor[0] = newColor;
+                borderColorButton.setBackground(newColor);
             }
         });
 
@@ -291,14 +268,11 @@ public class WhiteBoard extends Canvas implements Draggable {
         fillColorButton.setPreferredSize(new Dimension(100, 25));
         final Color[] selectedFillColor = { currentFillColor };
 
-        fillColorButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                Color newColor = JColorChooser.showDialog(editDialog, "Choose Fill Color", selectedFillColor[0]);
-                if (newColor != null) {
-                    selectedFillColor[0] = newColor;
-                    fillColorButton.setBackground(newColor);
-                }
+        fillColorButton.addActionListener((ActionEvent e) -> {
+            Color newColor = JColorChooser.showDialog(editDialog, "Choose Fill Color", selectedFillColor[0]);
+            if (newColor != null) {
+                selectedFillColor[0] = newColor;
+                fillColorButton.setBackground(newColor);
             }
         });
 
@@ -369,7 +343,7 @@ public class WhiteBoard extends Canvas implements Draggable {
         } else {
             // Create dummy objects to avoid null pointer exceptions
             borderRadiusSlider = new JSlider();
-            borderRadiusValueLabel = new JLabel();
+            borderRadiusValueLabel = new JLabel("");
         }
 
         // Add the form panel to the dialog
@@ -380,52 +354,46 @@ public class WhiteBoard extends Canvas implements Draggable {
         JButton okButton = new JButton("OK");
         JButton cancelButton = new JButton("Cancel");
 
-        okButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    // Get the rotation value
-                    double rotation = Double.parseDouble(rotationField.getText());
+        okButton.addActionListener((ActionEvent e) -> {
+            try {
+                // Get the rotation value
+                double rotation = Double.parseDouble(rotationField.getText());
 
-                    // Get the border radius value if it's a rectangle
-                    int borderRadius = 0;
-                    if (isRectangle) {
-                        borderRadius = borderRadiusSlider.getValue();
-                    }
-
-                    // Create a command to make the edit undoable
-                    EditShapeCommand command = new EditShapeCommand(
-                            selectedShapes,
-                            selectedBorderColor[0],
-                            selectedFillColor[0],
-                            rotation,
-                            borderRadius);
-
-                    // Execute the command and add it to the command history
-                    command.execute();
-                    commandHistory.addCommand(command);
-
-                    repaint();
-
-                    // Notify state change listener
-                    notifyStateChanged("Shape properties edited");
-
-                    editDialog.dispose();
-                } catch (NumberFormatException ex) {
-                    // Show an error message for invalid rotation value
-                    JOptionPane.showMessageDialog(editDialog,
-                            "Invalid rotation value. Please enter a number.",
-                            "Error",
-                            JOptionPane.ERROR_MESSAGE);
+                // Get the border radius value if it's a rectangle
+                int borderRadius = 0;
+                if (isRectangle) {
+                    borderRadius = borderRadiusSlider.getValue();
                 }
+
+                // Create a command to make the edit undoable
+                EditShapeCommand command = new EditShapeCommand(
+                        selectedShapes,
+                        selectedBorderColor[0],
+                        selectedFillColor[0],
+                        rotation,
+                        borderRadius);
+
+                // Execute the command and add it to the command history
+                command.execute();
+                commandHistory.addCommand(command);
+
+                repaint();
+
+                // Notify state change listener
+                notifyStateChanged("Shape properties edited");
+
+                editDialog.dispose();
+            } catch (NumberFormatException ex) {
+                // Show an error message for invalid rotation value
+                JOptionPane.showMessageDialog(editDialog,
+                        "Invalid rotation value. Please enter a number.",
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
             }
         });
 
-        cancelButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                editDialog.dispose();
-            }
+        cancelButton.addActionListener((ActionEvent e) -> {
+            editDialog.dispose();
         });
 
         buttonPanel.add(okButton);
@@ -436,34 +404,6 @@ public class WhiteBoard extends Canvas implements Draggable {
         editDialog.setSize(450, isRectangle ? 350 : 250);
         editDialog.setLocationRelativeTo(this);
         editDialog.setVisible(true);
-    }
-
-    /**
-     * Adds a color button to a dialog
-     */
-    private void addColorButton(Dialog dialog, Color color, final Color[] selectedColor) {
-        Button colorBtn = new Button();
-        colorBtn.setBackground(color);
-        colorBtn.setSize(30, 30);
-        colorBtn.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                selectedColor[0] = color;
-                dialog.dispose();
-            }
-        });
-        dialog.add(colorBtn);
-    }
-
-    /**
-     * Returns a contrasting color (black or white) based on the brightness of the
-     * input color
-     */
-    private Color getContrastColor(Color color) {
-        // Calculate the perceived brightness using the formula
-        // (0.299*R + 0.587*G + 0.114*B)
-        double brightness = (0.299 * color.getRed() + 0.587 * color.getGreen() + 0.114 * color.getBlue()) / 255;
-        return brightness > 0.5 ? Color.BLACK : Color.WHITE;
     }
 
     /**
@@ -513,27 +453,6 @@ public class WhiteBoard extends Canvas implements Draggable {
     }
 
     /**
-     * Convertit un nom de couleur en objet Color
-     */
-    private Color getColorFromName(String colorName) {
-        switch (colorName) {
-            case "Red":
-                return Color.RED;
-            case "Green":
-                return Color.GREEN;
-            case "Blue":
-                return Color.BLUE;
-            case "Yellow":
-                return Color.YELLOW;
-            case "White":
-                return Color.WHITE;
-            case "Black":
-            default:
-                return Color.BLACK;
-        }
-    }
-
-    /**
      * Groupe les formes sélectionnées
      */
     private void groupSelectedShapes() {
@@ -564,14 +483,12 @@ public class WhiteBoard extends Canvas implements Draggable {
      */
     private void ungroupSelectedShapes() {
         List<Shape> newSelection = new ArrayList<>();
-        List<UngroupShapesCommand> commands = new ArrayList<>();
 
         // Trouver tous les groupes sélectionnés et les dégrouper
         for (Shape shape : selectedShapes) {
             if (shape instanceof ShapeGroup) {
                 ShapeGroup group = (ShapeGroup) shape;
                 UngroupShapesCommand command = new UngroupShapesCommand(shapes, group);
-                commands.add(command);
                 commandHistory.executeCommand(command);
 
                 // Ajouter les formes dégroupées à la nouvelle sélection
@@ -616,9 +533,7 @@ public class WhiteBoard extends Canvas implements Draggable {
         });
     }
 
-    // Stocke les positions originales de toutes les formes sélectionnées pour le
-    // déplacement multiple
-    private Map<Shape, Point> originalPositions = new HashMap<>();
+    private final Map<Shape, Point> originalPositions = new HashMap<>();
 
     private void handleMousePress(MouseEvent e) {
         if (SwingUtilities.isLeftMouseButton(e)) {
@@ -653,7 +568,7 @@ public class WhiteBoard extends Canvas implements Draggable {
             if (foundShape) {
                 // Si la forme est déjà sélectionnée et que Ctrl est enfoncé, on la
                 // désélectionne
-                if (selectedShapes.contains(clickedShape) && isCtrlPressed) {
+                if (clickedShape != null && selectedShapes.contains(clickedShape) && isCtrlPressed) {
                     selectedShapes.remove(clickedShape);
                     clickedShape.setSelected(false);
                 } else {
@@ -671,8 +586,10 @@ public class WhiteBoard extends Canvas implements Draggable {
                         }
 
                         // Sélectionner la forme actuelle
-                        selectedShapes.add(clickedShape);
-                        clickedShape.setSelected(true);
+                        if (clickedShape != null) {
+                            selectedShapes.add(clickedShape);
+                            clickedShape.setSelected(true);
+                        }
 
                         // Définir la forme active pour le déplacement
                         activeShape = clickedShape;
@@ -904,7 +821,7 @@ public class WhiteBoard extends Canvas implements Draggable {
             }
 
             // Check if we're dropping shapes on the trash panel
-            if (isBeingDraggedToTrash && dragMediator != null && screenPoint != null) {
+            if (isBeingDraggedToTrash && dragMediator != null) {
                 try {
                     // Check if we're still over the trash panel
                     if (dragMediator.checkPointOverTrash(screenPoint)) {
@@ -933,15 +850,13 @@ public class WhiteBoard extends Canvas implements Draggable {
                 setDraggingToTrash(false);
             }
 
-            // Check if we're dropping shapes on the toolbar panel
-            boolean droppedOnToolbar = false;
-            if (isBeingDraggedToToolbar && dragMediator != null && screenPoint != null && toolbarPanel != null) {
+            if (isBeingDraggedToToolbar && dragMediator != null && toolbarPanel != null) {
                 try {
                     // Check if we're still over the toolbar panel
                     if (dragMediator.checkPointOverToolbar(screenPoint)) {
                         System.out.println("[WhiteBoard] Dropping shapes on toolbar panel - attempting to add");
                         // Call the toolbar panel's method to add the shapes
-                        droppedOnToolbar = toolbarPanel.addSelectedShapesToToolbar();
+                        toolbarPanel.addSelectedShapesToToolbar();
 
                         // Reset drag state variables immediately after successful drop on toolbar
                         isDragging = false;

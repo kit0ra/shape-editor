@@ -6,12 +6,13 @@ import com.editor.drawing.Drawer;
 
 public class Rectangle implements Shape {
     private static final long serialVersionUID = 1L;
-    private int x, y, width, height;
+    private int x, y;
+    private final int width, height;
     private boolean selected;
-    private Color fillColor = Color.BLUE;
-    private Color borderColor = Color.BLACK;
-    private double rotation = 0.0;
-    private int borderRadius = 0;
+    private Color fillColor = Color.BLUE; // Default fill color for rectangles
+    private Color borderColor = Color.BLACK; // Default border color
+    private double rotation = 0.0; // Rotation in degrees
+    private int borderRadius = 0; // Border radius for rounded corners
 
     public Rectangle(int x, int y, int width, int height) {
         this.x = x;
@@ -59,14 +60,15 @@ public class Rectangle implements Shape {
     }
 
     @Override
+    @SuppressWarnings("CloneDeclaresCloneNotSupported")
     public Shape clone() {
-        Rectangle clone = new Rectangle(x, y, width, height);
-        clone.setSelected(selected);
-        clone.setFillColor(fillColor);
-        clone.setBorderColor(borderColor);
-        clone.setRotation(rotation);
-        clone.setBorderRadius(borderRadius);
-        return clone;
+        try {
+            Rectangle clone = (Rectangle) super.clone();
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            // This shouldn't happen as we implement Cloneable
+            throw new AssertionError(e);
+        }
     }
 
     /**
@@ -83,6 +85,7 @@ public class Rectangle implements Shape {
      *
      * @param color The new border color
      */
+    @Override
     public void setBorderColor(Color color) {
         this.borderColor = color;
     }
