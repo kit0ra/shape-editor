@@ -60,6 +60,9 @@ public class ShapeCreationButtonDecorator extends ButtonDecorator implements Dra
                 Color lightPink = new Color(255, 182, 193, 128); // Light pink semi-transparent
                 Color lightPinkBorder = new Color(255, 105, 180); // Darker pink for border
 
+                // Debug output
+                System.out.println("Drawing shape preview with light pink: " + lightPink);
+
                 // Utiliser des couleurs différentes selon le type de forme
                 if ("Rectangle".equals(shapeType)) {
                     g2d.setColor(lightPink);

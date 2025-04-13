@@ -91,6 +91,15 @@ public class ShapeDrawingButtonDecorator extends ButtonDecorator {
 
             clonedShape.setPosition(shapeX, shapeY);
 
+            // Force light pink color for all shapes
+            if (clonedShape instanceof Rectangle) {
+                ((Rectangle) clonedShape).setFillColor(new Color(255, 182, 193));
+            } else if (clonedShape instanceof RegularPolygon) {
+                ((RegularPolygon) clonedShape).setFillColor(new Color(255, 182, 193));
+            } else if (clonedShape instanceof Circle) {
+                ((Circle) clonedShape).setFillColor(new Color(255, 182, 193));
+            }
+
             // Make sure the shape is drawn with its actual fill color
             System.out.println("Drawing shape on button with fill color: " + getFillColorName(clonedShape));
             clonedShape.draw(drawer);
