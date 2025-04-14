@@ -26,7 +26,7 @@ public class GroupShapesCommand implements Command {
         this.shapesToGroup = new ArrayList<>(shapesToGroup);
         this.group = new ShapeGroup(shapesToGroup);
         
-        // Store the original indices of the shapes in the canvas
+        
         for (Shape shape : shapesToGroup) {
             originalIndices.add(canvasShapes.indexOf(shape));
         }
@@ -34,19 +34,19 @@ public class GroupShapesCommand implements Command {
 
     @Override
     public void execute() {
-        // Remove the individual shapes from the canvas
+        
         canvasShapes.removeAll(shapesToGroup);
         
-        // Add the group to the canvas
+        
         canvasShapes.add(group);
     }
 
     @Override
     public void undo() {
-        // Remove the group from the canvas
+        
         canvasShapes.remove(group);
         
-        // Add back the individual shapes at their original positions
+        
         for (int i = 0; i < shapesToGroup.size(); i++) {
             int index = originalIndices.get(i);
             if (index >= 0 && index <= canvasShapes.size()) {

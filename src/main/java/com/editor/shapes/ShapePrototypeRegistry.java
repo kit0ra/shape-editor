@@ -3,7 +3,7 @@ package com.editor.shapes;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.editor.memento.PrototypeRegistryMemento; // Added import
+import com.editor.memento.PrototypeRegistryMemento; 
 
 /**
  * Registry for shape prototypes using the Prototype pattern.
@@ -37,10 +37,10 @@ public class ShapePrototypeRegistry {
             throw new IllegalArgumentException("No prototype registered with key: " + key);
         }
 
-        // Clone the prototype
+        
         Shape clone = prototype.clone();
 
-        // Position the clone at the specified coordinates
+        
         clone.setPosition(x, y);
 
         return clone;
@@ -72,11 +72,11 @@ public class ShapePrototypeRegistry {
      * @return A new map containing the current prototypes.
      */
     public Map<String, Shape> getPrototypesMap() {
-        // Return a copy to prevent external modification of the internal map
+        
         return new HashMap<>(this.prototypes);
     }
 
-    // --- Memento Pattern Implementation ---
+    
 
     /**
      * Creates a memento containing the current state of the registry.
@@ -87,7 +87,7 @@ public class ShapePrototypeRegistry {
         Map<String, Shape> currentPrototypes = new HashMap<>(this.prototypes);
         System.out.println("[LOG] ShapePrototypeRegistry.createMemento() - Creating memento with keys: "
                 + currentPrototypes.keySet());
-        // Pass a copy of the current prototypes map
+        
         return new PrototypeRegistryMemento(currentPrototypes);
     }
 
@@ -104,17 +104,17 @@ public class ShapePrototypeRegistry {
             return;
         }
         System.out.println("[ShapePrototypeRegistry] Restoring state from Memento...");
-        // Get the map directly from the memento (it already contains clones)
+        
         Map<String, Shape> restoredPrototypes = memento.getPrototypesState();
-        // Instead of clearing, merge the restored prototypes.
-        // This ensures default prototypes registered at startup are kept if not present
-        // in the memento.
-        // Prototypes from the memento will overwrite defaults if keys match.
+        
+        
+        
+        
         this.prototypes.putAll(restoredPrototypes);
         System.out.println(
                 "[LOG] ShapePrototypeRegistry.restoreFromMemento() - Merged restore complete. Prototype count: "
                         + this.prototypes.size());
-        // Log the keys restored for debugging
+        
         System.out.println("[LOG] ShapePrototypeRegistry.restoreFromMemento() - Final keys in registry: "
                 + this.prototypes.keySet());
     }

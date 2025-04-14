@@ -27,7 +27,7 @@ public class CompositeButtonFactory implements ButtonFactory {
     private final CommandHistory commandHistory;
     private DragMediator dragMediator;
 
-    // Default sizing constants
+    
     private static final int DEFAULT_HEIGHT = 40;
     private static final int DEFAULT_ICON_SIZE = 24;
     private static final int DEFAULT_PADDING = 8;
@@ -58,14 +58,14 @@ public class CompositeButtonFactory implements ButtonFactory {
 
     @Override
     public IButton createButton(int x, int y, String iconPath, String tooltipText, String typeKey) {
-        // Calculate button dimensions
+        
         int width = DEFAULT_ICON_SIZE + DEFAULT_PADDING * 2;
         int height = DEFAULT_HEIGHT;
 
-        // Create base button
+        
         IButton button = new CustomButton(x, y, width, height, "");
 
-        // Add shape drawing if available
+        
         ShapeGroup groupPrototype = null;
         if (compositeRegistry != null && compositeRegistry.hasPrototype(typeKey)) {
             groupPrototype = compositeRegistry.getPrototype(typeKey);
@@ -74,7 +74,7 @@ public class CompositeButtonFactory implements ButtonFactory {
             }
         }
 
-        // If no shape drawing, add image if available
+        
         if (groupPrototype == null) {
             Image icon = ImageLoader.loadImage(iconPath);
             if (icon != null) {
@@ -87,14 +87,14 @@ public class CompositeButtonFactory implements ButtonFactory {
             }
         }
 
-        // Add tooltip
+        
         button = new TooltipDecorator(button, tooltipText);
 
-        // Add composite shape creation functionality
+        
         DraggableCompositeShapeCreationButtonDecorator compositeButton = new DraggableCompositeShapeCreationButtonDecorator(
                 button, whiteBoard, compositeRegistry, typeKey);
 
-        // Set drag mediator if available
+        
         if (dragMediator != null) {
             compositeButton.setDragMediator(dragMediator);
         }

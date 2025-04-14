@@ -9,12 +9,12 @@ import java.io.Serializable;
  */
 public class AppStateMemento implements Serializable {
 
-    private static final long serialVersionUID = 1L; // For serialization
+    private static final long serialVersionUID = 1L; 
 
     private final ShapeMemento whiteBoardState;
     private final ToolbarMemento toolbarState;
     private final CompositeRegistryMemento compositeRegistryState;
-    private final PrototypeRegistryMemento prototypeRegistryState; // Added for standard shapes
+    private final PrototypeRegistryMemento prototypeRegistryState; 
 
     /**
      * Constructs an AppStateMemento.
@@ -27,13 +27,13 @@ public class AppStateMemento implements Serializable {
      *                               state.
      */
     public AppStateMemento(ShapeMemento whiteBoardState, ToolbarMemento toolbarState,
-            CompositeRegistryMemento compositeRegistryState, PrototypeRegistryMemento prototypeRegistryState) { // Added
-                                                                                                                // prototype
-                                                                                                                // state
+            CompositeRegistryMemento compositeRegistryState, PrototypeRegistryMemento prototypeRegistryState) { 
+                                                                                                                
+                                                                                                                
         this.whiteBoardState = whiteBoardState;
         this.toolbarState = toolbarState;
         this.compositeRegistryState = compositeRegistryState;
-        this.prototypeRegistryState = prototypeRegistryState; // Added
+        this.prototypeRegistryState = prototypeRegistryState; 
         System.out.println(
                 "[STATE DEBUG] AppStateMemento created with WhiteBoard, Toolbar, CompositeRegistry, and PrototypeRegistry states.");
     }
@@ -70,7 +70,7 @@ public class AppStateMemento implements Serializable {
      *
      * @return The PrototypeRegistryMemento for the ShapePrototypeRegistry.
      */
-    public PrototypeRegistryMemento getPrototypeRegistryState() { // Added getter
+    public PrototypeRegistryMemento getPrototypeRegistryState() { 
         return prototypeRegistryState;
     }
 }

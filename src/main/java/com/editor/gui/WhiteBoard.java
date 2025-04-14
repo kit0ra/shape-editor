@@ -54,7 +54,7 @@ import com.editor.commands.UngroupShapesCommand;
 import com.editor.drawing.AWTDrawing;
 import com.editor.drawing.Drawer;
 import com.editor.gui.button.Draggable;
-import com.editor.gui.panel.ToolbarPanel; // Added Memento import
+import com.editor.gui.panel.ToolbarPanel; 
 import com.editor.mediator.DragMediator;
 import com.editor.memento.ShapeMemento;
 import com.editor.shapes.Circle;
@@ -62,7 +62,7 @@ import com.editor.shapes.Rectangle;
 import com.editor.shapes.RegularPolygon;
 import com.editor.shapes.Shape;
 import com.editor.shapes.ShapeGroup;
-import com.editor.shapes.ShapePrototypeRegistry; // Added import
+import com.editor.shapes.ShapePrototypeRegistry; 
 import com.editor.state.StateChangeListener;
 
 public class WhiteBoard extends Canvas implements Draggable {
@@ -73,26 +73,26 @@ public class WhiteBoard extends Canvas implements Draggable {
     private final CommandHistory commandHistory = new CommandHistory();
     private ShapePrototypeRegistry prototypeRegistry = null;
     private String currentShapeType = null;
-    private Shape activeShape; // La forme actuellement active pour le déplacement
+    private Shape activeShape; 
 
-    // State change listener for auto-save functionality
+    
     private StateChangeListener stateChangeListener;
-    private Point dragStartPoint; // Where the mouse was initially pressed
-    private Point originalShapePosition; // Top-left corner of the shape when drag started
-    private Point dragOffset; // Difference between dragStartPoint and originalShapePosition
+    private Point dragStartPoint; 
+    private Point originalShapePosition; 
+    private Point dragOffset; 
     private boolean isDragging = false;
-    private boolean isCtrlPressed = false; // Pour la sélection multiple
+    private boolean isCtrlPressed = false; 
 
-    // Variables pour le rectangle de sélection
-    private Point selectionStart; // Point de départ du rectangle de sélection
-    private Point selectionEnd; // Point actuel pendant le glissement
-    private boolean isSelectionRectActive = false; // Indique si on dessine un rectangle de sélection
+    
+    private Point selectionStart; 
+    private Point selectionEnd; 
+    private boolean isSelectionRectActive = false; 
 
-    // Double buffering
+    
     private Image offscreenBuffer;
     private Graphics offscreenGraphics;
 
-    // Reference to ToolbarPanel for adding shapes
+    
     private ToolbarPanel toolbarPanel;
 
     public WhiteBoard(int width, int height, Color white) {
@@ -103,7 +103,7 @@ public class WhiteBoard extends Canvas implements Draggable {
         setupMouseListeners();
         setupKeyListeners();
 
-        // Pour permettre au composant de recevoir les événements clavier
+        
         setFocusable(true);
     }
 
@@ -111,9 +111,9 @@ public class WhiteBoard extends Canvas implements Draggable {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                requestFocusInWindow(); // Pour s'assurer que le composant reçoit les événements clavier
+                requestFocusInWindow(); 
 
-                // Gérer le clic droit pour le menu contextuel
+                
                 if (SwingUtilities.isRightMouseButton(e)) {
                     handleRightClick(e);
                 } else {
@@ -134,7 +134,7 @@ public class WhiteBoard extends Canvas implements Draggable {
             }
         });
 
-        // Add a component listener to update the offscreen buffer on resize
+        
         addComponentListener(new ComponentAdapter() {
             @Override
             public void componentResized(ComponentEvent e) {
@@ -147,7 +147,7 @@ public class WhiteBoard extends Canvas implements Draggable {
      * Gère le clic droit pour afficher le menu contextuel
      */
     private void handleRightClick(MouseEvent e) {
-        // Vérifier si on a cliqué sur une forme sélectionnée
+        
         boolean clickedOnSelected = false;
         for (Shape shape : selectedShapes) {
             if (shape.isSelected(e.getX(), e.getY())) {
@@ -156,7 +156,7 @@ public class WhiteBoard extends Canvas implements Draggable {
             }
         }
 
-        // Si on a cliqué sur une forme sélectionnée, afficher le menu contextuel
+        
         if (clickedOnSelected) {
             showContextMenu(e.getX(), e.getY());
         }
@@ -168,27 +168,27 @@ public class WhiteBoard extends Canvas implements Draggable {
     private void showContextMenu(int x, int y) {
         PopupMenu contextMenu = new PopupMenu();
 
-        // Option Edit
+        
         MenuItem editItem = new MenuItem("Edit");
         editItem.addActionListener((ActionEvent e) -> {
             editSelectedShape();
         });
         contextMenu.add(editItem);
 
-        // Option Group
+        
         MenuItem groupItem = new MenuItem("Group");
         groupItem.addActionListener((ActionEvent e) -> {
             groupSelectedShapes();
         });
         contextMenu.add(groupItem);
 
-        // Option Ungroup (activée uniquement si une forme sélectionnée est un groupe)
+        
         MenuItem ungroupItem = new MenuItem("Ungroup");
         ungroupItem.addActionListener((ActionEvent e) -> {
             ungroupSelectedShapes();
         });
 
-        // Vérifier si au moins une forme sélectionnée est un groupe
+        
         boolean hasGroup = false;
         for (Shape shape : selectedShapes) {
             if (shape instanceof ShapeGroup) {
@@ -199,7 +199,7 @@ public class WhiteBoard extends Canvas implements Draggable {
         ungroupItem.setEnabled(hasGroup);
         contextMenu.add(ungroupItem);
 
-        // Afficher le menu contextuel
+        
         this.add(contextMenu);
         contextMenu.show(this, x, y);
     }
@@ -209,35 +209,35 @@ public class WhiteBoard extends Canvas implements Draggable {
      */
     private void editSelectedShape() {
         if (selectedShapes.isEmpty()) {
-            return; // Aucune forme sélectionnée
+            return; 
         }
 
-        // Get the current properties from the first selected shape
+        
         Shape firstShape = selectedShapes.get(0);
         Color currentBorderColor = getBorderColor(firstShape);
         Color currentFillColor = getFillColor(firstShape);
         double currentRotation = getRotation(firstShape);
 
-        // Get border radius if it's a rectangle
+        
         int currentBorderRadius = 0;
         boolean isRectangle = firstShape instanceof Rectangle;
         if (isRectangle) {
             currentBorderRadius = ((Rectangle) firstShape).getBorderRadius();
         }
 
-        // Create a Swing dialog for editing properties
+        
         Frame parentFrame = (Frame) SwingUtilities.getWindowAncestor(this);
         final JDialog editDialog = new JDialog(parentFrame, "Edit Shape", true);
         editDialog.setLayout(new BorderLayout());
 
-        // Create a panel for the form fields
+        
         JPanel formPanel = new JPanel(new GridBagLayout());
         formPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(5, 5, 5, 5);
 
-        // Border Color
+        
         gbc.gridx = 0;
         gbc.gridy = 0;
         formPanel.add(new JLabel("Border Color:"), gbc);
@@ -258,7 +258,7 @@ public class WhiteBoard extends Canvas implements Draggable {
         gbc.gridx = 1;
         formPanel.add(borderColorButton, gbc);
 
-        // Fill Color
+        
         gbc.gridx = 0;
         gbc.gridy = 1;
         formPanel.add(new JLabel("Fill Color:"), gbc);
@@ -279,7 +279,7 @@ public class WhiteBoard extends Canvas implements Draggable {
         gbc.gridx = 1;
         formPanel.add(fillColorButton, gbc);
 
-        // Rotation
+        
         gbc.gridx = 0;
         gbc.gridy = 2;
         formPanel.add(new JLabel("Rotation (degrees):"), gbc);
@@ -288,84 +288,84 @@ public class WhiteBoard extends Canvas implements Draggable {
         gbc.gridx = 1;
         formPanel.add(rotationField, gbc);
 
-        // Border Radius (only for rectangles)
+        
         final JSlider borderRadiusSlider;
         final JLabel borderRadiusValueLabel;
 
         if (isRectangle) {
-            // Add a label for the radius control
+            
             gbc.gridx = 0;
             gbc.gridy = 3;
             formPanel.add(new JLabel("Border Radius:"), gbc);
 
-            // Create a simpler slider with better visibility
+            
             borderRadiusSlider = new JSlider(JSlider.HORIZONTAL, 0, 50, currentBorderRadius);
 
-            // Set slider properties for better visibility
+            
             borderRadiusSlider.setMajorTickSpacing(10);
             borderRadiusSlider.setMinorTickSpacing(5);
             borderRadiusSlider.setPaintTicks(true);
             borderRadiusSlider.setPaintLabels(true);
-            borderRadiusSlider.setSnapToTicks(false); // Allow smooth sliding
+            borderRadiusSlider.setSnapToTicks(false); 
 
-            // Make the slider more visible with a border and background
+            
             borderRadiusSlider.setBorder(BorderFactory.createCompoundBorder(
                     BorderFactory.createLineBorder(Color.LIGHT_GRAY),
                     BorderFactory.createEmptyBorder(5, 5, 5, 5)));
-            borderRadiusSlider.setBackground(new Color(240, 240, 240)); // Light gray background
+            borderRadiusSlider.setBackground(new Color(240, 240, 240)); 
 
-            // Create a value display
+            
             borderRadiusValueLabel = new JLabel(String.valueOf(currentBorderRadius));
             borderRadiusValueLabel.setHorizontalAlignment(JLabel.RIGHT);
             borderRadiusValueLabel.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
 
-            // Add a change listener with live preview
+            
             borderRadiusSlider.addChangeListener(e -> {
                 int value = borderRadiusSlider.getValue();
                 borderRadiusValueLabel.setText(String.valueOf(value));
 
-                // Create a preview of the shape with the new border radius
+                
                 if (!selectedShapes.isEmpty() && selectedShapes.get(0) instanceof Rectangle) {
                     Rectangle previewRect = (Rectangle) selectedShapes.get(0);
                     previewRect.setBorderRadius(value);
-                    repaint(); // Update the display to show the new border radius
+                    repaint(); 
                 }
             });
 
-            // Create a panel for the slider with the value label
+            
             JPanel sliderPanel = new JPanel(new BorderLayout());
             sliderPanel.add(borderRadiusSlider, BorderLayout.CENTER);
             sliderPanel.add(borderRadiusValueLabel, BorderLayout.EAST);
 
-            // Add the slider panel to the form
+            
             gbc.gridx = 1;
             formPanel.add(sliderPanel, gbc);
         } else {
-            // Create dummy objects to avoid null pointer exceptions
+            
             borderRadiusSlider = new JSlider();
 
         }
 
-        // Add the form panel to the dialog
+        
         editDialog.add(formPanel, BorderLayout.CENTER);
 
-        // Create buttons panel
+        
         JPanel buttonPanel = new JPanel();
         JButton okButton = new JButton("OK");
         JButton cancelButton = new JButton("Cancel");
 
         okButton.addActionListener((ActionEvent e) -> {
             try {
-                // Get the rotation value
+                
                 double rotation = Double.parseDouble(rotationField.getText());
 
-                // Get the border radius value if it's a rectangle
+                
                 int borderRadius = 0;
                 if (isRectangle) {
                     borderRadius = borderRadiusSlider.getValue();
                 }
 
-                // Create a command to make the edit undoable
+                
                 EditShapeCommand command = new EditShapeCommand(
                         selectedShapes,
                         selectedBorderColor[0],
@@ -373,18 +373,18 @@ public class WhiteBoard extends Canvas implements Draggable {
                         rotation,
                         borderRadius);
 
-                // Execute the command and add it to the command history
+                
                 command.execute();
                 commandHistory.addCommand(command);
 
                 repaint();
 
-                // Notify state change listener
+                
                 notifyStateChanged("Shape properties edited");
 
                 editDialog.dispose();
             } catch (NumberFormatException ex) {
-                // Show an error message for invalid rotation value
+                
                 JOptionPane.showMessageDialog(editDialog,
                         "Invalid rotation value. Please enter a number.",
                         "Error",
@@ -400,7 +400,7 @@ public class WhiteBoard extends Canvas implements Draggable {
         buttonPanel.add(cancelButton);
         editDialog.add(buttonPanel, BorderLayout.SOUTH);
 
-        // Set dialog size and show it
+        
         editDialog.setSize(450, isRectangle ? 350 : 250);
         editDialog.setLocationRelativeTo(this);
         editDialog.setVisible(true);
@@ -419,7 +419,7 @@ public class WhiteBoard extends Canvas implements Draggable {
         } else if (shape instanceof ShapeGroup) {
             return ((ShapeGroup) shape).getBorderColor();
         }
-        return Color.BLACK; // Default
+        return Color.BLACK; 
     }
 
     /**
@@ -433,7 +433,7 @@ public class WhiteBoard extends Canvas implements Draggable {
         } else if (shape instanceof Circle) {
             return ((Circle) shape).getFillColor();
         }
-        return Color.WHITE; // Default
+        return Color.WHITE; 
     }
 
     /**
@@ -449,7 +449,7 @@ public class WhiteBoard extends Canvas implements Draggable {
         } else if (shape instanceof ShapeGroup) {
             return ((ShapeGroup) shape).getRotation();
         }
-        return 0.0; // Default
+        return 0.0; 
     }
 
     /**
@@ -457,14 +457,14 @@ public class WhiteBoard extends Canvas implements Draggable {
      */
     private void groupSelectedShapes() {
         if (selectedShapes.size() < 2) {
-            return; // Il faut au moins 2 formes pour créer un groupe
+            return; 
         }
 
-        // Créer et exécuter la commande de groupement
+        
         GroupShapesCommand command = new GroupShapesCommand(shapes, new ArrayList<>(selectedShapes));
         commandHistory.executeCommand(command);
 
-        // Mettre à jour la sélection pour ne contenir que le groupe
+        
         for (Shape shape : selectedShapes) {
             shape.setSelected(false);
         }
@@ -484,21 +484,21 @@ public class WhiteBoard extends Canvas implements Draggable {
     private void ungroupSelectedShapes() {
         List<Shape> newSelection = new ArrayList<>();
 
-        // Trouver tous les groupes sélectionnés et les dégrouper
+        
         for (Shape shape : selectedShapes) {
             if (shape instanceof ShapeGroup) {
                 ShapeGroup group = (ShapeGroup) shape;
                 UngroupShapesCommand command = new UngroupShapesCommand(shapes, group);
                 commandHistory.executeCommand(command);
 
-                // Ajouter les formes dégroupées à la nouvelle sélection
+                
                 newSelection.addAll(command.getUngroupedShapes());
             } else {
                 newSelection.add(shape);
             }
         }
 
-        // Mettre à jour la sélection
+        
         for (Shape shape : selectedShapes) {
             shape.setSelected(false);
         }
@@ -509,7 +509,7 @@ public class WhiteBoard extends Canvas implements Draggable {
             selectedShapes.add(shape);
         }
 
-        // Réinitialiser la forme active
+        
         activeShape = null;
 
         repaint();
@@ -537,28 +537,28 @@ public class WhiteBoard extends Canvas implements Draggable {
 
     private void handleMousePress(MouseEvent e) {
         if (SwingUtilities.isLeftMouseButton(e)) {
-            // Vérifier si Ctrl est enfoncé pour la sélection multiple
+            
             isCtrlPressed = (e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) != 0;
 
-            // Reset drag state variables
+            
             isDragging = false;
             originalShapePosition = null;
             dragStartPoint = null;
             dragOffset = null;
             originalPositions.clear();
 
-            // Réinitialiser les variables du rectangle de sélection
+            
             isSelectionRectActive = false;
             selectionStart = null;
             selectionEnd = null;
 
-            // Try to select a shape under the mouse cursor
+            
             boolean foundShape = false;
             Shape clickedShape = null;
 
             for (Shape shape : shapes) {
                 if (shape.isSelected(e.getX(), e.getY())) {
-                    // Found a shape under the cursor
+                    
                     foundShape = true;
                     clickedShape = shape;
                     break;
@@ -566,18 +566,18 @@ public class WhiteBoard extends Canvas implements Draggable {
             }
 
             if (foundShape) {
-                // Si la forme est déjà sélectionnée et que Ctrl est enfoncé, on la
-                // désélectionne
+                
+                
                 if (clickedShape != null && selectedShapes.contains(clickedShape) && isCtrlPressed) {
                     selectedShapes.remove(clickedShape);
                     clickedShape.setSelected(false);
                 } else {
-                    // Si la forme est déjà sélectionnée, on commence simplement le déplacement
+                    
                     if (selectedShapes.contains(clickedShape)) {
-                        // Définir la forme active pour le déplacement
+                        
                         activeShape = clickedShape;
                     } else {
-                        // Si Ctrl n'est pas enfoncé, on désélectionne toutes les autres formes
+                        
                         if (!isCtrlPressed) {
                             for (Shape s : selectedShapes) {
                                 s.setSelected(false);
@@ -585,41 +585,41 @@ public class WhiteBoard extends Canvas implements Draggable {
                             selectedShapes.clear();
                         }
 
-                        // Sélectionner la forme actuelle
+                        
                         if (clickedShape != null) {
                             selectedShapes.add(clickedShape);
                             clickedShape.setSelected(true);
                         }
 
-                        // Définir la forme active pour le déplacement
+                        
                         activeShape = clickedShape;
                     }
 
-                    // Store the starting point for drag operation
+                    
                     dragStartPoint = e.getPoint();
 
-                    // Store the original shape position for undo/redo and offset calculation
+                    
                     Rectangle bounds = activeShape.getBounds();
                     originalShapePosition = new Point(bounds.getX(), bounds.getY());
 
-                    // Calculate the offset between the click point and the shape's origin
+                    
                     dragOffset = new Point(
                             dragStartPoint.x - originalShapePosition.x,
                             dragStartPoint.y - originalShapePosition.y);
 
-                    // Stocker les positions originales de toutes les formes sélectionnées
+                    
                     for (Shape s : selectedShapes) {
                         Rectangle b = s.getBounds();
                         originalPositions.put(s, new Point(b.getX(), b.getY()));
                     }
 
-                    // Set dragging state (internal whiteboard drag)
+                    
                     isDragging = true;
 
-                    // Notify the mediator that a drag started *from* the whiteboard
+                    
                     if (dragMediator != null && dragStartPoint != null) {
-                        // Pass 'this' (the WhiteBoard) as the source component
-                        // Use the initial click point (dragStartPoint) relative to the whiteboard
+                        
+                        
                         dragMediator.startDrag(this, this, dragStartPoint.x, dragStartPoint.y);
                         System.out.println("[WhiteBoard] Notified mediator of internal drag start.");
                     } else {
@@ -629,9 +629,9 @@ public class WhiteBoard extends Canvas implements Draggable {
                 }
             }
 
-            // Si aucune forme n'a été trouvée sous le curseur
+            
             if (!foundShape) {
-                // Si Ctrl n'est pas enfoncé, désélectionner toutes les formes
+                
                 if (!isCtrlPressed) {
                     for (Shape s : selectedShapes) {
                         s.setSelected(false);
@@ -640,13 +640,13 @@ public class WhiteBoard extends Canvas implements Draggable {
                     activeShape = null;
                 }
 
-                // Initialiser le rectangle de sélection
+                
                 selectionStart = e.getPoint();
-                selectionEnd = e.getPoint(); // Au début, le point de fin est le même que le point de départ
+                selectionEnd = e.getPoint(); 
                 isSelectionRectActive = true;
             }
 
-            // Create new shape if none selected and a shape type is selected
+            
             if (selectedShapes.isEmpty() && currentShapeType != null && prototypeRegistry != null) {
                 createShapeAt(e.getX(), e.getY());
             }
@@ -656,44 +656,44 @@ public class WhiteBoard extends Canvas implements Draggable {
     }
 
     private void handleMouseDrag(MouseEvent e) {
-        // Si on est en train de dessiner un rectangle de sélection
+        
         if (isSelectionRectActive && selectionStart != null) {
-            // Mettre à jour le point de fin du rectangle de sélection
+            
             selectionEnd = e.getPoint();
             repaint();
             return;
         }
 
-        // Ensure dragging state, a shape is selected, and we have the offset
+        
         if (isDragging && activeShape != null && dragOffset != null) {
-            // Calculate the new top-left position based on mouse position and initial
-            // offset
+            
+            
             int newX = e.getX() - dragOffset.x;
             int newY = e.getY() - dragOffset.y;
 
-            // Calculer le déplacement par rapport à la position d'origine
+            
             int deltaX = newX - originalShapePosition.x;
             int deltaY = newY - originalShapePosition.y;
 
-            // Si une seule forme est sélectionnée, déplacer uniquement cette forme
+            
             if (selectedShapes.size() == 1) {
-                // Ensure the shape stays within the whiteboard bounds with a small margin
+                
                 newX = Math.max(-20, Math.min(newX, getWidth() - 20));
                 newY = Math.max(-20, Math.min(newY, getHeight() - 20));
                 activeShape.setPosition(newX, newY);
             }
-            // Si plusieurs formes sont sélectionnées, les déplacer toutes ensemble
+            
             else if (selectedShapes.size() > 1) {
-                // Déplacer toutes les formes sélectionnées en fonction de leur position
-                // d'origine
+                
+                
                 for (Shape shape : selectedShapes) {
                     Point originalPos = originalPositions.get(shape);
                     if (originalPos != null) {
-                        // Calculer la nouvelle position en ajoutant le delta à la position d'origine
+                        
                         int shapeNewX = originalPos.x + deltaX;
                         int shapeNewY = originalPos.y + deltaY;
 
-                        // Ensure the shape stays within the whiteboard bounds with a small margin
+                        
                         shapeNewX = Math.max(-20, Math.min(shapeNewX, getWidth() - 20));
                         shapeNewY = Math.max(-20, Math.min(shapeNewY, getHeight() - 20));
 
@@ -702,68 +702,68 @@ public class WhiteBoard extends Canvas implements Draggable {
                 }
             }
 
-            // Check if we're dragging shapes to the trash panel or toolbar panel
+            
             if (dragMediator != null && !selectedShapes.isEmpty()) {
-                // Convert whiteboard coordinates to screen coordinates
+                
                 Point screenPoint = new Point(e.getX(), e.getY());
                 try {
                     screenPoint.translate(getLocationOnScreen().x, getLocationOnScreen().y);
 
-                    // Use the mediator to check if we're over the trash panel
+                    
                     boolean isOverTrash = dragMediator.checkPointOverTrash(screenPoint);
 
-                    // Update the trash panel visual state and our internal state
+                    
                     setDraggingToTrash(isOverTrash);
 
-                    // If not over trash, check if we're over the toolbar panel
+                    
                     if (!isOverTrash) {
-                        // Use the mediator to check if we're over the toolbar panel
+                        
                         boolean isOverToolbar = dragMediator.checkPointOverToolbar(screenPoint);
 
-                        // Update the toolbar panel visual state and our internal state
+                        
                         setDraggingToToolbar(isOverToolbar);
                     } else {
-                        // If over trash, make sure we're not also over toolbar
+                        
                         setDraggingToToolbar(false);
                     }
                 } catch (Exception ex) {
-                    // Ignore any exceptions during coordinate conversion
+                    
                     System.out.println("[WhiteBoard] Error checking drag position: " + ex.getMessage());
                 }
             }
 
-            // Request a repaint to show the shapes in their new positions
+            
             repaint();
         }
     }
 
     private void handleMouseRelease(MouseEvent e) {
-        // --- Check for external drag ending on WhiteBoard ---
+        
         if (dragMediator != null && dragMediator.isDragging() && dragMediator.getSourceComponentForDrag() != this) {
             System.out.println("[WhiteBoard] Mouse released, delegating endDrag to mediator for external drag.");
-            // Pass coordinates relative to the WhiteBoard
+            
             dragMediator.endDrag(e.getX(), e.getY());
-            // Reset internal state just in case, although mediator should handle most of it
-            isDragging = false; // Reset internal flag
+            
+            isDragging = false; 
             activeShape = null;
             isSelectionRectActive = false;
             selectionStart = null;
             selectionEnd = null;
-            // Don't repaint here, mediator's endDrag should handle repaint
-            return; // Skip internal whiteboard release logic
+            
+            return; 
         }
-        // --- End check for external drag ---
+        
 
-        // Si on a dessiné un rectangle de sélection (internal whiteboard interaction)
+        
         if (isSelectionRectActive && selectionStart != null && selectionEnd != null) {
             System.out.println("[WhiteBoard] Handling mouse release for selection rectangle.");
-            // Calculer les coordonnées du rectangle de sélection
+            
             int x1 = Math.min(selectionStart.x, selectionEnd.x);
             int y1 = Math.min(selectionStart.y, selectionEnd.y);
             int x2 = Math.max(selectionStart.x, selectionEnd.x);
             int y2 = Math.max(selectionStart.y, selectionEnd.y);
 
-            // Si le rectangle est trop petit, c'est probablement un clic accidentel
+            
             if (x2 - x1 < 5 || y2 - y1 < 5) {
                 isSelectionRectActive = false;
                 selectionStart = null;
@@ -772,7 +772,7 @@ public class WhiteBoard extends Canvas implements Draggable {
                 return;
             }
 
-            // Si Ctrl n'est pas enfoncé, désélectionner toutes les formes d'abord
+            
             if (!isCtrlPressed) {
                 for (Shape s : selectedShapes) {
                     s.setSelected(false);
@@ -780,15 +780,15 @@ public class WhiteBoard extends Canvas implements Draggable {
                 selectedShapes.clear();
             }
 
-            // Sélectionner toutes les formes qui se trouvent dans le rectangle
+            
             for (Shape shape : shapes) {
                 Rectangle bounds = shape.getBounds();
 
-                // Vérifier si la forme est dans le rectangle de sélection
+                
                 if (bounds.getX() >= x1 && bounds.getX() + bounds.getWidth() <= x2 &&
                         bounds.getY() >= y1 && bounds.getY() + bounds.getHeight() <= y2) {
 
-                    // Ajouter la forme à la sélection si elle n'y est pas déjà
+                    
                     if (!selectedShapes.contains(shape)) {
                         selectedShapes.add(shape);
                         shape.setSelected(true);
@@ -796,7 +796,7 @@ public class WhiteBoard extends Canvas implements Draggable {
                 }
             }
 
-            // Réinitialiser les variables du rectangle de sélection
+            
             isSelectionRectActive = false;
             selectionStart = null;
             selectionEnd = null;
@@ -805,31 +805,31 @@ public class WhiteBoard extends Canvas implements Draggable {
             return;
         }
 
-        // Check if an internal drag operation (started on whiteboard) was in progress
-        // and completed
-        // Use mediator state to confirm it was an internal drag
+        
+        
+        
         if (isDragging && activeShape != null && !originalPositions.isEmpty() && dragMediator != null
                 && dragMediator.getSourceComponentForDrag() == this) {
             System.out.println("[WhiteBoard] Handling mouse release for internal shape drag.");
-            // Convert whiteboard coordinates to screen coordinates for checking panels
+            
             Point screenPoint = new Point(e.getX(), e.getY());
             try {
                 screenPoint.translate(getLocationOnScreen().x, getLocationOnScreen().y);
             } catch (Exception ex) {
-                // Ignore any exceptions during coordinate conversion
+                
                 System.out.println("[WhiteBoard] Error converting coordinates: " + ex.getMessage());
             }
 
-            // Check if we're dropping shapes on the trash panel
+            
             if (isBeingDraggedToTrash && dragMediator != null) {
                 try {
-                    // Check if we're still over the trash panel
+                    
                     if (dragMediator.checkPointOverTrash(screenPoint)) {
                         System.out.println("[WhiteBoard] Dropping shapes on trash panel");
-                        // Delete the selected shapes
+                        
                         deleteSelectedShapes();
 
-                        // Reset drag state variables
+                        
                         isDragging = false;
                         dragStartPoint = null;
                         originalShapePosition = null;
@@ -837,77 +837,77 @@ public class WhiteBoard extends Canvas implements Draggable {
                         originalPositions.clear();
                         isBeingDraggedToTrash = false;
 
-                        // Repaint to update the view
+                        
                         repaint();
                         return;
                     }
                 } catch (Exception ex) {
-                    // Ignore any exceptions during coordinate conversion
+                    
                     System.out.println("[WhiteBoard] Error checking trash panel: " + ex.getMessage());
                 }
 
-                // Reset the trash panel visual state
+                
                 setDraggingToTrash(false);
             }
 
             if (isBeingDraggedToToolbar && dragMediator != null && toolbarPanel != null) {
                 try {
-                    // Check if we're still over the toolbar panel
+                    
                     if (dragMediator.checkPointOverToolbar(screenPoint)) {
                         System.out.println("[WhiteBoard] Dropping shapes on toolbar panel - attempting to add");
-                        // Call the toolbar panel's method to add the shapes
+                        
                         toolbarPanel.addSelectedShapesToToolbar();
 
-                        // Reset drag state variables immediately after successful drop on toolbar
+                        
                         isDragging = false;
                         dragStartPoint = null;
                         originalShapePosition = null;
                         dragOffset = null;
                         originalPositions.clear();
-                        isBeingDraggedToToolbar = false; // Reset toolbar drag state
+                        isBeingDraggedToToolbar = false; 
 
-                        // Reset toolbar visual state via mediator
-                        dragMediator.checkPointOverToolbar(new Point(-1, -1)); // Force reset
+                        
+                        dragMediator.checkPointOverToolbar(new Point(-1, -1)); 
 
-                        // Repaint to update the view
+                        
                         repaint();
-                        return; // Exit early, don't treat as a move
+                        return; 
                     }
                 } catch (Exception ex) {
-                    // Ignore any exceptions during coordinate conversion or toolbar interaction
+                    
                     System.out.println("[WhiteBoard] Error checking/adding to toolbar panel: " + ex.getMessage());
                 }
 
-                // Reset the toolbar panel visual state if drop wasn't successful or error
-                // occurred
+                
+                
                 setDraggingToToolbar(false);
                 if (dragMediator != null) {
-                    dragMediator.checkPointOverToolbar(new Point(-1, -1)); // Force reset
+                    dragMediator.checkPointOverToolbar(new Point(-1, -1)); 
                 }
             }
 
-            // If not dropped on trash or toolbar, proceed with move command logic
-            // Create a map to store the final positions of all selected shapes
+            
+            
             Map<Shape, Point> finalPositions = new HashMap<>();
             boolean positionsChanged = false;
 
-            // Collect the final positions of all selected shapes
+            
             for (Shape shape : selectedShapes) {
                 Rectangle bounds = shape.getBounds();
                 Point finalPosition = new Point(bounds.getX(), bounds.getY());
                 finalPositions.put(shape, finalPosition);
 
-                // Check if at least one shape has moved
+                
                 Point originalPos = originalPositions.get(shape);
                 if (originalPos != null && !originalPos.equals(finalPosition)) {
                     positionsChanged = true;
                 }
             }
 
-            // Only create and execute a command if at least one position actually changed
+            
             if (positionsChanged) {
                 if (selectedShapes.size() == 1) {
-                    // If only one shape is selected, use the simpler MoveShapeCommand
+                    
                     MoveShapeCommand moveCommand = new MoveShapeCommand(
                             activeShape,
                             originalPositions.get(activeShape),
@@ -915,7 +915,7 @@ public class WhiteBoard extends Canvas implements Draggable {
 
                     commandHistory.executeCommand(moveCommand);
                 } else {
-                    // If multiple shapes are selected, use MoveShapesCommand
+                    
                     MoveShapesCommand moveShapesCommand = new MoveShapesCommand(
                             selectedShapes,
                             originalPositions,
@@ -925,68 +925,68 @@ public class WhiteBoard extends Canvas implements Draggable {
                 }
             }
 
-            // Reset drag state variables regardless of whether a move occurred
+            
             isDragging = false;
             dragStartPoint = null;
             originalShapePosition = null;
             dragOffset = null;
             originalPositions.clear();
 
-            // Repaint to potentially remove drag-specific highlighting
+            
             repaint();
         }
     }
 
     @Override
     public void update(Graphics g) {
-        // Override update to prevent clearing the screen before painting
+        
         paint(g);
     }
 
     @Override
     public void paint(Graphics g) {
-        // Create offscreen buffer if it doesn't exist or if size has changed
+        
         if (offscreenBuffer == null ||
                 offscreenBuffer.getWidth(null) != getWidth() ||
                 offscreenBuffer.getHeight(null) != getHeight()) {
             createOffscreenBuffer();
         }
 
-        // Clear the offscreen buffer
+        
         offscreenGraphics.setColor(backgroundColor);
         offscreenGraphics.fillRect(0, 0, getWidth(), getHeight());
 
-        // Draw all shapes to the offscreen buffer
+        
         Drawer drawer = new AWTDrawing((Graphics2D) offscreenGraphics);
         for (Shape shape : shapes) {
             shape.draw(drawer);
         }
 
-        // Highlight selected shapes with dashed border
+        
         if (!selectedShapes.isEmpty()) {
             Graphics2D g2d = (Graphics2D) offscreenGraphics.create();
             try {
-                // Définir le style de trait en pointillés
+                
                 float[] dash = { 5.0f, 5.0f };
                 g2d.setStroke(new BasicStroke(2.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash, 0.0f));
 
-                // Dessiner un contour en pointillés autour de chaque forme sélectionnée
+                
                 for (Shape shape : selectedShapes) {
                     Rectangle bounds = shape.getBounds();
 
                     if (isDragging && shape == activeShape) {
-                        // Style spécifique pour la forme en cours de déplacement
-                        g2d.setColor(new Color(255, 165, 0)); // Orange
+                        
+                        g2d.setColor(new Color(255, 165, 0)); 
                     } else {
-                        // Style normal pour les formes sélectionnées
-                        g2d.setColor(new Color(0, 0, 255)); // Bleu
+                        
+                        g2d.setColor(new Color(0, 0, 255)); 
                     }
 
-                    // Dessiner le contour en pointillés légèrement plus grand que la forme
+                    
                     g2d.drawRect(bounds.getX() - 2, bounds.getY() - 2,
                             bounds.getWidth() + 4, bounds.getHeight() + 4);
 
-                    // Dessiner un point rouge au centre de la forme (comme dans les images)
+                    
                     g2d.setColor(Color.RED);
                     g2d.fillOval(bounds.getX() + bounds.getWidth() / 2 - 3,
                             bounds.getY() + bounds.getHeight() / 2 - 3, 6, 6);
@@ -996,33 +996,33 @@ public class WhiteBoard extends Canvas implements Draggable {
             }
         }
 
-        // Dessiner le rectangle de sélection s'il est actif
+        
         if (isSelectionRectActive && selectionStart != null && selectionEnd != null) {
             Graphics2D g2d = (Graphics2D) offscreenGraphics.create();
             try {
-                // Calculer les coordonnées du rectangle
+                
                 int x = Math.min(selectionStart.x, selectionEnd.x);
                 int y = Math.min(selectionStart.y, selectionEnd.y);
                 int width = Math.abs(selectionEnd.x - selectionStart.x);
                 int height = Math.abs(selectionEnd.y - selectionStart.y);
 
-                // Définir le style de trait en pointillés
+                
                 float[] dash = { 5.0f, 5.0f };
                 g2d.setStroke(new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash, 0.0f));
 
-                // Dessiner le rectangle de sélection avec un fond semi-transparent
-                g2d.setColor(new Color(0, 0, 255, 30)); // Bleu semi-transparent
+                
+                g2d.setColor(new Color(0, 0, 255, 30)); 
                 g2d.fillRect(x, y, width, height);
 
-                // Dessiner le contour du rectangle
-                g2d.setColor(new Color(0, 0, 255)); // Bleu
+                
+                g2d.setColor(new Color(0, 0, 255)); 
                 g2d.drawRect(x, y, width, height);
             } finally {
                 g2d.dispose();
             }
         }
 
-        // Draw overlay for shapes being dragged to trash
+        
         System.out.println("[WhiteBoard] Paint method - isDragging=" + isDragging + ", isBeingDraggedToTrash="
                 + isBeingDraggedToTrash + ", selectedShapes.isEmpty()=" + selectedShapes.isEmpty());
         if (isDragging && isBeingDraggedToTrash && !selectedShapes.isEmpty()) {
@@ -1035,7 +1035,7 @@ public class WhiteBoard extends Canvas implements Draggable {
             }
         }
 
-        // Draw the offscreen buffer to the screen
+        
         g.drawImage(offscreenBuffer, 0, 0, this);
     }
 
@@ -1053,65 +1053,65 @@ public class WhiteBoard extends Canvas implements Draggable {
             return;
         }
 
-        // Enable anti-aliasing for smoother drawing
+        
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        // Save the original graphics state
+        
         Composite originalComposite = g2d.getComposite();
         Stroke originalStroke = g2d.getStroke();
         Color originalColor = g2d.getColor();
 
         try {
-            // Get the mouse position
+            
             Point mousePos = getMousePosition();
             if (mousePos == null) {
-                // If mouse position is not available, use the center of the whiteboard
+                
                 mousePos = new Point(getWidth() / 2, getHeight() / 2);
             }
 
-            // Set semi-transparent composite for overlay
+            
             g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.7f));
 
-            // Draw a red overlay for each selected shape
+            
             for (Shape shape : selectedShapes) {
                 Rectangle bounds = shape.getBounds();
 
-                // Fill with semi-transparent red
-                g2d.setColor(new Color(255, 0, 0, 128)); // Red with 50% transparency
+                
+                g2d.setColor(new Color(255, 0, 0, 128)); 
                 g2d.fillRect(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight());
 
-                // Draw border with a thicker stroke
+                
                 g2d.setColor(Color.RED);
                 g2d.setStroke(new BasicStroke(2.0f));
                 g2d.drawRect(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight());
             }
 
-            // Draw a dashed line from the active shape to the mouse cursor
+            
             if (activeShape != null) {
                 Rectangle bounds = activeShape.getBounds();
                 int centerX = bounds.getX() + bounds.getWidth() / 2;
                 int centerY = bounds.getY() + bounds.getHeight() / 2;
 
-                // Draw dashed line
+                
                 g2d.setColor(Color.RED);
                 float[] dash = { 5.0f, 5.0f };
                 g2d.setStroke(new BasicStroke(2.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash, 0.0f));
                 g2d.drawLine(centerX, centerY, mousePos.x, mousePos.y);
 
-                // Draw a small trash icon near the cursor
-                int iconSize = 32; // Larger icon for better visibility
+                
+                int iconSize = 32; 
                 g2d.setColor(new Color(255, 0, 0, 200));
                 g2d.fillOval(mousePos.x - iconSize / 2, mousePos.y - iconSize / 2, iconSize, iconSize);
                 g2d.setColor(Color.WHITE);
-                g2d.setStroke(new BasicStroke(3.0f)); // Thicker stroke for better visibility
+                g2d.setStroke(new BasicStroke(3.0f)); 
 
-                // Draw an X inside the circle
+                
                 int offset = iconSize / 4;
                 g2d.drawLine(mousePos.x - offset, mousePos.y - offset, mousePos.x + offset, mousePos.y + offset);
                 g2d.drawLine(mousePos.x + offset, mousePos.y - offset, mousePos.x - offset, mousePos.y + offset);
             }
         } finally {
-            // Restore the original graphics state
+            
             g2d.setComposite(originalComposite);
             g2d.setStroke(originalStroke);
             g2d.setColor(originalColor);
@@ -1188,19 +1188,19 @@ public class WhiteBoard extends Canvas implements Draggable {
             commandHistory.executeCommand(
                     new CreateShapeCommand(shapes, newShape, x, y));
 
-            // Désélectionner toutes les formes précédemment sélectionnées
+            
             for (Shape s : selectedShapes) {
                 s.setSelected(false);
             }
             selectedShapes.clear();
 
-            // Sélectionner la nouvelle forme
+            
             selectedShapes.add(newShape);
             activeShape = newShape;
             newShape.setSelected(true);
             repaint();
 
-            // Notify state change listener
+            
             notifyStateChanged("Shape created on whiteboard");
         }
     }
@@ -1210,7 +1210,7 @@ public class WhiteBoard extends Canvas implements Draggable {
      */
     public void addShapeToCenter() {
         if (currentShapeType != null && prototypeRegistry != null) {
-            // Calculate the center of the whiteboard
+            
             int centerX = getWidth() / 2;
             int centerY = getHeight() / 2;
 
@@ -1224,7 +1224,7 @@ public class WhiteBoard extends Canvas implements Draggable {
      */
     public void addShapeToTopLeft() {
         if (currentShapeType != null && prototypeRegistry != null) {
-            // Use a small margin from the top-left corner
+            
             int marginX = 20;
             int marginY = 20;
 
@@ -1252,25 +1252,25 @@ public class WhiteBoard extends Canvas implements Draggable {
             return false;
         }
 
-        // Remove all selected shapes from the shapes list
+        
         boolean removed = shapes.removeAll(selectedShapes);
 
-        // Clear the selection
+        
         selectedShapes.clear();
         activeShape = null;
 
-        // Reset the dragging to trash state
+        
         isBeingDraggedToTrash = false;
 
-        // Reset the trash panel visual state if we have a mediator
+        
         if (dragMediator != null) {
             dragMediator.resetTrashPanelState();
         }
 
-        // Repaint to show the updated state
+        
         repaint();
 
-        // Notify state change listener
+        
         if (removed) {
             notifyStateChanged("Shapes deleted from whiteboard");
         }
@@ -1285,7 +1285,7 @@ public class WhiteBoard extends Canvas implements Draggable {
         this.relH = heightPercent / 100.0;
     }
 
-    // Draggable interface implementation
+    
     private boolean isBeingDraggedToTrash = false;
     private boolean isBeingDraggedToToolbar = false;
     private DragMediator dragMediator;
@@ -1310,27 +1310,27 @@ public class WhiteBoard extends Canvas implements Draggable {
 
     @Override
     public void startDrag(int x, int y) {
-        // This method is called when a shape is being dragged from the whiteboard
-        // We don't need to do anything special here as the mouse handlers already
-        // handle selection
+        
+        
+        
     }
 
     @Override
     public void drag(int x, int y) {
-        // This method is called when a shape is being dragged
-        // The actual dragging is handled by the mouse motion handlers
+        
+        
     }
 
     @Override
     public void endDrag(int x, int y) {
-        // This method is called when a shape drag operation ends
-        // If the shape was being dragged to the trash, delete it
+        
+        
         if (isBeingDraggedToTrash) {
             deleteSelectedShapes();
             isBeingDraggedToTrash = false;
         }
 
-        // Reset the toolbar drag state
+        
         if (isBeingDraggedToToolbar) {
             System.out.println("[WhiteBoard] Ending drag to toolbar");
             isBeingDraggedToToolbar = false;
@@ -1339,8 +1339,8 @@ public class WhiteBoard extends Canvas implements Draggable {
 
     @Override
     public String getShapeType() {
-        // For the whiteboard, we don't have a specific shape type
-        // This is used when dragging shapes from the whiteboard to the trash
+        
+        
         return "SelectedShapes";
     }
 
@@ -1362,9 +1362,9 @@ public class WhiteBoard extends Canvas implements Draggable {
                 s.setSelected(false);
             }
             selectedShapes.clear();
-            activeShape = null; // Ensure no shape remains active
+            activeShape = null; 
             System.out.println("[WhiteBoard] Selection cleared.");
-            // No repaint here, let the caller decide when to repaint
+            
         }
     }
 
@@ -1377,9 +1377,9 @@ public class WhiteBoard extends Canvas implements Draggable {
     public void addSelectedShape(Shape shape) {
         if (shape != null && !selectedShapes.contains(shape)) {
             selectedShapes.add(shape);
-            shape.setSelected(true); // Ensure the shape knows it's selected
+            shape.setSelected(true); 
             System.out.println("[WhiteBoard] Added shape to selection: " + shape);
-            // No repaint here, let the caller decide
+            
         }
     }
 
@@ -1391,9 +1391,9 @@ public class WhiteBoard extends Canvas implements Draggable {
     public void setDraggingToTrash(boolean isDraggingToTrash) {
         if (this.isBeingDraggedToTrash != isDraggingToTrash) {
             this.isBeingDraggedToTrash = isDraggingToTrash;
-            // Debug output
+            
             System.out.println("[WhiteBoard] Setting isBeingDraggedToTrash to " + isDraggingToTrash);
-            // Trigger a repaint to show or hide the overlay
+            
             repaint();
         }
     }
@@ -1407,9 +1407,9 @@ public class WhiteBoard extends Canvas implements Draggable {
     public void setDraggingToToolbar(boolean isDraggingToToolbar) {
         if (this.isBeingDraggedToToolbar != isDraggingToToolbar) {
             this.isBeingDraggedToToolbar = isDraggingToToolbar;
-            // Debug output
+            
             System.out.println("[WhiteBoard] Setting isBeingDraggedToToolbar to " + isDraggingToToolbar);
-            // Trigger a repaint to show or hide the overlay
+            
             repaint();
         }
     }
@@ -1424,7 +1424,7 @@ public class WhiteBoard extends Canvas implements Draggable {
 
         frame.addComponentListener(resizeListener);
 
-        // Initial positioning
+        
         updateBounds(frame);
     }
 
@@ -1439,7 +1439,7 @@ public class WhiteBoard extends Canvas implements Draggable {
 
         setBounds(x, y, width, height);
 
-        // Recreate the offscreen buffer when size changes
+        
         createOffscreenBuffer();
         repaint();
     }
@@ -1477,7 +1477,7 @@ public class WhiteBoard extends Canvas implements Draggable {
         }
     }
 
-    // --- Memento Pattern Implementation ---
+    
 
     /**
      * Creates a memento containing the current state of the whiteboard (shapes).
@@ -1486,8 +1486,8 @@ public class WhiteBoard extends Canvas implements Draggable {
      */
     public ShapeMemento createMemento() {
         System.out.println("[WhiteBoard] Creating Memento...");
-        // Pass the current list of shapes to the memento constructor
-        return new ShapeMemento(new ArrayList<>(this.shapes)); // Pass a copy
+        
+        return new ShapeMemento(new ArrayList<>(this.shapes)); 
     }
 
     /**
@@ -1501,13 +1501,13 @@ public class WhiteBoard extends Canvas implements Draggable {
             return;
         }
         System.out.println("[WhiteBoard] Restoring state from Memento...");
-        // Get the shapes from the memento (these are already clones)
+        
         this.shapes = memento.getShapesState();
-        // Clear selection and command history as the state is completely replaced
+        
         this.selectedShapes.clear();
         this.activeShape = null;
-        this.commandHistory.clear(); // Clear history after loading state
+        this.commandHistory.clear(); 
         System.out.println("[WhiteBoard] Memento restore complete. Shape count: " + this.shapes.size());
-        repaint(); // Repaint to show the restored shapes
+        repaint(); 
     }
 }

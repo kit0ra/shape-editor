@@ -32,21 +32,21 @@ public class SingleShapeProcessor implements ShapeProcessor {
             return null;
         }
 
-        // Generate a unique key for the shape
+        
         String uniqueShapeKey = generateUniqueKey(shape);
 
-        // Clone the shape for the prototype
+        
         Shape clonedShape = shape.clone();
 
-        // Register the shape with the registry
+        
         registry.registerPrototype(uniqueShapeKey, clonedShape);
 
-        // Get the icon path for the shape - used as fallback
+        
         String iconPath = getIconForShape(shape);
 
-        // Create a button for the shape
-        // The buttonFactory will use the shape prototype from the registry
-        // which will preserve all properties (color, etc.)
+        
+        
+        
         IButton button = buttonFactory.createButton(
                 x, y,
                 iconPath,

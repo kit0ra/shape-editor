@@ -18,9 +18,9 @@ public class TrashPanel extends CustomPanel {
     private boolean isShapeOverTrash = false;
     private WhiteBoard targetWhiteBoard;
 
-    // Colors for visual feedback
+    
     private final Color normalColor = java.awt.Color.decode("#F6E9D7");
-    private final Color hoverColor = new Color(255, 200, 200); // Light red when shape is over trash
+    private final Color hoverColor = new Color(255, 200, 200); 
 
     public TrashPanel() {
         super();
@@ -30,12 +30,12 @@ public class TrashPanel extends CustomPanel {
 
     @Override
     public void paint(Graphics g) {
-        // Set the background color based on whether a shape is over the trash
+        
         setBackground(isShapeOverTrash ? hoverColor : normalColor);
 
         super.paint(g);
 
-        // Draw the trash icon centered in the panel
+        
         if (trashIcon != null) {
             int iconWidth = 32;
             int iconHeight = 32;
@@ -64,7 +64,7 @@ public class TrashPanel extends CustomPanel {
     public void setDragMediator(DragMediator mediator) {
         this.dragMediator = mediator;
 
-        // Register with the mediator as a special panel
+        
         if (mediator != null) {
             mediator.registerTrashPanel(this);
         }

@@ -49,7 +49,7 @@ public class EditShapeCommand implements Command {
             int newBorderRadius) {
         this.shapes = new ArrayList<>(shapes);
 
-        // Store old states
+        
         for (Shape shape : shapes) {
             Color oldBorderColor = getBorderColor(shape);
             Color oldFillColor = getFillColor(shape);
@@ -78,7 +78,7 @@ public class EditShapeCommand implements Command {
         for (Shape shape : shapes) {
             ShapeState newState = newStates.get(shape);
 
-            // Apply new properties
+            
             shape.setBorderColor(newState.borderColor);
             setFillColor(shape, newState.fillColor);
             setRotation(shape, newState.rotation);
@@ -91,7 +91,7 @@ public class EditShapeCommand implements Command {
         for (Shape shape : shapes) {
             ShapeState oldState = oldStates.get(shape);
 
-            // Restore old properties
+            
             shape.setBorderColor(oldState.borderColor);
             setFillColor(shape, oldState.fillColor);
             setRotation(shape, oldState.rotation);
@@ -99,7 +99,7 @@ public class EditShapeCommand implements Command {
         }
     }
 
-    // Helper methods to get/set properties based on shape type
+    
 
     private Color getBorderColor(Shape shape) {
         if (shape instanceof Rectangle) {
@@ -109,7 +109,7 @@ public class EditShapeCommand implements Command {
         } else if (shape instanceof Circle) {
             return ((Circle) shape).getBorderColor();
         }
-        return Color.BLACK; // Default
+        return Color.BLACK; 
     }
 
     private Color getFillColor(Shape shape) {
@@ -120,7 +120,7 @@ public class EditShapeCommand implements Command {
         } else if (shape instanceof Circle) {
             return ((Circle) shape).getFillColor();
         }
-        return Color.WHITE; // Default
+        return Color.WHITE; 
     }
 
     private double getRotation(Shape shape) {
@@ -131,7 +131,7 @@ public class EditShapeCommand implements Command {
         } else if (shape instanceof Circle) {
             return ((Circle) shape).getRotation();
         }
-        return 0.0; // Default
+        return 0.0; 
     }
 
     private void setFillColor(Shape shape, Color color) {
@@ -158,13 +158,13 @@ public class EditShapeCommand implements Command {
         if (shape instanceof Rectangle) {
             return ((Rectangle) shape).getBorderRadius();
         }
-        return 0; // Default
+        return 0; 
     }
 
     private void setBorderRadius(Shape shape, int borderRadius) {
         if (shape instanceof Rectangle) {
             ((Rectangle) shape).setBorderRadius(borderRadius);
         }
-        // Other shapes don't have border radius
+        
     }
 }

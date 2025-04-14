@@ -4,18 +4,18 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.editor.drawing.Drawer; // Import Serializable
+import com.editor.drawing.Drawer; 
 
 /**
  * Represents a group of shapes that can be manipulated as a single entity.
  * Implements Serializable to allow saving/loading state.
  */
-public class ShapeGroup implements Shape { // Implement Serializable
-    private static final long serialVersionUID = 1L; // Keep serialVersionUID
+public class ShapeGroup implements Shape { 
+    private static final long serialVersionUID = 1L; 
     private List<Shape> shapes = new ArrayList<>();
     private boolean selected;
     private Color borderColor = Color.BLACK;
-    private double rotation = 0.0; // Rotation in degrees
+    private double rotation = 0.0; 
 
     /**
      * Creates a new empty shape group.
@@ -57,12 +57,12 @@ public class ShapeGroup implements Shape { // Implement Serializable
      * @return The list of shapes
      */
     public List<Shape> getShapes() {
-        return new ArrayList<>(shapes); // Return a copy to prevent external modification
+        return new ArrayList<>(shapes); 
     }
 
     @Override
     public void draw(Drawer drawer) {
-        // Draw all shapes in the group
+        
         for (Shape shape : shapes) {
             shape.draw(drawer);
         }
@@ -70,7 +70,7 @@ public class ShapeGroup implements Shape { // Implement Serializable
 
     @Override
     public void move(int dx, int dy) {
-        // Move all shapes in the group
+        
         for (Shape shape : shapes) {
             shape.move(dx, dy);
         }
@@ -78,18 +78,18 @@ public class ShapeGroup implements Shape { // Implement Serializable
 
     @Override
     public void setPosition(int x, int y) {
-        // Calculate the offset from the current position
+        
         Rectangle bounds = getBounds();
         int dx = x - bounds.getX();
         int dy = y - bounds.getY();
 
-        // Move all shapes by this offset
+        
         move(dx, dy);
     }
 
     @Override
     public boolean isSelected(int x, int y) {
-        // Check if the point is within any shape in the group
+        
         for (Shape shape : shapes) {
             if (shape.isSelected(x, y)) {
                 return true;
@@ -102,7 +102,7 @@ public class ShapeGroup implements Shape { // Implement Serializable
     public void setSelected(boolean selected) {
         this.selected = selected;
 
-        // Set the selection state of all shapes in the group
+        
         for (Shape shape : shapes) {
             shape.setSelected(selected);
         }
@@ -119,14 +119,14 @@ public class ShapeGroup implements Shape { // Implement Serializable
             return new Rectangle(0, 0, 0, 0);
         }
 
-        // Start with the bounds of the first shape
+        
         Rectangle bounds = shapes.get(0).getBounds();
         int minX = bounds.getX();
         int minY = bounds.getY();
         int maxX = minX + bounds.getWidth();
         int maxY = minY + bounds.getHeight();
 
-        // Expand to include all other shapes
+        
         for (int i = 1; i < shapes.size(); i++) {
             Rectangle shapeBounds = shapes.get(i).getBounds();
             minX = Math.min(minX, shapeBounds.getX());
@@ -142,23 +142,23 @@ public class ShapeGroup implements Shape { // Implement Serializable
     @SuppressWarnings("CloneDeclaresCloneNotSupported")
     public Shape clone() {
         try {
-            // Call Object.clone() to create the initial shallow copy
+            
             ShapeGroup clone = (ShapeGroup) super.clone();
 
-            // Initialize a new list for the cloned shapes
+            
             clone.shapes = new ArrayList<>();
 
-            // Deep clone the shapes in the group
+            
             for (Shape shape : shapes) {
                 clone.addShape(shape.clone());
             }
 
-            // Copy rotation property
+            
             clone.rotation = this.rotation;
 
             return clone;
         } catch (CloneNotSupportedException e) {
-            // This should never happen since we implement Cloneable
+            
             throw new InternalError("Could not clone ShapeGroup", e);
         }
     }
@@ -191,7 +191,7 @@ public class ShapeGroup implements Shape { // Implement Serializable
     @Override
     public void setRotation(double degrees) {
         this.rotation = degrees;
-        // Apply rotation to all shapes in the group
+        
         for (Shape shape : shapes) {
             shape.setRotation(degrees);
         }

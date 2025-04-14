@@ -21,14 +21,14 @@ public class EditorStateManager {
      * @param data Additional data about the state change
      */
     public void registerStateChange(String component, String action, Object data) {
-        // Cache the state change
+        
         String key = component + "." + action;
         stateCache.put(key, data);
         
-        // Create a state change event
+        
         StateChangeEvent event = new StateChangeEvent(component, action, data);
         
-        // Notify listeners
+        
         notifyListeners(event);
     }
     

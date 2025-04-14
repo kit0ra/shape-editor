@@ -4,7 +4,7 @@ import java.awt.Graphics;
 
 import com.editor.commands.CommandHistory;
 import com.editor.commands.CreateGroupCommand;
-import com.editor.gui.WhiteBoard; // Assuming WhiteBoard provides access or we pass it
+import com.editor.gui.WhiteBoard; 
 import com.editor.gui.button.IButton;
 import com.editor.shapes.CompositeShapePrototypeRegistry;
 import com.editor.shapes.ShapeGroup;
@@ -17,7 +17,7 @@ public class CompositeShapeCreationButtonDecorator extends ButtonDecorator {
 
     protected final WhiteBoard whiteBoard;
     protected final CompositeShapePrototypeRegistry compositeRegistry;
-    protected final String groupKey; // Key to identify the group in the registry
+    protected final String groupKey; 
 
     public CompositeShapeCreationButtonDecorator(IButton decoratedButton, WhiteBoard whiteBoard,
             CompositeShapePrototypeRegistry compositeRegistry, String groupKey) {
@@ -33,37 +33,37 @@ public class CompositeShapeCreationButtonDecorator extends ButtonDecorator {
 
     @Override
     public void onClick() {
-        super.onClick(); // Call underlying button's onClick if needed
+        super.onClick(); 
 
         System.out.println("[CompositeButtonDecorator] Clicked - attempting to create group with key: " + groupKey);
 
-        // Get the CommandHistory from the WhiteBoard (assuming a getter exists or is
-        // added)
-        // If no direct access, this might need adjustment (e.g., passing
-        // CommandHistory)
-        CommandHistory commandHistory = whiteBoard.getCommandHistory(); // Needs getter in WhiteBoard
+        
+        
+        
+        
+        CommandHistory commandHistory = whiteBoard.getCommandHistory(); 
         if (commandHistory == null) {
             System.err.println("[CompositeButtonDecorator] Error: CommandHistory not available from WhiteBoard.");
             return;
         }
 
-        // Define where to place the new group (e.g., center of whiteboard)
+        
         int targetX = whiteBoard.getWidth() / 2;
         int targetY = whiteBoard.getHeight() / 2;
 
         try {
-            // Create the group instance from the registry
+            
             ShapeGroup newGroup = compositeRegistry.createGroup(groupKey, targetX, targetY);
 
-            // Create and execute the command
-            CreateGroupCommand command = new CreateGroupCommand(whiteBoard.getShapesList(), newGroup); // Needs getter
-                                                                                                       // in WhiteBoard
+            
+            CreateGroupCommand command = new CreateGroupCommand(whiteBoard.getShapesList(), newGroup); 
+                                                                                                       
             commandHistory.executeCommand(command);
 
-            // Optionally select the newly added group
-            whiteBoard.clearSelection(); // Needs implementation or alternative
+            
+            whiteBoard.clearSelection(); 
             newGroup.setSelected(true);
-            whiteBoard.addSelectedShape(newGroup); // Needs implementation or alternative
+            whiteBoard.addSelectedShape(newGroup); 
 
             whiteBoard.repaint();
             System.out.println("[CompositeButtonDecorator] Successfully created and added group: " + groupKey);
@@ -76,13 +76,13 @@ public class CompositeShapeCreationButtonDecorator extends ButtonDecorator {
         }
     }
 
-    // --- Delegate other IButton methods ---
+    
 
     @Override
     public void draw(Graphics g) {
         super.draw(g);
-        // Note: The actual shape drawing is handled by the ShapeDrawingButtonDecorator
-        // if it was applied before this decorator
+        
+        
     }
 
     @Override

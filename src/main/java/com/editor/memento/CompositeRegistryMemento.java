@@ -17,7 +17,7 @@ public class CompositeRegistryMemento implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    // Store clones of the prototypes to ensure immutability and capture state
+    
     private final Map<String, ShapeGroup> prototypesState;
 
     /**
@@ -27,11 +27,11 @@ public class CompositeRegistryMemento implements Serializable {
      *                   ShapeGroup value).
      */
     public CompositeRegistryMemento(Map<String, ShapeGroup> prototypes) {
-        // Deep copy the map by cloning each ShapeGroup value
+        
         this.prototypesState = prototypes.entrySet().stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
-                        entry -> (ShapeGroup) entry.getValue().clone() // Clone each ShapeGroup
+                        entry -> (ShapeGroup) entry.getValue().clone() 
                 ));
         System.out.println("[LOG] CompositeRegistryMemento(Map) - Constructor called. Storing keys: "
                 + this.prototypesState.keySet());
@@ -48,18 +48,18 @@ public class CompositeRegistryMemento implements Serializable {
         Map<String, ShapeGroup> extractedMap = new HashMap<>();
 
         try {
-            // Use reflection to access the private groupPrototypes field
+            
             Field field = CompositeShapePrototypeRegistry.class.getDeclaredField("groupPrototypes");
             field.setAccessible(true);
 
             @SuppressWarnings("unchecked")
             Map<String, ShapeGroup> registryMap = (Map<String, ShapeGroup>) field.get(registry);
 
-            // Deep copy the map by cloning each ShapeGroup value
+            
             extractedMap = registryMap.entrySet().stream()
                     .collect(Collectors.toMap(
                             Map.Entry::getKey,
-                            entry -> (ShapeGroup) entry.getValue().clone() // Clone each ShapeGroup
+                            entry -> (ShapeGroup) entry.getValue().clone() 
                     ));
 
             System.out.println(
@@ -79,8 +79,8 @@ public class CompositeRegistryMemento implements Serializable {
      *         memento creation).
      */
     public Map<String, ShapeGroup> getPrototypesState() {
-        // Return a copy of the map held by the memento.
-        // The values are already clones created when the memento was constructed.
+        
+        
         return new HashMap<>(this.prototypesState);
     }
 
@@ -94,10 +94,10 @@ public class CompositeRegistryMemento implements Serializable {
     public CompositeShapePrototypeRegistry getRegistryState() {
         CompositeShapePrototypeRegistry registry = new CompositeShapePrototypeRegistry();
 
-        // Register each prototype in the new registry
+        
         for (Map.Entry<String, ShapeGroup> entry : prototypesState.entrySet()) {
             String key = entry.getKey();
-            ShapeGroup group = (ShapeGroup) entry.getValue().clone(); // Clone again for safety
+            ShapeGroup group = (ShapeGroup) entry.getValue().clone(); 
             registry.registerPrototype(key, group);
         }
 

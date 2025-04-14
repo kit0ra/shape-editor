@@ -9,10 +9,10 @@ public class Rectangle implements Shape {
     private int x, y;
     private final int width, height;
     private boolean selected;
-    private Color fillColor = new Color(255, 182, 193); // Light pink default fill color
-    private Color borderColor = Color.BLACK; // Default border color
-    private double rotation = 0.0; // Rotation in degrees
-    private int borderRadius = 0; // Border radius for rounded corners
+    private Color fillColor = new Color(255, 182, 193); 
+    private Color borderColor = Color.BLACK; 
+    private double rotation = 0.0; 
+    private int borderRadius = 0; 
 
     public Rectangle(int x, int y, int width, int height) {
         this.x = x;
@@ -66,7 +66,7 @@ public class Rectangle implements Shape {
             Rectangle clone = (Rectangle) super.clone();
             return clone;
         } catch (CloneNotSupportedException e) {
-            // This shouldn't happen as we implement Cloneable
+            
             throw new AssertionError(e);
         }
     }

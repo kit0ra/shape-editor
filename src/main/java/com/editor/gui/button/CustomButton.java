@@ -7,7 +7,7 @@ public class CustomButton implements IButton {
 
     private final int x, y, width, height;
     private final String text;
-    private boolean isMouseOver = false; // Tracks hover state
+    private boolean isMouseOver = false; 
 
     public CustomButton(int x, int y, int width, int height, String text) {
         this.x = x;
@@ -42,7 +42,7 @@ public class CustomButton implements IButton {
         isMouseOver = false;
     }
 
-    // Button colors
+    
     private static final Color BUTTON_COLOR = Color.LIGHT_GRAY;
     private static final Color BUTTON_HOVER_COLOR = new Color(200, 200, 200);
 

@@ -17,12 +17,12 @@ public class ButtonManager {
     private final List<IButton> buttons = new ArrayList<>();
     private final Map<IButton, String> buttonToPrototypeKeyMap = new HashMap<>();
 
-    // Button layout constants
+    
     private static final int BUTTON_Y_START = 30;
     private static final int BUTTON_Y_SPACING = 5;
     private int nextButtonY = BUTTON_Y_START;
 
-    // State change listener for auto-save functionality
+    
     private StateChangeListener stateChangeListener;
 
     /**
@@ -40,10 +40,10 @@ public class ButtonManager {
         buttons.add(button);
         buttonToPrototypeKeyMap.put(button, prototypeKey);
 
-        // Update next button position
+        
         nextButtonY += button.getHeight() + BUTTON_Y_SPACING;
 
-        // Notify state change listener
+        
         notifyStateChanged("Button added with key: " + prototypeKey);
 
         return true;
@@ -65,7 +65,7 @@ public class ButtonManager {
             String removedKey = buttonToPrototypeKeyMap.remove(button);
             recalculateButtonPositions();
 
-            // Notify state change listener
+            
             notifyStateChanged("Button removed with key: " + removedKey);
         }
 
@@ -88,8 +88,8 @@ public class ButtonManager {
         nextButtonY = BUTTON_Y_START;
 
         for (IButton button : buttons) {
-            // Ideally, we would update the button's position here
-            // For now, we just update the next button position
+            
+            
             nextButtonY += button.getHeight() + BUTTON_Y_SPACING;
         }
     }

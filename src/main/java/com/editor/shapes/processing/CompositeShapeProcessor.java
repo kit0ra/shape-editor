@@ -35,17 +35,17 @@ public class CompositeShapeProcessor implements ShapeProcessor {
             return null;
         }
         
-        // Handle single shape as a group with one shape
+        
         List<Shape> shapesToGroup = new ArrayList<>();
         
         if (shape instanceof ShapeGroup) {
-            // If it's already a group, clone its shapes
+            
             ShapeGroup group = (ShapeGroup) shape;
             for (Shape s : group.getShapes()) {
                 shapesToGroup.add(s.clone());
             }
         } else {
-            // If it's a single shape, just add it
+            
             shapesToGroup.add(shape.clone());
         }
         
@@ -53,19 +53,19 @@ public class CompositeShapeProcessor implements ShapeProcessor {
             return null;
         }
         
-        // Create a group prototype
+        
         ShapeGroup groupPrototype = new ShapeGroup(shapesToGroup);
         
-        // Generate a unique key for the group
+        
         String groupKey = generateUniqueKey(groupPrototype);
         
-        // Register the group with the registry
+        
         compositeRegistry.registerPrototype(groupKey, groupPrototype);
         
-        // Get the icon path for the group
+        
         String iconPath = getIconForShape(groupPrototype);
         
-        // Create a button for the group
+        
         IButton button = buttonFactory.createButton(
                 x, y, 
                 iconPath, 
@@ -88,25 +88,25 @@ public class CompositeShapeProcessor implements ShapeProcessor {
             return null;
         }
         
-        // Clone all shapes
+        
         List<Shape> shapesToGroup = new ArrayList<>();
         for (Shape s : shapes) {
             shapesToGroup.add(s.clone());
         }
         
-        // Create a group prototype
+        
         ShapeGroup groupPrototype = new ShapeGroup(shapesToGroup);
         
-        // Generate a unique key for the group
+        
         String groupKey = generateUniqueKey(groupPrototype);
         
-        // Register the group with the registry
+        
         compositeRegistry.registerPrototype(groupKey, groupPrototype);
         
-        // Get the icon path for the group
+        
         String iconPath = getIconForShape(groupPrototype);
         
-        // Create a button for the group
+        
         IButton button = buttonFactory.createButton(
                 x, y, 
                 iconPath, 

@@ -22,10 +22,10 @@ public class RedoButtonDecorator extends ButtonDecorator {
 
     @Override
     public void onClick() {
-        // Call the redo method on the whiteboard
+        
         whiteBoard.redo();
         
-        // Call the original button's onClick method
+        
         super.onClick();
     }
 }

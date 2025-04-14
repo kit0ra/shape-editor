@@ -22,10 +22,10 @@ public class UndoButtonDecorator extends ButtonDecorator {
 
     @Override
     public void onClick() {
-        // Call the undo method on the whiteboard
+        
         whiteBoard.undo();
         
-        // Call the original button's onClick method
+        
         super.onClick();
     }
 }

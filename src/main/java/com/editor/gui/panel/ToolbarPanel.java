@@ -47,42 +47,42 @@ public class ToolbarPanel extends CustomPanel {
 
     private boolean isShapeOverToolbar = false;
     private WhiteBoard targetWhiteBoard;
-    // Mediator field in CustomPanel (superclass) is protected now
-    // private DragMediator dragMediator;
+    
+    
     private ShapePrototypeRegistry prototypeRegistry;
     private CompositeShapePrototypeRegistry compositeRegistry;
 
-    // Button factories and processors
+    
     private ShapeButtonFactory shapeButtonFactory;
     private CompositeButtonFactory compositeButtonFactory;
     private SingleShapeProcessor singleShapeProcessor;
     private CompositeShapeProcessor compositeShapeProcessor;
     private final ButtonManager buttonManager;
 
-    // State management
+    
     private final EditorStateManager stateManager;
 
-    // Button layout constants
+    
     private static final int BUTTON_Y_START = 30;
     private static final int BUTTON_X_MARGIN = 10;
     private static final int BUTTON_Y_SPACING = 5;
     private int nextButtonY = BUTTON_Y_START;
 
-    // Store mapping from button instance to its prototype key for memento
-    // Use the 'buttons' list from CustomPanel and this map in parallel
+    
+    
     private final Map<IButton, String> buttonToPrototypeKeyMap = new HashMap<>();
 
-    // Colors for visual feedback
+    
     private final Color hoverColor = new Color(220, 240, 220);
 
     public ToolbarPanel() {
         super();
         setBackground(NORMALCOLOR);
 
-        // Initialize button manager
+        
         buttonManager = new ButtonManager();
 
-        // Initialize state manager
+        
         stateManager = new EditorStateManager();
     }
 
@@ -102,7 +102,7 @@ public class ToolbarPanel extends CustomPanel {
     public void setTargetWhiteBoard(WhiteBoard whiteBoard) {
         this.targetWhiteBoard = whiteBoard;
 
-        // Initialize factories and processors when whiteboard is set
+        
         if (whiteBoard != null) {
             if (prototypeRegistry != null) {
                 shapeButtonFactory = new ShapeButtonFactory(whiteBoard, prototypeRegistry,
@@ -116,7 +116,7 @@ public class ToolbarPanel extends CustomPanel {
                 compositeShapeProcessor = new CompositeShapeProcessor(compositeButtonFactory, compositeRegistry);
             }
 
-            // Set drag mediator for factories if available
+            
             if (this.dragMediator != null) {
                 if (shapeButtonFactory != null) {
                     shapeButtonFactory.setDragMediator(this.dragMediator);
@@ -131,13 +131,13 @@ public class ToolbarPanel extends CustomPanel {
     public void setPrototypeRegistry(ShapePrototypeRegistry registry) {
         this.prototypeRegistry = registry;
 
-        // Update factory and processor if whiteboard is already set
+        
         if (targetWhiteBoard != null && registry != null) {
             shapeButtonFactory = new ShapeButtonFactory(targetWhiteBoard, registry,
                     targetWhiteBoard.getCommandHistory());
             singleShapeProcessor = new SingleShapeProcessor(shapeButtonFactory, registry);
 
-            // Set drag mediator if available
+            
             if (this.dragMediator != null && shapeButtonFactory != null) {
                 shapeButtonFactory.setDragMediator(this.dragMediator);
             }
@@ -148,13 +148,13 @@ public class ToolbarPanel extends CustomPanel {
         this.compositeRegistry = registry;
         System.out.println("[ToolbarPanel] CompositeShapePrototypeRegistry set: " + (registry != null));
 
-        // Update factory and processor if whiteboard is already set
+        
         if (targetWhiteBoard != null && registry != null) {
             compositeButtonFactory = new CompositeButtonFactory(targetWhiteBoard, registry,
                     targetWhiteBoard.getCommandHistory());
             compositeShapeProcessor = new CompositeShapeProcessor(compositeButtonFactory, registry);
 
-            // Set drag mediator if available
+            
             if (this.dragMediator != null && compositeButtonFactory != null) {
                 compositeButtonFactory.setDragMediator(this.dragMediator);
             }
@@ -168,10 +168,10 @@ public class ToolbarPanel extends CustomPanel {
      * @param listener The state change listener
      */
     public void setStateChangeListener(StateChangeListener listener) {
-        // Set the listener for the button manager
+        
         buttonManager.setStateChangeListener(listener);
 
-        // Add the listener to the state manager
+        
         if (listener != null) {
             stateManager.addListener(listener);
         }
@@ -179,12 +179,12 @@ public class ToolbarPanel extends CustomPanel {
 
     @Override
     public void setDragMediator(DragMediator mediator) {
-        super.setDragMediator(mediator); // Registers as CustomPanel
+        super.setDragMediator(mediator); 
         if (mediator != null) {
-            mediator.registerToolbarPanel(this); // Registers specifically as ToolbarPanel
+            mediator.registerToolbarPanel(this); 
             System.out.println("[ToolbarPanel] Registered with mediator (as ToolbarPanel and CustomPanel).");
 
-            // Set mediator for factories if available
+            
             if (shapeButtonFactory != null) {
                 shapeButtonFactory.setDragMediator(mediator);
             }
@@ -225,7 +225,7 @@ public class ToolbarPanel extends CustomPanel {
             return false;
         }
 
-        // Check if processors are initialized
+        
         if (singleShapeProcessor == null || compositeShapeProcessor == null) {
             System.err.println("[ToolbarPanel] Cannot add shapes: Processors not initialized.");
             return false;
@@ -241,25 +241,25 @@ public class ToolbarPanel extends CustomPanel {
         ProcessingResult result;
 
         if (selectedShapes.size() == 1 && !(selectedShapes.get(0) instanceof ShapeGroup)) {
-            // Handle single shape using SingleShapeProcessor
+            
             Shape singleShape = selectedShapes.get(0);
             result = singleShapeProcessor.processShape(singleShape, BUTTON_X_MARGIN, nextButtonY);
         } else {
-            // Handle group or multiple shapes using CompositeShapeProcessor
+            
             result = compositeShapeProcessor.processShapes(selectedShapes, BUTTON_X_MARGIN, nextButtonY);
         }
 
         if (result != null && result.getButton() != null) {
-            // Add the button using ButtonManager
+            
             boolean added = buttonManager.addButton(result.getButton(), result.getPrototypeKey());
             if (added) {
-                // Add the button to the panel
+                
                 super.addButton(result.getButton());
 
-                // Store the mapping for memento
+                
                 buttonToPrototypeKeyMap.put(result.getButton(), result.getPrototypeKey());
 
-                // Update next button position
+                
                 nextButtonY += result.getButton().getHeight() + BUTTON_Y_SPACING;
 
                 System.out.println("[ToolbarPanel] Added button for key: " + result.getPrototypeKey());
@@ -267,7 +267,7 @@ public class ToolbarPanel extends CustomPanel {
                 targetWhiteBoard.repaint();
                 repaint();
 
-                // Register state change with the state manager
+                
                 if (stateManager != null) {
                     stateManager.registerStateChange("ToolbarPanel", "AddShapes", result.getPrototypeKey());
                 }
@@ -278,13 +278,13 @@ public class ToolbarPanel extends CustomPanel {
         return false;
     }
 
-    // Use this specific method to add buttons AND store their keys
+    
     private void addButton(IButton button, String prototypeKey) {
-        super.addButton(button); // Adds to CustomPanel's list and repaints
+        super.addButton(button); 
         buttonToPrototypeKeyMap.put(button, prototypeKey);
         System.out.println("[ToolbarPanel] Stored mapping for button with key: " + prototypeKey);
 
-        // Register state change with the state manager
+        
         if (stateManager != null) {
             stateManager.registerStateChange("ToolbarPanel", "AddButton", prototypeKey);
         }
@@ -292,19 +292,19 @@ public class ToolbarPanel extends CustomPanel {
 
     @Override
     public boolean removeButton(IButton button) {
-        boolean removed = super.removeButton(button); // Removes from CustomPanel's list and repaints
+        boolean removed = super.removeButton(button); 
         if (removed) {
             String removedKey = buttonToPrototypeKeyMap.remove(button);
             System.out.println("[ToolbarPanel] Removed mapping for button with key: " + removedKey);
 
-            // Remove from button manager
+            
             if (buttonManager != null) {
                 buttonManager.removeButton(button);
             }
 
-            recalculateButtonLayout(); // Adjust layout after removal
+            recalculateButtonLayout(); 
 
-            // Register state change with the state manager
+            
             if (stateManager != null) {
                 stateManager.registerStateChange("ToolbarPanel", "RemoveButton", removedKey);
             }
@@ -312,27 +312,27 @@ public class ToolbarPanel extends CustomPanel {
         return removed;
     }
 
-    // Implement a proper layout recalculation using ButtonManager
+    
     private void recalculateButtonLayout() {
         System.out.println("[ToolbarPanel] Recalculating button layout...");
 
-        // Use ButtonManager to recalculate positions
+        
         if (buttonManager != null) {
             buttonManager.recalculateButtonPositions();
             nextButtonY = buttonManager.getNextYPosition();
         } else {
-            // Fallback to old implementation if ButtonManager is not available
+            
             nextButtonY = BUTTON_Y_START;
-            List<IButton> currentButtons = new ArrayList<>(this.buttons); // Get current buttons from superclass
-            this.buttons.clear(); // Clear superclass list
-            Map<IButton, String> currentMap = new HashMap<>(this.buttonToPrototypeKeyMap); // Copy map
-            this.buttonToPrototypeKeyMap.clear(); // Clear map
+            List<IButton> currentButtons = new ArrayList<>(this.buttons); 
+            this.buttons.clear(); 
+            Map<IButton, String> currentMap = new HashMap<>(this.buttonToPrototypeKeyMap); 
+            this.buttonToPrototypeKeyMap.clear(); 
 
             for (IButton button : currentButtons) {
-                String key = currentMap.get(button); // Find the key for this button
+                String key = currentMap.get(button); 
                 if (key != null) {
                     System.out.println("[ToolbarPanel] Re-adding button for key: " + key);
-                    this.addButton(button, key); // Re-add using the method that updates the map
+                    this.addButton(button, key); 
                     nextButtonY += button.getHeight() + BUTTON_Y_SPACING;
                 } else {
                     System.err.println(
@@ -353,11 +353,11 @@ public class ToolbarPanel extends CustomPanel {
         IButton button = new CustomButton(x, y, 40, 40, "");
         Shape shapePrototype = null;
 
-        // If a custom shape prototype is provided, use it directly
+        
         if (customShapePrototype != null) {
             shapePrototype = customShapePrototype;
         }
-        // Otherwise, get the shape from the registry
+        
         else if (prototypeRegistry != null && prototypeRegistry.hasPrototype(shapeTypeKey)) {
             try {
                 shapePrototype = prototypeRegistry.createShape(shapeTypeKey, 0, 0);
@@ -381,7 +381,7 @@ public class ToolbarPanel extends CustomPanel {
         } else {
             return null;
         }
-        // Mapping is done when calling addButton(button, key)
+        
         return button;
     }
 
@@ -424,14 +424,14 @@ public class ToolbarPanel extends CustomPanel {
         } else {
             return null;
         }
-        // Mapping is done when calling addButton(button, key)
+        
         return button;
     }
 
-    // --- Memento Pattern Implementation ---
+    
 
     public ToolbarMemento createMemento() {
-        // Get the values (String prototype keys) from the map.
+        
         List<String> keys = new ArrayList<>(buttonToPrototypeKeyMap.values());
         System.out.println("[LOG] ToolbarPanel.createMemento() - Keys being saved: " + keys);
         return new ToolbarMemento(keys);
@@ -447,24 +447,24 @@ public class ToolbarPanel extends CustomPanel {
         System.out.println(
                 "[LOG] ToolbarPanel.restoreFromMemento() - Keys received from ToolbarMemento: " + keysToRestore);
 
-        // Clear existing dynamic buttons (using super.removeButton to avoid map issues
-        // during clear)
-        List<IButton> buttonsToRemove = new ArrayList<>(this.buttons); // Use list from superclass
+        
+        
+        List<IButton> buttonsToRemove = new ArrayList<>(this.buttons); 
         System.out.println("[ToolbarPanel] Removing " + buttonsToRemove.size() + " existing dynamic buttons.");
         for (IButton btn : buttonsToRemove) {
-            super.removeButton(btn); // Remove from superclass list directly
+            super.removeButton(btn); 
         }
-        buttonToPrototypeKeyMap.clear(); // Clear the map
-        nextButtonY = BUTTON_Y_START; // Reset layout position
+        buttonToPrototypeKeyMap.clear(); 
+        nextButtonY = BUTTON_Y_START; 
 
-        // Log the state of the registries the ToolbarPanel instance knows about just
-        // before checking
+        
+        
         System.out.println(
                 "[LOG] ToolbarPanel.restoreFromMemento() - Checking internal registry references before loop:");
         System.out.println("[LOG]   this.prototypeRegistry is null: " + (this.prototypeRegistry == null));
         if (this.prototypeRegistry != null) {
-            // Assuming ShapePrototypeRegistry has a method to get keys or check existence
-            // For now, just re-check the specific keys we expect.
+            
+            
             System.out.println("[LOG]   this.prototypeRegistry.hasPrototype('Rectangle'): "
                     + this.prototypeRegistry.hasPrototype("Rectangle"));
             System.out.println("[LOG]   this.prototypeRegistry.hasPrototype('Polygon'): "
@@ -472,12 +472,12 @@ public class ToolbarPanel extends CustomPanel {
         }
         System.out.println("[LOG]   this.compositeRegistry is null: " + (this.compositeRegistry == null));
         if (this.compositeRegistry != null) {
-            // Use getPrototypesMap() which we know exists
+            
             System.out.println(
                     "[LOG]   this.compositeRegistry keys: " + this.compositeRegistry.getPrototypesMap().keySet());
         }
 
-        // Recreate buttons from memento keys
+        
         System.out.println("[LOG] ToolbarPanel.restoreFromMemento() - Recreating buttons from restored keys...");
         for (String key : keysToRestore) {
             IButton newButton = null;
@@ -500,19 +500,19 @@ public class ToolbarPanel extends CustomPanel {
                         + "', Registry has key: " + hasKey);
 
                 if (hasKey) {
-                    // Extract the base shape type from the key (e.g., "Rectangle_UUID" ->
-                    // "Rectangle")
+                    
+                    
                     String baseShapeType = key;
                     if (key.contains("_")) {
                         baseShapeType = key.substring(0, key.indexOf("_"));
                     }
 
-                    // Get the icon path based on the base shape type
+                    
                     String iconPath = "icons/" + baseShapeType.toLowerCase() + ".png";
                     System.out.println("[LOG] ToolbarPanel.restoreFromMemento() - Using icon path: " + iconPath
                             + " for key: " + key);
 
-                    // Create the button with the original key to preserve custom properties
+                    
                     newButton = createDraggableShapeButton(BUTTON_X_MARGIN, nextButtonY, iconPath,
                             "Restored " + baseShapeType, key);
                 } else {
@@ -523,8 +523,8 @@ public class ToolbarPanel extends CustomPanel {
             }
 
             if (newButton != null) {
-                // Use the specific addButton overload that correctly populates the map
-                this.addButton(newButton, key); // This method already logs the addition
+                
+                this.addButton(newButton, key); 
                 nextButtonY += newButton.getHeight() + BUTTON_Y_SPACING;
                 System.out.println(
                         "[LOG] ToolbarPanel.restoreFromMemento() - Successfully recreated and added button for key: "

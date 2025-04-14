@@ -44,20 +44,20 @@ public class ShapeEditorFrame extends Frame {
     private final TrashPanel trashPanel;
     private final WhiteBoard whiteBoard;
 
-    // Mediator for drag operations
+    
     private DragMediator dragMediator;
 
-    // Button spacing and positioning constants
+    
     private static final int HORIZONTAL_BUTTON_SPACING = 10;
 
-    // Shape prototype registries
+    
     private ShapePrototypeRegistry prototypeRegistry;
-    private CompositeShapePrototypeRegistry compositeRegistry; // Added
+    private CompositeShapePrototypeRegistry compositeRegistry; 
 
-    // Auto-save manager
+    
     private AutoSaveManager autoSaveManager;
     private static final int HORIZONTAL_INITIAL_OFFSET = 10;
-    private static final int BUTTON_LEFT_MARGIN = 10; // Left margin for buttons in panels
+    private static final int BUTTON_LEFT_MARGIN = 10; 
 
     public ShapeEditorFrame() {
         super("Shape Editor");
@@ -65,31 +65,31 @@ public class ShapeEditorFrame extends Frame {
         setLayout(null);
 
         whiteBoard = new WhiteBoard(800, 600, Color.WHITE);
-        whiteBoard.setRelativeBounds(20, 30, 80, 70); // x=20%, y=30% (below vertical panel), width=80%, height=70%
+        whiteBoard.setRelativeBounds(20, 30, 80, 70); 
         add(whiteBoard);
 
         horizontalPanel = new HorizontalPanel();
-        horizontalPanel.setRelativeBounds(0, 10, 100, 10); // x=10%, y=10%, width=80%, height=10%
+        horizontalPanel.setRelativeBounds(0, 10, 100, 10); 
         add(horizontalPanel);
 
         verticalPanel = new VerticalPanel();
-        verticalPanel.setRelativeBounds(0, 20, 20, 10); // x=0%, y=20% (below horizontal panel), width=20%, height=10%
-        verticalPanel.setTargetWhiteBoard(whiteBoard); // Définir le whiteboard comme cible pour le glisser-déposer
+        verticalPanel.setRelativeBounds(0, 20, 20, 10); 
+        verticalPanel.setTargetWhiteBoard(whiteBoard); 
         add(verticalPanel);
 
-        // Initialize the toolbar panel in the middle of the left side
+        
         toolbarPanel = new ToolbarPanel();
-        toolbarPanel.setRelativeBounds(0, 30, 20, 60); // x=0%, y=30% (below vertical panel), width=20%, height=60%
+        toolbarPanel.setRelativeBounds(0, 30, 20, 60); 
         toolbarPanel.setTargetWhiteBoard(whiteBoard);
         add(toolbarPanel);
 
-        // Initialize the trash panel at the bottom left
+        
         trashPanel = new TrashPanel();
-        trashPanel.setRelativeBounds(0, 90, 20, 10); // x=0%, y=90% (bottom), width=20%, height=10%
+        trashPanel.setRelativeBounds(0, 90, 20, 10); 
         trashPanel.setTargetWhiteBoard(whiteBoard);
         add(trashPanel);
 
-        // Preload all icons
+        
         ImageLoader.preloadImages(
                 "icons/save.png",
                 "icons/load.png",
@@ -99,38 +99,38 @@ public class ShapeEditorFrame extends Frame {
                 "icons/polygon.png",
                 "icons/circle.png");
 
-        // Initialize the shape prototype registries
+        
         initializePrototypeRegistry();
-        initializeCompositeRegistry(); // Added call
+        initializeCompositeRegistry(); 
 
-        // Initialize and set up the drag mediator
+        
         setupDragMediator();
 
-        // Initialize the auto-save manager
+        
         setupAutoSaveManager();
 
-        // Add window listener to handle closing properly
+        
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
-                // Perform a final auto-save FIRST, before disposing components
+                
                 if (autoSaveManager != null) {
                     System.out.println("[LOG] ShapeEditorFrame.windowClosing - Performing final auto-save...");
-                    autoSaveManager.shutdown(); // This calls performSave()
+                    autoSaveManager.shutdown(); 
                     System.out.println("[LOG] ShapeEditorFrame.windowClosing - Final auto-save complete.");
                 } else {
                     System.out.println(
                             "[LOG] ShapeEditorFrame.windowClosing - AutoSaveManager is null, skipping final save.");
                 }
 
-                // Now clean up resources
+                
                 System.out.println("[LOG] ShapeEditorFrame.windowClosing - Disposing whiteboard...");
                 if (whiteBoard != null) {
                     whiteBoard.dispose();
                 }
 
                 System.out.println("[LOG] ShapeEditorFrame.windowClosing - Disposing frame...");
-                dispose(); // Dispose the frame itself
+                dispose(); 
                 System.out.println("[LOG] ShapeEditorFrame.windowClosing - Exiting application...");
                 System.exit(0);
             }
@@ -141,7 +141,7 @@ public class ShapeEditorFrame extends Frame {
     }
 
     private void initializeResponsiveness() {
-        // Make components responsive after construction is complete
+        
         whiteBoard.makeResponsiveTo(this);
         horizontalPanel.makeResponsiveTo(this);
         verticalPanel.makeResponsiveTo(this);
@@ -150,7 +150,7 @@ public class ShapeEditorFrame extends Frame {
     }
 
     private void init() {
-        // Initialize buttons in both panels
+        
         setupHorizontalButtons();
         setupVerticalButtons();
     }
@@ -159,16 +159,16 @@ public class ShapeEditorFrame extends Frame {
      * Sets up the drag mediator to handle drag operations between components
      */
     private void setupDragMediator() {
-        // Create a new mediator instance
+        
         dragMediator = new ShapeDragMediator();
 
-        // Enable debug messages
+        
         dragMediator.setDebugEnabled(true);
 
-        // Register components with the mediator
+        
         dragMediator.registerWhiteBoard(whiteBoard);
 
-        // Set the mediator in the panels and whiteboard
+        
         verticalPanel.setDragMediator(dragMediator);
         horizontalPanel.setDragMediator(dragMediator);
         trashPanel.setDragMediator(dragMediator);
@@ -180,28 +180,28 @@ public class ShapeEditorFrame extends Frame {
      * Sets up the auto-save manager and initializes auto-loading.
      */
     private void setupAutoSaveManager() {
-        // Initialize the singleton auto-save manager with both registries
+        
         autoSaveManager = AutoSaveManager.initialize(whiteBoard, toolbarPanel, compositeRegistry, prototypeRegistry);
 
-        // Create a state change listener to trigger auto-save using lambda
+        
         StateChangeListener stateChangeListener = (source, description) -> {
             System.out.println("[AutoSave] State changed: " + description);
             autoSaveManager.triggerAutoSave();
         };
 
-        // Set the state change listener on the whiteboard and toolbar panel
+        
         whiteBoard.setStateChangeListener(stateChangeListener);
         toolbarPanel.setStateChangeListener(stateChangeListener);
 
-        // Set registries on ToolbarPanel BEFORE auto-load
+        
         System.out.println("[LOG] ShapeEditorFrame - Setting registries on ToolbarPanel...");
         toolbarPanel.setPrototypeRegistry(prototypeRegistry);
-        toolbarPanel.setCompositePrototypeRegistry(compositeRegistry); // Added
+        toolbarPanel.setCompositePrototypeRegistry(compositeRegistry); 
 
-        // Auto-load the previous state if it exists
+        
         if (autoSaveManager.autoSaveExists()) {
             System.out.println("[LOG] ShapeEditorFrame - Found previous state, auto-loading...");
-            // Use the AutoLoadCommand with the updated constructor (uses singleton)
+            
             AutoLoadCommand autoLoadCommand = new AutoLoadCommand(
                     whiteBoard, toolbarPanel, compositeRegistry, prototypeRegistry);
             autoLoadCommand.execute();
@@ -209,18 +209,18 @@ public class ShapeEditorFrame extends Frame {
             System.out.println("[AutoSave] No previous state found, starting with empty state.");
         }
 
-        // REMOVED Shutdown hook - rely on windowClosing for final save
+        
 
-        // Register the trash panel with the mediator
+        
         dragMediator.registerTrashPanel(trashPanel);
 
-        // Register the toolbar panel with the mediator
+        
         dragMediator.registerToolbarPanel(toolbarPanel);
 
-        // Set the toolbar panel reference in the whiteboard (can stay here)
+        
         whiteBoard.setToolbarPanel(toolbarPanel);
 
-        // Registries were set above, before auto-load
+        
 
         System.out.println("Drag mediator initialized and connected to components");
     }
@@ -231,51 +231,51 @@ public class ShapeEditorFrame extends Frame {
     private void initializePrototypeRegistry() {
         prototypeRegistry = new ShapePrototypeRegistry();
 
-        // Create a light pink color for all shapes
+        
         Color lightPink = new Color(255, 182, 193);
 
-        // Register a rectangle prototype
+        
         Rectangle rectanglePrototype = new Rectangle(0, 0, 80, 60);
         rectanglePrototype.setFillColor(lightPink);
         rectanglePrototype.setBorderColor(Color.BLACK);
         prototypeRegistry.registerPrototype("Rectangle", rectanglePrototype);
 
-        // Register a regular polygon (hexagon) prototype
-        int radius = 40; // Radius of the hexagon
-        int numPoints = 6; // Hexagon has 6 points
+        
+        int radius = 40; 
+        int numPoints = 6; 
 
-        // Create a regular hexagon centered at (0, 0) with radius 40
+        
         RegularPolygon polygonPrototype = new RegularPolygon(0, 0, radius, numPoints);
         polygonPrototype.setFillColor(lightPink);
         polygonPrototype.setBorderColor(Color.BLACK);
         prototypeRegistry.registerPrototype("Polygon", polygonPrototype);
 
-        // Register a circle prototype
+        
         Circle circlePrototype = new Circle(0, 0, 40);
         circlePrototype.setFillColor(lightPink);
         circlePrototype.setBorderColor(Color.BLACK);
         prototypeRegistry.registerPrototype("Circle", circlePrototype);
 
-        // Force update of the default colors in the shape classes
-        // This is needed because the default colors in the shape classes are still
-        // blue, green, and red
+        
+        
+        
         try {
-            // Update Rectangle default color
+            
             Rectangle defaultRect = (Rectangle) prototypeRegistry.createShape("Rectangle", 0, 0);
             System.out.println("Rectangle fill color: " + defaultRect.getFillColor());
 
-            // Update Polygon default color
+            
             RegularPolygon defaultPoly = (RegularPolygon) prototypeRegistry.createShape("Polygon", 0, 0);
             System.out.println("Polygon fill color: " + defaultPoly.getFillColor());
 
-            // Update Circle default color
+            
             Circle defaultCircle = (Circle) prototypeRegistry.createShape("Circle", 0, 0);
             System.out.println("Circle fill color: " + defaultCircle.getFillColor());
         } catch (Exception e) {
             System.err.println("Error updating default colors: " + e.getMessage());
         }
 
-        // Set the prototype registry in the whiteboard
+        
         whiteBoard.setPrototypeRegistry(prototypeRegistry);
     }
 
@@ -284,8 +284,8 @@ public class ShapeEditorFrame extends Frame {
      */
     private void initializeCompositeRegistry() {
         compositeRegistry = new CompositeShapePrototypeRegistry();
-        // Initially empty, prototypes are added dynamically when groups are dragged to
-        // the toolbar.
+        
+        
         System.out.println("Composite shape registry initialized.");
     }
 
@@ -295,48 +295,48 @@ public class ShapeEditorFrame extends Frame {
     private void setupHorizontalButtons() {
         int x = HORIZONTAL_INITIAL_OFFSET;
 
-        // Create save button (icon only) - Base button, no action yet
+        
         IButton saveButtonBase = createIconButton(x, 5, "icons/save.png", "Save the current drawing");
-        // Decorate save button to add save action
+        
         IButton saveButton = new ButtonDecorator(saveButtonBase) {
             @Override
             public void onClick() {
-                super.onClick(); // Call decorated button's onClick (if any)
-                handleSaveState(); // Add save action
+                super.onClick(); 
+                handleSaveState(); 
             }
-            // Assuming ButtonDecorator delegates other methods
+            
         };
-        horizontalPanel.addButton(saveButton); // Add the final decorated button
+        horizontalPanel.addButton(saveButton); 
 
-        // Create load button - Base button, no action yet
-        x += saveButton.getWidth() + HORIZONTAL_BUTTON_SPACING; // Use final button width for spacing
+        
+        x += saveButton.getWidth() + HORIZONTAL_BUTTON_SPACING; 
         IButton loadButtonBase = createIconButton(x, 5, "icons/load.png", "Load a saved drawing");
-        // Decorate load button to add load action
+        
         IButton loadButton = new ButtonDecorator(loadButtonBase) {
             @Override
             public void onClick() {
-                super.onClick(); // Call decorated button's onClick (if any)
-                handleLoadState(); // Add load action
+                super.onClick(); 
+                handleLoadState(); 
             }
-            // Assuming ButtonDecorator delegates other methods
+            
         };
-        horizontalPanel.addButton(loadButton); // Add the final decorated button
+        horizontalPanel.addButton(loadButton); 
 
-        // Create undo button
+        
         x += loadButton.getWidth() + HORIZONTAL_BUTTON_SPACING;
         IButton undoButton = createIconButton(x, 5, "icons/undo.png", "Undo the last action");
-        undoButton = new UndoButtonDecorator(undoButton, whiteBoard); // Decorate with Undo functionality
+        undoButton = new UndoButtonDecorator(undoButton, whiteBoard); 
         horizontalPanel.addButton(undoButton);
 
-        // Create redo button
+        
         x += undoButton.getWidth() + HORIZONTAL_BUTTON_SPACING;
         IButton redoButton = createIconButton(x, 5, "icons/redo.png", "Redo the last undone action");
-        redoButton = new RedoButtonDecorator(redoButton, whiteBoard); // Decorate with Redo functionality
+        redoButton = new RedoButtonDecorator(redoButton, whiteBoard); 
         horizontalPanel.addButton(redoButton);
 
-        // Note: The previous Save/Load buttons were replaced above with functional
-        // ones.
-        // If you intended to keep separate Save/Load State buttons, adjust accordingly.
+        
+        
+        
     }
 
     /**
@@ -344,16 +344,16 @@ public class ShapeEditorFrame extends Frame {
      * layout
      */
     private void setupVerticalButtons() {
-        // Center buttons vertically in the panel
-        int y = 5; // Small top margin
+        
+        int y = 5; 
         int x = BUTTON_LEFT_MARGIN;
 
-        // Create a ShapeButtonFactory for creating shape buttons
+        
         ShapeButtonFactory buttonFactory = new ShapeButtonFactory(whiteBoard, prototypeRegistry,
                 whiteBoard.getCommandHistory());
         buttonFactory.setDragMediator(dragMediator);
 
-        // Create rectangle button (icon only with drag capability)
+        
         IButton rectangleButton = buttonFactory.createButton(
                 x, y,
                 "icons/rectangle.png",
@@ -361,8 +361,8 @@ public class ShapeEditorFrame extends Frame {
                 "Rectangle");
         verticalPanel.addButton(rectangleButton);
 
-        // Create polygon button (icon only with drag capability) - positioned
-        // horizontally
+        
+        
         x += rectangleButton.getWidth() + HORIZONTAL_BUTTON_SPACING;
         IButton polygonButton = buttonFactory.createButton(
                 x, y,
@@ -371,8 +371,8 @@ public class ShapeEditorFrame extends Frame {
                 "Polygon");
         verticalPanel.addButton(polygonButton);
 
-        // Create circle button (icon only with drag capability) - positioned
-        // horizontally
+        
+        
         x += polygonButton.getWidth() + HORIZONTAL_BUTTON_SPACING;
         IButton circleButton = buttonFactory.createButton(
                 x, y,
@@ -386,24 +386,24 @@ public class ShapeEditorFrame extends Frame {
      * Helper method to create an icon-only button with tooltip
      */
     private IButton createIconButton(int x, int y, String iconPath, String tooltipText) {
-        // Load the icon
+        
         Image icon = ImageLoader.loadImage(iconPath);
 
-        // Create base button
+        
         IButton button = new CustomButton(x, y, 40, 40, "");
 
-        // Add icon decoration
+        
         if (icon != null) {
             button = new ImageDecorator(
                     button,
                     icon,
-                    24, 24, // Icon dimensions
-                    8, // Padding
-                    ImageDecorator.ImageMode.ICON_ONLY // Icon-only mode
+                    24, 24, 
+                    8, 
+                    ImageDecorator.ImageMode.ICON_ONLY 
             );
         }
 
-        // Add tooltip decoration
+        
         return new TooltipDecorator(button, tooltipText);
     }
 
@@ -416,38 +416,38 @@ public class ShapeEditorFrame extends Frame {
         frame.launch();
     }
 
-    // --- Save/Load Handling Methods ---
+    
 
     private void handleSaveState() {
         System.out.println("[ShapeEditorFrame] Save button clicked.");
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Save Application State");
         fileChooser.setFileFilter(new FileNameExtensionFilter("Shape Editor State (*.ser)", "ser"));
-        fileChooser.setSelectedFile(new File("editor_state.ser")); // Default filename
+        fileChooser.setSelectedFile(new File("editor_state.ser")); 
 
         int userSelection = fileChooser.showSaveDialog(this);
 
         if (userSelection == JFileChooser.APPROVE_OPTION) {
             File fileToSave = fileChooser.getSelectedFile();
-            // Ensure the file has the .ser extension
+            
             String filePath = fileToSave.getAbsolutePath();
             if (!filePath.toLowerCase().endsWith(".ser")) {
                 filePath += ".ser";
             }
             System.out.println("[ShapeEditorFrame] Saving state to: " + filePath);
 
-            // Create and execute the SaveStateCommand
-            // Note: We assume whiteBoard, toolbarPanel, and both registries are correctly
-            // initialized
-            if (whiteBoard != null && toolbarPanel != null && compositeRegistry != null && prototypeRegistry != null) { // Check
-                                                                                                                        // prototypeRegistry
-                // Create the SaveStateCommand with both registries
+            
+            
+            
+            if (whiteBoard != null && toolbarPanel != null && compositeRegistry != null && prototypeRegistry != null) { 
+                                                                                                                        
+                
                 SaveStateCommand saveCommand = new SaveStateCommand(whiteBoard, toolbarPanel,
-                        compositeRegistry, prototypeRegistry, filePath); // Pass prototypeRegistry
-                // Execute directly, or use CommandHistory if undoing save makes sense
+                        compositeRegistry, prototypeRegistry, filePath); 
+                
                 saveCommand.execute();
-                // whiteBoard.getCommandHistory().executeCommand(saveCommand); // If using
-                // history
+                
+                
             } else {
                 System.err.println(
                         "[ShapeEditorFrame] Cannot save: WhiteBoard, ToolbarPanel, or CompositeRegistry is null.");
@@ -470,12 +470,12 @@ public class ShapeEditorFrame extends Frame {
             String filePath = fileToLoad.getAbsolutePath();
             System.out.println("[ShapeEditorFrame] Loading state from: " + filePath);
 
-            // Create and execute the LoadStateCommand, passing both registries
-            if (whiteBoard != null && toolbarPanel != null && compositeRegistry != null && prototypeRegistry != null) { // Check
-                                                                                                                        // prototypeRegistry
+            
+            if (whiteBoard != null && toolbarPanel != null && compositeRegistry != null && prototypeRegistry != null) { 
+                                                                                                                        
                 LoadStateCommand loadCommand = new LoadStateCommand(whiteBoard, toolbarPanel,
-                        compositeRegistry, prototypeRegistry, filePath); // Pass prototypeRegistry
-                // Use CommandHistory to allow undoing the load operation
+                        compositeRegistry, prototypeRegistry, filePath); 
+                
                 whiteBoard.getCommandHistory().executeCommand(loadCommand);
             } else {
                 System.err.println(

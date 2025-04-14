@@ -18,9 +18,9 @@ import com.editor.shapes.ShapePrototypeRegistry;
  */
 public class AutoSaveManager {
     private static final String DEFAULT_AUTOSAVE_FILENAME = "autosave.ser";
-    private static final long DEBOUNCE_DELAY_MS = 1000; // 1 second debounce
+    private static final long DEBOUNCE_DELAY_MS = 1000; 
 
-    // Singleton instance
+    
     private static AutoSaveManager instance;
 
     private WhiteBoard whiteBoard;
@@ -38,7 +38,7 @@ public class AutoSaveManager {
      * Use getInstance() methods instead.
      */
     private AutoSaveManager() {
-        // Private constructor for singleton pattern
+        
         scheduler = Executors.newSingleThreadScheduledExecutor();
     }
 
@@ -116,7 +116,7 @@ public class AutoSaveManager {
 
             scheduler.schedule(() -> {
                 performSave();
-                // Use atomic operation instead of nested synchronization
+                
                 saveScheduled = false;
             }, DEBOUNCE_DELAY_MS, TimeUnit.MILLISECONDS);
         }
@@ -128,10 +128,10 @@ public class AutoSaveManager {
     private void performSave() {
         System.out.println("[AutoSaveManager] Performing auto-save...");
         try {
-            // Create the SaveStateCommand with both registries
+            
             SaveStateCommand saveCommand = new SaveStateCommand(
-                    whiteBoard, toolbarPanel, compositeRegistry, prototypeRegistry, autoSaveFilePath); // Added
-                                                                                                       // prototypeRegistry
+                    whiteBoard, toolbarPanel, compositeRegistry, prototypeRegistry, autoSaveFilePath); 
+                                                                                                       
             saveCommand.execute();
             System.out.println("[AutoSaveManager] Auto-save completed successfully");
         } catch (Exception e) {
@@ -167,10 +167,10 @@ public class AutoSaveManager {
         System.out.println("[AutoSaveManager] Shutting down...");
         scheduler.shutdown();
         try {
-            // Perform one final save before shutting down
+            
             performSave();
 
-            // Wait for any pending tasks to complete
+            
             if (!scheduler.awaitTermination(2, TimeUnit.SECONDS)) {
                 scheduler.shutdownNow();
             }

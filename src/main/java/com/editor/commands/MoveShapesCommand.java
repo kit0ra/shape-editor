@@ -25,7 +25,7 @@ public class MoveShapesCommand implements Command {
     public MoveShapesCommand(List<Shape> shapes, Map<Shape, Point> startPositions, Map<Shape, Point> endPositions) {
         this.shapes = shapes;
         
-        // Create deep copies of the position maps to avoid external modification
+        
         this.startPositions = new HashMap<>();
         for (Map.Entry<Shape, Point> entry : startPositions.entrySet()) {
             this.startPositions.put(entry.getKey(), new Point(entry.getValue()));
@@ -39,7 +39,7 @@ public class MoveShapesCommand implements Command {
 
     @Override
     public void execute() {
-        // Move each shape to its end position
+        
         for (Shape shape : shapes) {
             Point endPos = endPositions.get(shape);
             if (endPos != null) {
@@ -50,7 +50,7 @@ public class MoveShapesCommand implements Command {
 
     @Override
     public void undo() {
-        // Move each shape back to its start position
+        
         for (Shape shape : shapes) {
             Point startPos = startPositions.get(shape);
             if (startPos != null) {

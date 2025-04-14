@@ -3,7 +3,7 @@ package com.editor.commands;
 import com.editor.shapes.Shape;
 import java.awt.Point;
 
-// MoveShapeCommand.java: Handles moving a shape and supports undo/redo.
+
 public class MoveShapeCommand implements Command {
     private final Shape shape;
     private final Point startPosition;
@@ -33,27 +33,27 @@ public class MoveShapeCommand implements Command {
      */
     public MoveShapeCommand(Shape shape, Point startPosition, Point endPosition) {
         this.shape = shape;
-        this.startPosition = new Point(startPosition); // Use copy constructor
-        this.endPosition = new Point(endPosition); // Use copy constructor
+        this.startPosition = new Point(startPosition); 
+        this.endPosition = new Point(endPosition); 
     }
 
     @Override
     public void execute() {
-        // Move the shape to the end position
-        // Assuming Shape has a setPosition(int x, int y) method
+        
+        
         shape.setPosition(endPosition.x, endPosition.y);
     }
 
     @Override
     public void undo() {
-        // Move the shape back to the start position
+        
         shape.setPosition(startPosition.x, startPosition.y);
     }
 
     @Override
     public String toString() {
         return "MoveShapeCommand{" +
-                "shape=" + shape.getClass().getSimpleName() + // Avoid printing full shape details
+                "shape=" + shape.getClass().getSimpleName() + 
                 ", startPosition=" + startPosition +
                 ", endPosition=" + endPosition +
                 '}';

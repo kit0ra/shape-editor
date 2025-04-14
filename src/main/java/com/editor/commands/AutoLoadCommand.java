@@ -43,7 +43,7 @@ public class AutoLoadCommand implements Command {
             System.out.println("[AutoLoadCommand] Found autosave file: " + filePath);
 
             try {
-                // Create and execute a LoadStateCommand
+                
                 LoadStateCommand loadCommand = new LoadStateCommand(
                         whiteBoard, toolbarPanel, compositeRegistry, shapeRegistry, filePath);
                 loadCommand.execute();
@@ -52,7 +52,7 @@ public class AutoLoadCommand implements Command {
                 System.err.println("[AutoLoadCommand] Error loading autosaved state: " + e.getMessage());
                 System.err.println("[AutoLoadCommand] Stack trace: " + e);
 
-                // If loading fails, delete the corrupted autosave file
+                
                 File autosaveFile = new File(filePath);
                 if (autosaveFile.exists()) {
                     boolean deleted = autosaveFile.delete();
@@ -70,7 +70,7 @@ public class AutoLoadCommand implements Command {
 
     @Override
     public void undo() {
-        // Auto-loading cannot be undone in a meaningful way
+        
         System.out.println("[AutoLoadCommand] Undo not supported for auto-loading");
     }
 }

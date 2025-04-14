@@ -12,9 +12,9 @@ import com.editor.shapes.Shape;
  */
 public class ShapeMemento implements Serializable {
 
-    private static final long serialVersionUID = 1L; // For serialization
+    private static final long serialVersionUID = 1L; 
 
-    // Store clones of the shapes to avoid external modification
+    
     private final List<Shape> shapesState;
 
     /**
@@ -23,9 +23,9 @@ public class ShapeMemento implements Serializable {
      * @param shapesToSave The list of shapes currently on the WhiteBoard.
      */
     public ShapeMemento(List<Shape> shapesToSave) {
-        // Deep copy: Clone each shape to store its state at this moment
+        
         this.shapesState = shapesToSave.stream()
-                .map(Shape::clone) // Assuming Shape implements Cloneable and clone() correctly
+                .map(Shape::clone) 
                 .collect(Collectors.toList());
         System.out.println("[ShapeMemento] Created with " + this.shapesState.size() + " shapes.");
     }
@@ -36,7 +36,7 @@ public class ShapeMemento implements Serializable {
      * @return A new list containing clones of the saved shapes.
      */
     public List<Shape> getShapesState() {
-        // Return clones again to prevent modification of the memento's internal state
+        
         return this.shapesState.stream()
                 .map(Shape::clone)
                 .collect(Collectors.toList());

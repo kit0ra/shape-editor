@@ -46,20 +46,20 @@ public class ShapeCreationButtonDecorator extends ButtonDecorator implements Dra
 
     @Override
     public void draw(Graphics g) {
-        // Draw the base button
+        
         super.draw(g);
 
-        // If dragging, draw a visual indicator
+        
         if (isDragging) {
             Graphics2D g2d = (Graphics2D) g.create();
             try {
-                // Draw a semi-transparent shape preview at the drag location
+                
                 g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
 
-                // Create a light pink color for all shapes
-                Color lightPink = new Color(255, 182, 193, 128); // Light pink semi-transparent
-                Color lightPinkBorder = new Color(255, 105, 180); // Darker pink for border
-                if (null != shapeType) // Utiliser des couleurs différentes selon le type de forme
+                
+                Color lightPink = new Color(255, 182, 193, 128); 
+                Color lightPinkBorder = new Color(255, 105, 180); 
+                if (null != shapeType) 
                     switch (shapeType) {
                         case "Rectangle":
                             g2d.setColor(lightPink);
@@ -68,7 +68,7 @@ public class ShapeCreationButtonDecorator extends ButtonDecorator implements Dra
                             g2d.drawRect(dragX - 30, dragY - 20, 60, 40);
                             break;
                         case "Polygon": {
-                            // Dessiner un hexagone pour le polygone
+                            
                             int radius = 30;
                             int sides = 6;
                             int[] xPoints = new int[sides];
@@ -85,7 +85,7 @@ public class ShapeCreationButtonDecorator extends ButtonDecorator implements Dra
                             break;
                         }
                         case "Circle": {
-                            // Draw a circle
+                            
                             int radius = 30;
                             g2d.setColor(lightPink);
                             g2d.fillOval(dragX - radius, dragY - radius, radius * 2, radius * 2);
@@ -97,7 +97,7 @@ public class ShapeCreationButtonDecorator extends ButtonDecorator implements Dra
                             break;
                     }
 
-                // Dessiner une ligne pointillée pour indiquer le glisser-déposer
+                
                 g2d.setColor(Color.DARK_GRAY);
                 float[] dash = { 5.0f, 5.0f };
                 g2d.setStroke(new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash, 0.0f));
@@ -110,14 +110,14 @@ public class ShapeCreationButtonDecorator extends ButtonDecorator implements Dra
 
     @Override
     public void onClick() {
-        // When clicked, create a shape at the top-left corner of the whiteboard
+        
         targetWhiteBoard.setPrototypeRegistry(prototypeRegistry);
         targetWhiteBoard.setCurrentShapeType(shapeType);
-        targetWhiteBoard.addShapeToTopLeft(); // Use addShapeToTopLeft to place in the top-left corner
+        targetWhiteBoard.addShapeToTopLeft(); 
 
-        // Reset the current shape type to null after adding the shape
-        // This ensures that clicking on the whiteboard won't add another shape
-        // but clicking the button again will
+        
+        
+        
         targetWhiteBoard.setCurrentShapeType(null);
     }
 
@@ -127,11 +127,11 @@ public class ShapeCreationButtonDecorator extends ButtonDecorator implements Dra
         dragX = x;
         dragY = y;
 
-        // Set the current shape type in the whiteboard
+        
         targetWhiteBoard.setPrototypeRegistry(prototypeRegistry);
         targetWhiteBoard.setCurrentShapeType(shapeType);
 
-        // Notify the drag mediator if available
+        
         if (dragMediator != null) {
             dragMediator.startDrag(this, this, x, y);
         }
@@ -147,14 +147,14 @@ public class ShapeCreationButtonDecorator extends ButtonDecorator implements Dra
     public void endDrag(int x, int y) {
         isDragging = false;
 
-        // Vérifier si les coordonnées sont valides (pas -1, -1 qui indique une
-        // annulation)
+        
+        
         if (x >= 0 && y >= 0) {
-            // Create the shape at the drop location
+            
             targetWhiteBoard.createShapeAt(x, y);
         }
 
-        // Reset the current shape type to null after adding the shape
+        
         targetWhiteBoard.setCurrentShapeType(null);
     }
 

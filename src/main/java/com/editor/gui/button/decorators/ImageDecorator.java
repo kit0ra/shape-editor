@@ -7,9 +7,9 @@ import com.editor.gui.button.IButton;
 
 public class ImageDecorator extends ButtonDecorator {
     public enum ImageMode {
-        ICON_ONLY, // Button is just the image (centered)
-        ICON_AND_TEXT, // Standard icon + text layout
-        FILL_BUTTON // Image stretches to fill entire button
+        ICON_ONLY, 
+        ICON_AND_TEXT, 
+        FILL_BUTTON 
     }
 
     private final Image image;
@@ -28,7 +28,7 @@ public class ImageDecorator extends ButtonDecorator {
         this.mode = mode;
     }
 
-    // Convenience constructor with default mode
+    
     public ImageDecorator(IButton decoratedButton, Image image,
             int desiredWidth, int desiredHeight,
             int padding) {
@@ -47,7 +47,7 @@ public class ImageDecorator extends ButtonDecorator {
 
         switch (mode) {
             case FILL_BUTTON:
-                // Fill entire button with image
+                
                 imgX = getX();
                 imgY = getY();
                 imgWidth = getWidth();
@@ -55,7 +55,7 @@ public class ImageDecorator extends ButtonDecorator {
                 break;
 
             case ICON_ONLY:
-                // Center image in button
+                
                 imgWidth = Math.min(desiredWidth, getWidth() - padding * 2);
                 imgHeight = Math.min(desiredHeight, getHeight() - padding * 2);
                 imgX = getX() + (getWidth() - imgWidth) / 2;
@@ -64,13 +64,13 @@ public class ImageDecorator extends ButtonDecorator {
 
             case ICON_AND_TEXT:
             default:
-                // Standard icon + text layout
+                
                 imgWidth = desiredWidth;
                 imgHeight = desiredHeight;
                 imgX = getX() + padding;
                 imgY = getY() + (getHeight() - imgHeight) / 2;
 
-                // Draw text if exists
+                
                 String text = getText();
                 if (text != null && !text.isEmpty()) {
                     int textX = imgX + imgWidth + padding;

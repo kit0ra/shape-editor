@@ -6,5 +6,5 @@ package com.editor;
  * The main entry point is now in ShapeEditorFrame.
  */
 public class App {
-    // Main method removed - use ShapeEditorFrame.main() instead
+    
 }

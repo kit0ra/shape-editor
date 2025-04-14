@@ -7,25 +7,25 @@ import com.editor.drawing.Drawer;
 public interface Shape extends Cloneable, Serializable {
     void draw(Drawer drawer);
 
-    void move(int dx, int dy); // Moves the shape by a delta
+    void move(int dx, int dy); 
 
-    void setPosition(int x, int y); // Sets the absolute position of the shape
+    void setPosition(int x, int y); 
 
-    boolean isSelected(int x, int y); // Check if point (x,y) is within the shape
+    boolean isSelected(int x, int y); 
 
-    void setSelected(boolean selected); // Set selection state
+    void setSelected(boolean selected); 
 
-    boolean isSelected(); // Get current selection state
+    boolean isSelected(); 
 
-    Rectangle getBounds(); // Get the bounding rectangle of the shape
+    Rectangle getBounds(); 
 
-    // Color methods
-    void setBorderColor(java.awt.Color color); // Set the border color
+    
+    void setBorderColor(java.awt.Color color); 
 
-    // Rotation methods
-    void setRotation(double degrees); // Set rotation in degrees
+    
+    void setRotation(double degrees); 
 
-    double getRotation(); // Get current rotation in degrees
+    double getRotation(); 
 
     /**
      * Creates a deep clone of this shape.

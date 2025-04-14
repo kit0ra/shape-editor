@@ -3,7 +3,7 @@ package com.editor.gui.panel;
 import java.awt.Canvas;
 import java.awt.Dimension;
 import java.awt.Frame;
-import java.awt.Graphics; // Ensure Graphics is imported
+import java.awt.Graphics; 
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -19,16 +19,16 @@ import com.editor.mediator.DragMediator;
 public class CustomPanel extends Canvas {
     private int relX, relY, relWidth, relHeight;
 
-    protected List<IButton> buttons = new ArrayList<>(); // Changed to protected for subclasses if needed
+    protected List<IButton> buttons = new ArrayList<>(); 
 
-    // Variables pour le glisser-déposer
+    
     private Draggable currentDraggedButton = null;
-    private WhiteBoard targetWhiteBoard = null; // Keep for potential legacy use or direct reference if needed
+    private WhiteBoard targetWhiteBoard = null; 
     private boolean isDragging = false;
     private Point dragOffset = null;
 
-    // Mediator for drag operations
-    protected DragMediator dragMediator = null; // Changed to protected
+    
+    protected DragMediator dragMediator = null; 
 
     public CustomPanel() {
         setBackground(java.awt.Color.decode("#F6E9D7"));
@@ -42,7 +42,7 @@ public class CustomPanel extends Canvas {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                // Ne traiter les clics que si nous ne sommes pas en train de glisser
+                
                 if (!isDragging) {
                     for (IButton button : buttons) {
                         if (button.isMouseOver(e.getX(), e.getY())) {
@@ -54,27 +54,27 @@ public class CustomPanel extends Canvas {
 
             @Override
             public void mousePressed(MouseEvent e) {
-                // Vérifier si un bouton draggable est sous la souris
+                
                 for (IButton button : buttons) {
                     if (button.isMouseOver(e.getX(), e.getY()) && button instanceof Draggable) {
                         currentDraggedButton = (Draggable) button;
                         isDragging = true;
 
-                        // Calculer l'offset pour que le glisser soit relatif au point de clic
+                        
                         dragOffset = new Point(e.getX() - button.getX(), e.getY() - button.getY());
 
-                        // Use mediator if available
+                        
                         if (dragMediator != null) {
-                            // Pass 'this' (the CustomPanel) as the source component
+                            
                             dragMediator.startDrag(CustomPanel.this, currentDraggedButton, e.getX(), e.getY());
                         } else {
-                            // Fallback or legacy approach (should ideally not be needed if mediator is
-                            // always set)
+                            
+                            
                             System.err.println("[CustomPanel] Warning: DragMediator not set. Using legacy drag start.");
                             currentDraggedButton.startDrag(e.getX(), e.getY());
                         }
 
-                        // Repaint might be needed to show initial drag feedback on the button/panel
+                        
                         repaint();
                         break;
                     }
@@ -84,22 +84,22 @@ public class CustomPanel extends Canvas {
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (isDragging && currentDraggedButton != null) {
-                    // Mediator handles the end drag logic, including coordinate conversion and
-                    // calling endDrag on the button
+                    
+                    
                     if (dragMediator != null) {
-                        // Pass the coordinates relative to this panel
+                        
                         dragMediator.endDrag(e.getX(), e.getY());
                     } else {
-                        // Fallback or legacy approach
+                        
                         System.err.println("[CustomPanel] Warning: DragMediator not set. Using legacy drag end.");
-                        currentDraggedButton.endDrag(-1, -1); // Cancel if no mediator
+                        currentDraggedButton.endDrag(-1, -1); 
                     }
 
-                    // Reset local drag state (mediator handles its own state)
+                    
                     isDragging = false;
                     currentDraggedButton = null;
                     dragOffset = null;
-                    // Repaint might be needed to clear any drag feedback on the panel
+                    
                     repaint();
                 }
             }
@@ -115,15 +115,15 @@ public class CustomPanel extends Canvas {
                 for (IButton button : buttons) {
                     boolean isOver = button.isMouseOver(mouseX, mouseY);
 
-                    // Check if this button is currently being hovered over
+                    
                     if (isOver) {
-                        // Only call onMouseOver if the state is changing
+                        
                         if (!button.isCurrentlyHovered()) {
                             button.onMouseOver();
                             stateChanged = true;
                         }
                     } else {
-                        // Only call onMouseOut if the state is changing
+                        
                         if (button.isCurrentlyHovered()) {
                             button.onMouseOut();
                             stateChanged = true;
@@ -131,7 +131,7 @@ public class CustomPanel extends Canvas {
                     }
                 }
 
-                // Only repaint if a button's state has changed
+                
                 if (stateChanged) {
                     repaint();
                 }
@@ -140,18 +140,18 @@ public class CustomPanel extends Canvas {
             @Override
             public void mouseDragged(MouseEvent e) {
                 if (isDragging && currentDraggedButton != null) {
-                    // Mediator handles the drag logic
+                    
                     if (dragMediator != null) {
-                        // Pass coordinates relative to this panel
+                        
                         dragMediator.drag(e.getX(), e.getY());
                     } else {
-                        // Fallback or legacy approach
+                        
                         System.err.println("[CustomPanel] Warning: DragMediator not set. Using legacy drag.");
-                        currentDraggedButton.drag(e.getX(), e.getY()); // Direct update as fallback
+                        currentDraggedButton.drag(e.getX(), e.getY()); 
                     }
-                    // Repainting is handled by the mediator calling repaint on the source component
-                    // repaint(); // Repaint might still be needed here depending on visual feedback
-                    // desired on the panel itself
+                    
+                    
+                    
                 }
             }
         });
@@ -164,7 +164,7 @@ public class CustomPanel extends Canvas {
      */
     public void addButton(IButton button) {
         buttons.add(button);
-        repaint(); // Repaint after adding a button
+        repaint(); 
     }
 
     /**
@@ -177,21 +177,21 @@ public class CustomPanel extends Canvas {
         boolean removed = buttons.remove(button);
         if (removed) {
             System.out.println("[CustomPanel] Removed button: " + button.getClass().getSimpleName());
-            // TODO: Add logic here or in subclasses (like ToolbarPanel)
-            // to potentially readjust layout if necessary.
-            repaint(); // Repaint after removing the button
+            
+            
+            repaint(); 
         }
         return removed;
     }
 
     @Override
     public void paint(Graphics g) {
-        super.paint(g); // Let the superclass paint first (e.g., background)
-        // Draw all buttons
+        super.paint(g); 
+        
         for (IButton button : buttons) {
             button.draw(g);
         }
-        // Note: Drag preview drawing is handled by the Draggable button itself
+        
     }
 
     /**
@@ -203,7 +203,7 @@ public class CustomPanel extends Canvas {
     public void setTargetWhiteBoard(WhiteBoard whiteBoard) {
         this.targetWhiteBoard = whiteBoard;
 
-        // Register with mediator if available
+        
         if (dragMediator != null) {
             dragMediator.registerWhiteBoard(whiteBoard);
         }
@@ -217,18 +217,18 @@ public class CustomPanel extends Canvas {
     public void setDragMediator(DragMediator mediator) {
         this.dragMediator = mediator;
 
-        // Register this panel with the mediator
+        
         if (mediator != null) {
             mediator.registerPanel(this);
 
-            // Register the whiteboard if it's already set
+            
             if (targetWhiteBoard != null) {
                 mediator.registerWhiteBoard(targetWhiteBoard);
             }
         }
     }
 
-    // Legacy convertToWhiteboardCoordinates method removed - handled by mediator
+    
 
     public void setRelativeBounds(int xPercent, int yPercent, int widthPercent, int heightPercent) {
         this.relX = xPercent;
@@ -246,7 +246,7 @@ public class CustomPanel extends Canvas {
     }
 
     public void makeResponsiveTo(Frame frame) {
-        applyResponsiveBounds(frame.getSize()); // initial
+        applyResponsiveBounds(frame.getSize()); 
         frame.addComponentListener(new java.awt.event.ComponentAdapter() {
             @Override
             public void componentResized(java.awt.event.ComponentEvent e) {
@@ -257,7 +257,7 @@ public class CustomPanel extends Canvas {
 
     @Override
     public Dimension getPreferredSize() {
-        // Provide a default preferred size, adjust as needed
-        return new Dimension(100, 50); // Example size
+        
+        return new Dimension(100, 50); 
     }
 }

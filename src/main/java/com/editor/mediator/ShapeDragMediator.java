@@ -1,6 +1,6 @@
 package com.editor.mediator;
 
-import java.awt.Component; // Added
+import java.awt.Component; 
 import java.awt.IllegalComponentStateException;
 import java.awt.Point;
 import java.util.ArrayList;
@@ -8,7 +8,7 @@ import java.util.List;
 
 import com.editor.gui.WhiteBoard;
 import com.editor.gui.button.Draggable;
-import com.editor.gui.button.IButton; // Added import
+import com.editor.gui.button.IButton; 
 import com.editor.gui.panel.CustomPanel;
 import com.editor.gui.panel.ToolbarPanel;
 import com.editor.gui.panel.TrashPanel;
@@ -18,10 +18,10 @@ import com.editor.gui.panel.TrashPanel;
  * This class mediates drag operations between panels and the whiteboard.
  */
 public class ShapeDragMediator implements DragMediator {
-    private final List<CustomPanel> panels = new ArrayList<>(); // Keep track of panels specifically if needed
+    private final List<CustomPanel> panels = new ArrayList<>(); 
     private WhiteBoard whiteBoard;
     private Draggable currentDraggable;
-    private Object sourceComponentForDrag; // Changed type to Object
+    private Object sourceComponentForDrag; 
     private boolean isDragging = false;
     private boolean debugEnabled = false;
     private TrashPanel trashPanel = null;
@@ -42,36 +42,36 @@ public class ShapeDragMediator implements DragMediator {
     }
 
     @Override
-    public void startDrag(Object sourceComponent, Draggable draggable, int x, int y) { // Changed param type
+    public void startDrag(Object sourceComponent, Draggable draggable, int x, int y) { 
         if (whiteBoard == null) {
             debugLog("ERROR: Cannot start drag - WhiteBoard not registered");
             return;
         }
-        if (!(sourceComponent instanceof Component)) { // Basic check
+        if (!(sourceComponent instanceof Component)) { 
             debugLog("ERROR: Cannot start drag - sourceComponent is not a valid Component");
             return;
         }
 
         currentDraggable = draggable;
-        sourceComponentForDrag = sourceComponent; // Store the source component
+        sourceComponentForDrag = sourceComponent; 
         isDragging = true;
 
-        // Set up the whiteboard for the drag operation (if applicable)
-        // This might need adjustment depending on whether the source is the whiteboard
-        // itself
+        
+        
+        
         if (sourceComponent != whiteBoard) {
-            whiteBoard.setPrototypeRegistry(whiteBoard.getPrototypeRegistry()); // Assuming this is needed for external
-                                                                                // drags
+            whiteBoard.setPrototypeRegistry(whiteBoard.getPrototypeRegistry()); 
+                                                                                
             whiteBoard.setCurrentShapeType(draggable.getShapeType());
         }
 
-        // Notify the draggable that dragging has started
-        draggable.startDrag(x, y); // Notify the draggable itself
+        
+        draggable.startDrag(x, y); 
 
         debugLog("Started drag operation from " + sourceComponent.getClass().getSimpleName() + ": "
                 + draggable.getShapeType() + " at (" + x + ", " + y + ")");
 
-        // Request repaint of the source component
+        
         ((Component) sourceComponent).repaint();
     }
 
@@ -81,35 +81,35 @@ public class ShapeDragMediator implements DragMediator {
             return;
         }
 
-        // Update the draggable with the new position
+        
         currentDraggable.drag(x, y);
 
-        // Convert source component coordinates to screen coordinates for checking
-        // panels
+        
+        
         Point screenPoint = null;
         if (sourceComponentForDrag instanceof Component) {
             Component sourceComp = (Component) sourceComponentForDrag;
             try {
                 screenPoint = new Point(x, y);
-                // Use the source component's location on screen
+                
                 Point sourceLocation = sourceComp.getLocationOnScreen();
                 screenPoint.translate(sourceLocation.x, sourceLocation.y);
             } catch (IllegalComponentStateException e) {
                 debugLog("Error converting coordinates (source component not showing?): " + e.getMessage());
-                screenPoint = null; // Ensure screenPoint is null if conversion fails
+                screenPoint = null; 
             } catch (Exception e) {
                 debugLog("Unexpected error converting coordinates: " + e.getMessage());
-                screenPoint = null; // Ensure screenPoint is null if conversion fails
+                screenPoint = null; 
             }
         }
 
-        // Check if the drag is over the trash panel
+        
         if (trashPanel != null && screenPoint != null) {
             try {
-                // Check if the point is over the trash panel
+                
                 boolean isOverTrash = trashPanel.isPointOverTrash(screenPoint);
                 trashPanel.setShapeOverTrash(isOverTrash);
-                // Update whiteboard state if dragging from whiteboard
+                
                 if (sourceComponentForDrag == whiteBoard) {
                     whiteBoard.setDraggingToTrash(isOverTrash);
                 }
@@ -118,16 +118,16 @@ public class ShapeDragMediator implements DragMediator {
             }
         }
 
-        // Check if the drag is over the toolbar panel
+        
         if (toolbarPanel != null && screenPoint != null) {
             try {
-                // Check if the point is over the toolbar panel
-                boolean isOverToolbar = toolbarPanel.isPointOverToolbar(screenPoint); // Reverted to direct call
-                toolbarPanel.setShapeOverToolbar(isOverToolbar); // Let ToolbarPanel manage its visual state
-                // Update whiteboard state if dragging from whiteboard
+                
+                boolean isOverToolbar = toolbarPanel.isPointOverToolbar(screenPoint); 
+                toolbarPanel.setShapeOverToolbar(isOverToolbar); 
+                
                 if (sourceComponentForDrag == whiteBoard) {
                     whiteBoard.setDraggingToToolbar(isOverToolbar);
-                    // Ensure whiteboard doesn't think it's going to trash if it's going to toolbar
+                    
                     if (isOverToolbar)
                         whiteBoard.setDraggingToTrash(false);
                 }
@@ -138,11 +138,11 @@ public class ShapeDragMediator implements DragMediator {
 
         debugLog("Dragging: " + currentDraggable.getShapeType() + " at source coords (" + x + ", " + y + ")");
 
-        // Request repaint of the source component
+        
         if (sourceComponentForDrag instanceof Component) {
             ((Component) sourceComponentForDrag).repaint();
         }
-        // Also repaint whiteboard if dragging shapes on it
+        
         if (sourceComponentForDrag == whiteBoard) {
             whiteBoard.repaint();
         }
@@ -157,14 +157,14 @@ public class ShapeDragMediator implements DragMediator {
             return;
         }
 
-        // Convert source component coordinates to screen coordinates for checking
-        // panels
+        
+        
         Point screenPoint = null;
         if (sourceComponentForDrag instanceof Component) {
             Component sourceComp = (Component) sourceComponentForDrag;
             try {
                 screenPoint = new Point(x, y);
-                // Use the source component's location on screen
+                
                 Point sourceLocation = sourceComp.getLocationOnScreen();
                 screenPoint.translate(sourceLocation.x, sourceLocation.y);
                 debugLog("Calculated screenPoint for endDrag: (" + screenPoint.x + ", " + screenPoint.y + ")");
@@ -180,72 +180,72 @@ public class ShapeDragMediator implements DragMediator {
         boolean deletedShape = false;
         boolean addedToToolbar = false;
 
-        // Check if the drag ended over the trash panel
+        
         if (trashPanel != null && screenPoint != null) {
             try {
                 if (trashPanel.isPointOverTrash(screenPoint)) {
                     debugLog("Ending drag over trash panel - deleting shape(s)");
-                    // If dragging from whiteboard, let whiteboard handle deletion via its endDrag
+                    
                     if (sourceComponentForDrag == whiteBoard) {
-                        // Whiteboard's endDrag will call deleteSelectedShapes
-                        deletedShape = true; // Mark as handled by whiteboard
+                        
+                        deletedShape = true; 
                         debugLog("Drag from WhiteBoard ended over trash. WhiteBoard will handle deletion.");
                     } else if (sourceComponentForDrag instanceof CustomPanel && currentDraggable instanceof IButton) {
-                        // If dragging a button from a CustomPanel (like ToolbarPanel) to trash
+                        
                         debugLog("Drag from CustomPanel ended over trash. Attempting to remove button.");
                         CustomPanel sourcePanel = (CustomPanel) sourceComponentForDrag;
                         IButton draggedButton = (IButton) currentDraggable;
                         boolean removed = sourcePanel.removeButton(draggedButton);
                         if (removed) {
                             debugLog("Button removed successfully from source panel.");
-                            deletedShape = true; // Mark as handled (button removed)
+                            deletedShape = true; 
                         } else {
                             debugLog("Failed to remove button from source panel.");
-                            currentDraggable.endDrag(-1, -1); // Cancel drop if removal failed
-                            deletedShape = true; // Still mark as handled to prevent further processing
+                            currentDraggable.endDrag(-1, -1); 
+                            deletedShape = true; 
                         }
                     } else {
-                        // If dragging from other source or draggable is not IButton, just cancel
-                        deletedShape = true; // Mark as handled, effectively cancelling drop
-                        currentDraggable.endDrag(-1, -1); // Explicitly cancel button drop
+                        
+                        deletedShape = true; 
+                        currentDraggable.endDrag(-1, -1); 
                         debugLog("Drag from unknown source/type ended over trash. Cancelling drop.");
                     }
-                    trashPanel.setShapeOverTrash(false); // Reset visual state
+                    trashPanel.setShapeOverTrash(false); 
                 }
             } catch (Exception e) {
                 debugLog("Error checking if shape is over trash: " + e.getMessage());
             }
         }
 
-        // Check if the drag ended over the toolbar panel
+        
         if (toolbarPanel != null && screenPoint != null && !deletedShape) {
             try {
-                // Check if the point is over the toolbar panel
-                if (toolbarPanel.isPointOverToolbar(screenPoint)) { // Reverted to direct call
+                
+                if (toolbarPanel.isPointOverToolbar(screenPoint)) { 
                     debugLog("Ending drag over toolbar panel - adding shape(s) to toolbar");
-                    // If dragging from whiteboard, let whiteboard handle adding via its endDrag
+                    
                     if (sourceComponentForDrag == whiteBoard) {
-                        // Whiteboard's endDrag will call toolbarPanel.addSelectedShapesToToolbar
-                        addedToToolbar = true; // Mark as handled
+                        
+                        addedToToolbar = true; 
                     } else {
-                        // If dragging from elsewhere (e.g., toolbar button), just cancel
-                        addedToToolbar = true; // Mark as handled, effectively cancelling drop
-                        currentDraggable.endDrag(-1, -1); // Explicitly cancel button drop
+                        
+                        addedToToolbar = true; 
+                        currentDraggable.endDrag(-1, -1); 
                         debugLog("Drag from external source ended over toolbar. Cancelling drop.");
                     }
-                    toolbarPanel.setShapeOverToolbar(false); // Reset visual state
+                    toolbarPanel.setShapeOverToolbar(false); 
                 }
             } catch (Exception e) {
                 debugLog("Error checking if shape is over toolbar: " + e.getMessage());
             }
         }
 
-        // If the shape wasn't deleted or added to toolbar, handle normal drag end
+        
         if (!deletedShape && !addedToToolbar) {
-            // Convert source component coordinates to whiteboard coordinates if needed
+            
             Point whiteboardPoint = null;
-            if (x >= 0 && y >= 0 && sourceComponentForDrag instanceof Component) { // Check if source is a component
-                // Pass the source component itself
+            if (x >= 0 && y >= 0 && sourceComponentForDrag instanceof Component) { 
+                
                 whiteboardPoint = convertToWhiteboardCoordinates(sourceComponentForDrag, new Point(x, y));
             } else {
                 debugLog(
@@ -253,63 +253,63 @@ public class ShapeDragMediator implements DragMediator {
             }
 
             if (whiteboardPoint != null) {
-                // Check if the drop target is the whiteboard
+                
                 if (isPointOverWhiteboard(screenPoint)) {
                     debugLog("Ending drag on whiteboard at (" + whiteboardPoint.x + ", " + whiteboardPoint.y + ")");
-                    // End the drag on the whiteboard - let the draggable handle it
+                    
                     currentDraggable.endDrag(whiteboardPoint.x, whiteboardPoint.y);
                 } else {
                     debugLog("Drop point is not over whiteboard. Cancelling.");
-                    currentDraggable.endDrag(-1, -1); // Cancel if not over whiteboard
+                    currentDraggable.endDrag(-1, -1); 
                 }
 
             } else {
                 debugLog("Cancelling drag operation (not convertible to whiteboard coords or invalid drop)");
-                // Cancel the drag
+                
                 currentDraggable.endDrag(-1, -1);
             }
         } else if (sourceComponentForDrag == whiteBoard) {
-            // If dragging from whiteboard and it was deleted or added to toolbar,
-            // still need to call whiteboard's endDrag to finalize its state
+            
+            
             debugLog("Calling WhiteBoard's endDrag after delete/toolbar add.");
-            whiteBoard.endDrag(x, y); // Let whiteboard clean up its internal state
+            whiteBoard.endDrag(x, y); 
         }
 
-        // Reset the whiteboard's current shape type if drag didn't start from
-        // whiteboard
+        
+        
         if (sourceComponentForDrag != whiteBoard) {
             whiteBoard.setCurrentShapeType(null);
         }
 
-        // Reset drag state
+        
         isDragging = false;
         currentDraggable = null;
 
-        // Always reset the trash panel visual state at the end of a drag operation
+        
         resetTrashPanelState();
-        // Always reset the toolbar panel visual state
+        
         if (toolbarPanel != null)
             toolbarPanel.setShapeOverToolbar(false);
-        // Reset whiteboard drag states
+        
         if (whiteBoard != null) {
             whiteBoard.setDraggingToTrash(false);
             whiteBoard.setDraggingToToolbar(false);
         }
 
-        // Request repaint of the source component
+        
         if (sourceComponentForDrag instanceof Component) {
             ((Component) sourceComponentForDrag).repaint();
         }
-        // Also repaint whiteboard if it wasn't the source
+        
         if (sourceComponentForDrag != whiteBoard && whiteBoard != null) {
             whiteBoard.repaint();
         }
 
-        sourceComponentForDrag = null; // Clear the source component reference
+        sourceComponentForDrag = null; 
     }
 
     @Override
-    // Changed signature to accept Object sourceComponent
+    
     @SuppressWarnings("CallToPrintStackTrace")
     public Point convertToWhiteboardCoordinates(Object sourceComponent, Point sourcePoint) {
         if (whiteBoard == null || sourceComponent == null || !(sourceComponent instanceof Component)) {
@@ -317,19 +317,19 @@ public class ShapeDragMediator implements DragMediator {
             return null;
         }
 
-        Component sourceComp = (Component) sourceComponent; // Cast to Component
+        Component sourceComp = (Component) sourceComponent; 
 
         try {
-            // Convert source component coordinates to screen coordinates
+            
             Point screenPoint = new Point(sourcePoint);
-            Point sourceLocation = sourceComp.getLocationOnScreen(); // Use source component's location
+            Point sourceLocation = sourceComp.getLocationOnScreen(); 
             screenPoint.translate(sourceLocation.x, sourceLocation.y);
 
             debugLog("Input sourcePoint: (" + sourcePoint.x + ", " + sourcePoint.y + ") from "
                     + sourceComp.getClass().getSimpleName());
             debugLog("Calculated screenPoint: (" + screenPoint.x + ", " + screenPoint.y + ")");
 
-            // Get whiteboard location on screen
+            
             Point whiteboardLocation = whiteBoard.getLocationOnScreen();
             int wbX = whiteboardLocation.x;
             int wbY = whiteboardLocation.y;
@@ -338,10 +338,10 @@ public class ShapeDragMediator implements DragMediator {
             debugLog(
                     "Whiteboard screen location: (" + wbX + ", " + wbY + "), Size: (" + wbWidth + "x" + wbHeight + ")");
 
-            // Check if the point is within the whiteboard bounds with a small margin
-            // This allows shapes to be dragged even when the cursor is slightly outside the
-            // whiteboard
-            int margin = 10; // 10-pixel margin around the whiteboard
+            
+            
+            
+            int margin = 10; 
             boolean withinX = screenPoint.x >= wbX - margin && screenPoint.x < wbX + wbWidth + margin;
             boolean withinY = screenPoint.y >= wbY - margin && screenPoint.y < wbY + wbHeight + margin;
             debugLog("Bounds check: withinX=" + withinX + " (Range: " + (wbX - margin) + " to "
@@ -351,7 +351,7 @@ public class ShapeDragMediator implements DragMediator {
 
             if (withinX && withinY) {
                 debugLog("Point IS within whiteboard bounds (including margin).");
-                // Convert to whiteboard coordinates
+                
                 Point whiteboardPoint = new Point(
                         screenPoint.x - wbX,
                         screenPoint.y - wbY);
@@ -369,7 +369,7 @@ public class ShapeDragMediator implements DragMediator {
             debugLog(
                     "ERROR: IllegalComponentStateException during coordinate conversion (Source component not showing?): "
                             + e.getMessage());
-            return null; // Return null if component isn't showing
+            return null; 
         } catch (Exception e) {
             debugLog("ERROR: Unexpected Exception during coordinate conversion: " + e.getMessage());
             e.printStackTrace();
@@ -417,13 +417,13 @@ public class ShapeDragMediator implements DragMediator {
         }
 
         boolean isOverTrash = trashPanel.isPointOverTrash(screenPoint);
-        // Visual state update is handled within the trash panel itself now
-        // if (isOverTrash) {
-        // debugLog("Point is over trash panel");
-        // trashPanel.setShapeOverTrash(true);
-        // } else {
-        // trashPanel.setShapeOverTrash(false);
-        // }
+        
+        
+        
+        
+        
+        
+        
         return isOverTrash;
     }
 
@@ -447,15 +447,15 @@ public class ShapeDragMediator implements DragMediator {
             debugLog("ERROR: Cannot check if point is over toolbar - ToolbarPanel not registered");
             return false;
         }
-        // Reverted bypass and explicit cast
+        
         boolean isOverToolbar = toolbarPanel.isPointOverToolbar(screenPoint);
-        // Visual state update is handled within the toolbar panel itself now
-        // if (isOverToolbar) {
-        // debugLog("Point is over toolbar panel");
-        // toolbarPanel.setShapeOverToolbar(true);
-        // } else {
-        // toolbarPanel.setShapeOverToolbar(false);
-        // }
+        
+        
+        
+        
+        
+        
+        
         return isOverToolbar;
     }
 
@@ -465,7 +465,7 @@ public class ShapeDragMediator implements DragMediator {
         debugLog("Debug " + (enabled ? "enabled" : "disabled"));
     }
 
-    // --- Implementation of new interface methods ---
+    
 
     @Override
     public boolean isDragging() {

@@ -30,19 +30,19 @@ public class UngroupShapesCommand implements Command {
 
     @Override
     public void execute() {
-        // Remove the group from the canvas
+        
         canvasShapes.remove(group);
         
-        // Add the individual shapes to the canvas
+        
         canvasShapes.addAll(ungroupedShapes);
     }
 
     @Override
     public void undo() {
-        // Remove the individual shapes from the canvas
+        
         canvasShapes.removeAll(ungroupedShapes);
         
-        // Add the group back at its original position
+        
         if (groupIndex >= 0 && groupIndex <= canvasShapes.size()) {
             canvasShapes.add(groupIndex, group);
         } else {

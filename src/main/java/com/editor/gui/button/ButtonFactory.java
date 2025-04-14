@@ -6,7 +6,7 @@ import com.editor.gui.button.decorators.ImageDecorator;
 import com.editor.utils.ImageLoader;
 
 public class ButtonFactory {
-    // Default sizing constants
+    
     public static final int DEFAULT_HEIGHT = 40;
     public static final int DEFAULT_ICON_SIZE = 24;
     public static final int DEFAULT_PADDING = 8;
@@ -18,13 +18,13 @@ public class ButtonFactory {
             String text,
             ImageDecorator.ImageMode mode) {
 
-        // Calculate button dimensions based on mode
+        
         int width, height = DEFAULT_HEIGHT;
         Image image = ImageLoader.loadImage(imagePath);
 
         switch (mode) {
             case FILL_BUTTON:
-                width = height; // Square button for full-image
+                width = height; 
                 break;
             case ICON_ONLY:
                 width = DEFAULT_ICON_SIZE + DEFAULT_PADDING * 2;
@@ -32,13 +32,13 @@ public class ButtonFactory {
             case ICON_AND_TEXT:
             default:
                 width = DEFAULT_ICON_SIZE + DEFAULT_PADDING * 3 +
-                        (text.isEmpty() ? 0 : text.length() * 7); // Approximate text width
+                        (text.isEmpty() ? 0 : text.length() * 7); 
         }
 
-        // Create base button
+        
         IButton button = new CustomButton(x, y, width, height, text);
 
-        // Add image if loaded
+        
         if (image != null) {
             button = new ImageDecorator(
                     button,

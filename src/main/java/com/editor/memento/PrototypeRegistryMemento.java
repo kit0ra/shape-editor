@@ -15,7 +15,7 @@ public class PrototypeRegistryMemento implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    // Store clones of the prototypes to ensure immutability and capture state
+    
     private final Map<String, Shape> prototypesState;
 
     /**
@@ -25,11 +25,11 @@ public class PrototypeRegistryMemento implements Serializable {
      *                   Shape value).
      */
     public PrototypeRegistryMemento(Map<String, Shape> prototypes) {
-        // Deep copy the map by cloning each Shape value
+        
         this.prototypesState = prototypes.entrySet().stream()
                 .collect(Collectors.toMap(
                         Map.Entry::getKey,
-                        entry -> entry.getValue().clone() // Clone each Shape
+                        entry -> entry.getValue().clone() 
                 ));
         System.out.println("[LOG] PrototypeRegistryMemento(Map) - Constructor called. Storing keys: "
                 + this.prototypesState.keySet());
@@ -42,8 +42,8 @@ public class PrototypeRegistryMemento implements Serializable {
      *         memento creation).
      */
     public Map<String, Shape> getPrototypesState() {
-        // Return a copy of the map held by the memento.
-        // The values are already clones created when the memento was constructed.
+        
+        
         return new HashMap<>(this.prototypesState);
     }
 }

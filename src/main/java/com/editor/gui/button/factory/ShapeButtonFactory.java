@@ -27,7 +27,7 @@ public class ShapeButtonFactory implements ButtonFactory {
     private final CommandHistory commandHistory;
     private DragMediator dragMediator;
 
-    // Default sizing constants
+    
     private static final int DEFAULT_HEIGHT = 40;
     private static final int DEFAULT_ICON_SIZE = 24;
     private static final int DEFAULT_PADDING = 8;
@@ -56,14 +56,14 @@ public class ShapeButtonFactory implements ButtonFactory {
 
     @Override
     public IButton createButton(int x, int y, String iconPath, String tooltipText, String typeKey) {
-        // Calculate button dimensions
+        
         int width = DEFAULT_ICON_SIZE + DEFAULT_PADDING * 2;
         int height = DEFAULT_HEIGHT;
 
-        // Create base button
+        
         IButton button = new CustomButton(x, y, width, height, "");
 
-        // Check if we can draw the actual shape
+        
         Shape shapePrototype = null;
         if (registry != null && registry.hasPrototype(typeKey)) {
             try {
@@ -76,7 +76,7 @@ public class ShapeButtonFactory implements ButtonFactory {
             }
         }
 
-        // If no shape drawing, add image if available
+        
         if (shapePrototype == null) {
             Image icon = ImageLoader.loadImage(iconPath);
             if (icon != null) {
@@ -89,14 +89,14 @@ public class ShapeButtonFactory implements ButtonFactory {
             }
         }
 
-        // Add tooltip
+        
         button = new TooltipDecorator(button, tooltipText);
 
-        // Add shape creation functionality
+        
         ShapeCreationButtonDecorator shapeButton = new ShapeCreationButtonDecorator(
                 button, whiteBoard, registry, typeKey);
 
-        // Set drag mediator if available
+        
         if (dragMediator != null) {
             shapeButton.setDragMediator(dragMediator);
         }

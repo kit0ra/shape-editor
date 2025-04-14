@@ -45,33 +45,33 @@ public class DraggableCompositeShapeCreationButtonDecorator extends CompositeSha
 
     @Override
     public void draw(Graphics g) {
-        // Draw the base button
+        
         super.draw(g);
 
-        // If dragging, draw a visual indicator
+        
         if (isDragging) {
             Graphics2D g2d = (Graphics2D) g.create();
             try {
                 System.out.println("[DraggableCompositeButton] Drawing drag preview at (" + dragX + ", " + dragY + ")");
 
-                // Draw a semi-transparent shape preview at the drag location
+                
                 g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
 
-                // Create a light pink color for all shapes
-                Color lightPink = new Color(255, 182, 193, 128); // Light pink semi-transparent
-                Color lightPinkBorder = new Color(255, 105, 180); // Darker pink for border
+                
+                Color lightPink = new Color(255, 182, 193, 128); 
+                Color lightPinkBorder = new Color(255, 105, 180); 
 
-                // Draw a generic group representation (a rectangle with a "G" in it)
+                
                 g2d.setColor(lightPink);
                 g2d.fillRect(dragX - 30, dragY - 20, 60, 40);
                 g2d.setColor(lightPinkBorder);
                 g2d.drawRect(dragX - 30, dragY - 20, 60, 40);
 
-                // Draw a "G" in the center
+                
                 g2d.setColor(Color.BLACK);
                 g2d.drawString("G", dragX - 5, dragY + 5);
 
-                // Draw a dashed line from button to cursor
+                
                 g2d.setColor(Color.DARK_GRAY);
                 float[] dash = { 5.0f, 5.0f };
                 g2d.setStroke(new BasicStroke(1.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash, 0.0f));
@@ -106,32 +106,32 @@ public class DraggableCompositeShapeCreationButtonDecorator extends CompositeSha
         System.out.println("[DraggableCompositeButton] Ended drag at (" + x + ", " + y + ")");
         isDragging = false;
 
-        // Check if the coordinates are valid (not -1, -1 which indicates cancellation)
+        
         if (x >= 0 && y >= 0) {
             System.out.println("[DraggableCompositeButton] Attempting to create composite shape at drop location: (" + x
                     + ", " + y + ")");
 
-            // --- Replicate shape creation logic from
-            // CompositeShapeCreationButtonDecorator.onClick() ---
-            // --- but use the drop coordinates (x, y) instead of whiteboard center ---
+            
+            
+            
             CommandHistory commandHistory = whiteBoard.getCommandHistory();
             if (commandHistory == null) {
                 System.err.println("[DraggableCompositeButton] Error: CommandHistory not available from WhiteBoard.");
-                return; // Exit if history is not available
+                return; 
             }
 
             try {
-                // Create the group instance from the registry AT THE DROP LOCATION (x, y)
+                
                 ShapeGroup newGroup = compositeRegistry.createGroup(groupKey, x, y);
                 System.out.println("[DraggableCompositeButton] Created group instance for key '" + groupKey + "' at ("
                         + x + ", " + y + ")");
 
-                // Create and execute the command
+                
                 CreateGroupCommand command = new CreateGroupCommand(whiteBoard.getShapesList(), newGroup);
                 commandHistory.executeCommand(command);
                 System.out.println("[DraggableCompositeButton] Executed CreateGroupCommand.");
 
-                // Optionally select the newly added group
+                
                 whiteBoard.clearSelection();
                 newGroup.setSelected(true);
                 whiteBoard.addSelectedShape(newGroup);
@@ -148,7 +148,7 @@ public class DraggableCompositeShapeCreationButtonDecorator extends CompositeSha
                         "[DraggableCompositeButton] Unexpected error during group creation: " + e.getMessage());
                 e.printStackTrace();
             }
-            // --- End of replicated logic ---
+            
         } else {
             System.out.println("[DraggableCompositeButton] Drag ended outside valid area or cancelled (" + x + ", " + y
                     + "). No shape created.");
@@ -157,7 +157,7 @@ public class DraggableCompositeShapeCreationButtonDecorator extends CompositeSha
 
     @Override
     public String getShapeType() {
-        // Return a unique identifier for this composite shape
+        
         return "CompositeShape";
     }
 
